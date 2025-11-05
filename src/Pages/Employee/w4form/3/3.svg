@@ -1,0 +1,19 @@
+<svg viewBox="0 0 934 1209" version="1.1" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<style>
+.g0_3{fill:none;stroke:#000;stroke-width:1.527;stroke-miterlimit:10;}
+.g1_3{fill:none;stroke:#000;stroke-width:0.763;stroke-miterlimit:10;}
+.g2_3{fill:none;stroke:#000;stroke-width:1.145;stroke-miterlimit:10;}
+.g3_3{fill:none;stroke:#000;stroke-width:1.527;stroke-linecap:square;stroke-miterlimit:10;}
+</style>
+</defs>
+<path d="M54.6 73.3H825.4m-.8 0h55.8" class="g0_3"/>
+<path d="M54.2 110H880.8" class="g1_3"/>
+<image preserveAspectRatio="none" x="847" y="76" width="31" height="31" href="img/1.jpg"/>
+<path d="M769.6 284.2H880.4M769.6 403.3H880.4M769.6 485.8H880.4M769.6 513.3H880.4M769.6 559.2H880.4M769.6 623.3H880.4" class="g1_3"/>
+<path d="M54.2 632.5H880.8" class="g2_3"/>
+<path d="M54.2 669.2H880.8" class="g1_3"/>
+<image preserveAspectRatio="none" x="847" y="636" width="31" height="30" href="img/2.jpg"/>
+<path d="M769.6 733.3H880.4M769.6 779.2H880.4M769.6 843.3H880.4M769.6 889.2H880.4M769.6 916.7H880.4" class="g1_3"/>
+<path d="M880 925.8H55" class="g3_3"/>
+</svg>

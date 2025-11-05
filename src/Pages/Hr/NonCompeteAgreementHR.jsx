@@ -1,0 +1,674 @@
+import { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import {
+  ArrowLeft,
+  Download,
+  FileText,
+  AlertCircle,
+  Eye,
+  CheckCircle,
+  Calendar,
+} from "lucide-react";
+import { Layout } from "../../Components/Common/layout/Layout";
+import Navbar from "../../Components/Common/Navbar/Navbar";
+import toast, { Toaster } from "react-hot-toast";
+import axios from "axios";
+import HRNotesInput from "../../Components/Common/HRNotesInput/HRNotesInput";
+
+const NonCompeteAgreementHR = () => {
+  const navigate = useNavigate();
+  const { employeeId } = useParams();
+  const baseURL = import.meta.env.VITE__BASEURL;
+
+  const [loading, setLoading] = useState(true);
+  const [uploadedForm, setUploadedForm] = useState(null);
+  const [employeeName, setEmployeeName] = useState("");
+  const [formId, setFormId] = useState(null);
+  const [formData, setFormData] = useState(null);
+  const [selectedSignature, setSelectedSignature] = useState(null);
+
+  const loadData = async () => {
+    try {
+      const response = await axios.get(
+        `${baseURL}/onboarding/get-application/${employeeId}`,
+        { withCredentials: true }
+      );
+
+      if (response.data?.data?.forms?.nonCompeteAgreement) {
+        const data = response.data.data.forms.nonCompeteAgreement;
+        console.log("📄 Non-Compete Form Data:", data);
+        console.log("📄 Uploaded Form:", data.employeeUploadedForm);
+        setFormId(data._id);
+        setUploadedForm(data.employeeUploadedForm);
+        setEmployeeName(data.employeeName || "Employee");
+        setFormData(data);
+      }
+      setLoading(false);
+    } catch (error) {
+      console.error("Error loading data:", error);
+      toast.error("Failed to load data");
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadData();
+  }, [employeeId]);
+
+  const handleDownload = () => {
+    if (uploadedForm?.filePath) {
+      const url = uploadedForm.filePath.startsWith("http")
+        ? uploadedForm.filePath
+        : `${baseURL}/${uploadedForm.filePath}`;
+      window.open(url, "_blank");
+    } else {
+      toast.error("File path not found");
+    }
+  };
+
+  const handleClear = async () => {
+    if (
+      !window.confirm("Are you sure you want to clear this uploaded document?")
+    )
+      return;
+
+    try {
+      await axios.delete(
+        `${baseURL}/onboarding/hr-clear-non-compete-submission/${formId}`,
+        { withCredentials: true }
+      );
+      toast.success("Document cleared successfully");
+      setUploadedForm(null);
+    } catch (error) {
+      console.error("Error clearing document:", error);
+      toast.error("Failed to clear document");
+    }
+  };
+
+  return (
+    <Layout>
+      <Navbar />
+      {/* Add Southampton Script font */}
+      <link
+        href="https://fonts.googleapis.com/css2?family=Southampton:wght@400&display=swap"
+        rel="stylesheet"
+      />
+
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 md:px-8 py-8">
+        <button
+          onClick={() => navigate(-1)}
+          className="inline-flex items-center gap-2 px-4 py-2 text-white bg-gradient-to-r from-[#1F3A93] to-[#2748B4] rounded-lg hover:from-[#16306e] hover:to-[#1F3A93] transition-all mb-6"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Back
+        </button>
+
+        {loading ? (
+          <div className="bg-white rounded-2xl shadow-xl border p-8">
+            <div className="flex items-center justify-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#1F3A93]"></div>
+              <span className="ml-3 text-gray-600">Loading...</span>
+            </div>
+          </div>
+        ) : (
+          <div className="bg-white rounded-2xl shadow-xl border overflow-hidden">
+            <div className="bg-gradient-to-r from-[#1F3A93] to-[#2748B4] text-white text-center py-6 px-6">
+              <h2 className="text-2xl font-bold">Non-Compete Agreement</h2>
+              <p className="text-blue-100 mt-2">HR Document Review</p>
+              <p className="text-sm opacity-90 mt-1">
+                Employee: {employeeName}
+              </p>
+            </div>
+
+            <div className="p-8">
+              {/* Non-Compete Agreement Form Display */}
+              {formData && (
+                <div className="space-y-6 mb-8">
+                  <div className="bg-white border border-gray-200 rounded-lg p-6">
+                    <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                      Non-Compete Agreement Form
+                    </h3>
+                    <div className="max-w-4xl mx-auto bg-white p-8 font-serif text-sm leading-relaxed border border-gray-200 rounded-lg">
+                      {/* Page 1 */}
+                      <div className="mb-8">
+                        <h1 className="text-center text-base font-bold mb-8 border-b border-gray-400 pb-2">
+                          NON-COMPETE AGREEMENT
+                        </h1>
+
+                        <p className="mb-6">
+                          This Non-Compete (the "Agreement") is made as of this{" "}
+                          <span className="border-b border-black px-1">
+                            {formData.day || "___"}
+                          </span>{" "}
+                          day of{" "}
+                          <span className="border-b border-black px-1">
+                            {formData.month || "___"}
+                          </span>
+                          ,{" "}
+                          <span className="border-b border-black px-1">
+                            {formData.year || "20__"}
+                          </span>{" "}
+                          (the "Effective Date") by and between Pacific Health
+                          Systems LLC ("Company"), located at 303 Corporate
+                          Center Dr., Suite 325, Stockbridge, GA 30281, and{" "}
+                          <span className="border-b border-black px-1">
+                            {formData.employeeName || "____________________"}
+                          </span>{" "}
+                          ("Employee"), residing at{" "}
+                          <span className="border-b border-black px-1">
+                            {formData.employeeAddress || "____________________"}
+                          </span>
+                          <span className="block border-b border-black w-full my-1"></span>
+                          Employee will be serving as{" "}
+                          <span className="border-b border-black px-1">
+                            {formData.employeePosition ||
+                              "____________________"}
+                          </span>
+                          . Employee may have access to or may generate or
+                          otherwise come into contact with proprietary and/or
+                          confidential information of the Company or the
+                          Company's clients. The Company wishes to enter into a
+                          non-compete agreement in the event Employee terminates
+                          his or her employment. In consideration of the
+                          promises and mutual covenants herein, the parties
+                          agree as follows:
+                        </p>
+
+                        <h3 className="font-bold text-blue-700 mb-2">
+                          1. Employee Covenants.
+                        </h3>
+
+                        <p className="mb-4">
+                          In consideration of offer of employment or continued
+                          employment with the Company, Employee covenants that
+                          during their employment with the Company and for a
+                          period of two (2) years or the longest period of time
+                          allowed by state law, whichever is shorter, after said
+                          employment is ended for any reason, including but not
+                          limited to the termination of their employment due to
+                          inadequate performance or resignation:
+                        </p>
+
+                        <div className="ml-8 mb-6 space-y-3">
+                          <div className="flex">
+                            <span className="mr-4">a.</span>
+                            <p>
+                              Employee shall not induce, directly or indirectly,
+                              any other employees of the Company to terminate
+                              their employment.
+                            </p>
+                          </div>
+                          <div className="flex">
+                            <span className="mr-4">b.</span>
+                            <p>
+                              Employee shall not solicit the business of any
+                              client of the Company.
+                            </p>
+                          </div>
+                          <div className="flex">
+                            <span className="mr-4">c.</span>
+                            <p>
+                              Employee shall not offer same or similar services
+                              to a client that they previously served during
+                              employment.
+                            </p>
+                          </div>
+                          <div className="flex">
+                            <span className="mr-4">d.</span>
+                            <p>
+                              Employee shall not induce, directly or indirectly,
+                              any client of the Company to transfer services to
+                              another agency.
+                            </p>
+                          </div>
+                        </div>
+
+                        <h3 className="font-bold text-blue-700 mb-2">
+                          2. Confidentiality Agreement.
+                        </h3>
+
+                        <p className="mb-6">
+                          Employee shall not, without written consent, share or
+                          use any information relating to the Company that has
+                          not been previously publicly released including but
+                          not limited to patient charts, trade secrets,
+                          proprietary and confidential information, research,
+                          designs, financial data, customer and employee
+                          records, and marketing plans.
+                        </p>
+
+                        <h3 className="font-bold text-blue-700 mb-2">
+                          3. Injunctive Relief.
+                        </h3>
+
+                        <p className="mb-6">
+                          Employee acknowledges that disclosure of any
+                          confidential information or breach of any of the
+                          noncompetitive covenants will cause irreparable harm
+                          to the Company. Injunctive relief is agreed to be an
+                          appropriate remedy.
+                        </p>
+
+                        <div className="text-xs text-gray-600 border-t border-gray-300 pt-2 mt-8">
+                          1 | Page
+                        </div>
+                      </div>
+
+                      {/* Page 2 */}
+                      <div className="mt-12">
+                        <h3 className="font-bold text-blue-700 mb-2">
+                          4. Binding Effect.
+                        </h3>
+
+                        <p className="mb-6">
+                          This Agreement is binding upon the parties and their
+                          legal representatives, successors, and permitted
+                          assigns.
+                        </p>
+
+                        <h3 className="font-bold text-blue-700 mb-2">
+                          5. Severability.
+                        </h3>
+
+                        <p className="mb-6">
+                          If any provision is deemed invalid, the remainder
+                          shall still be enforceable.
+                        </p>
+
+                        <h3 className="font-bold text-blue-700 mb-2">
+                          6. Governing Law.
+                        </h3>
+
+                        <p className="mb-6">
+                          This Agreement shall be governed by the laws of the
+                          State of Georgia.
+                        </p>
+
+                        <h3 className="font-bold text-blue-700 mb-2">
+                          7. Dispute Resolution.
+                        </h3>
+
+                        <p className="mb-6">
+                          Disputes shall be brought only in Georgia courts. All
+                          parties waive the right to trial by jury to the
+                          maximum extent permitted by law.
+                        </p>
+
+                        <h3 className="font-bold text-blue-700 mb-2">
+                          8. Headings.
+                        </h3>
+
+                        <p className="mb-6">
+                          Section headings are for convenience only and do not
+                          affect interpretation.
+                        </p>
+
+                        <h3 className="font-bold text-blue-700 mb-2">
+                          9. Entire Agreement.
+                        </h3>
+
+                        <p className="mb-6">
+                          This document contains the full agreement and
+                          supersedes prior oral or written agreements.
+                        </p>
+
+                        <h3 className="font-bold text-blue-700 mb-2">
+                          10. Amendment.
+                        </h3>
+
+                        <p className="mb-6">
+                          This Agreement can only be amended in writing signed
+                          by both parties.
+                        </p>
+
+                        <h3 className="font-bold text-blue-700 mb-2">
+                          11. Notices.
+                        </h3>
+
+                        <p className="mb-6">
+                          All notices must be in writing and delivered to the
+                          parties' last known addresses.
+                        </p>
+
+                        <h3 className="font-bold text-blue-700 mb-2">
+                          12. Waiver.
+                        </h3>
+
+                        <p className="mb-8">
+                          Waiver of any provision must be in writing and does
+                          not waive any other rights.
+                        </p>
+
+                        <p className="mb-12">
+                          IN WITNESS WHEREOF, this Agreement has been executed
+                          as of the date first above written.
+                        </p>
+
+                        {/* Signature Section */}
+                        <div className="space-y-12">
+                          <div className="grid grid-cols-2 gap-8">
+                            <div>
+                              <div className="border-b border-black mb-2 h-12"></div>
+                              <p className="text-xs">
+                                Company Representative Signature
+                              </p>
+                            </div>
+                            <div>
+                              <div className="border-b border-black mb-2 h-12"></div>
+                              <p className="text-xs">
+                                Company Representative Name and Title
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-8">
+                            <div>
+                              <div className="border-b border-black mb-2 h-12 flex items-end pb-1">
+                                <p
+                                  className="text-lg"
+                                  style={{
+                                    fontFamily: "'Southampton', cursive",
+                                    fontSize: "24px",
+                                    fontWeight: "400",
+                                  }}
+                                >
+                                  {formData.employeeSignature || "No Signature"}
+                                </p>
+                              </div>
+                              <p className="text-xs">Employee Signature</p>
+                            </div>
+                            <div>
+                              <div className="border-b border-black mb-2 h-12 flex items-center px-2">
+                                <span className="text-sm">
+                                  {formData.employeeSignatureName ||
+                                    "____________________"}
+                                </span>
+                              </div>
+                              <p className="text-xs">Employee Name</p>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="text-xs text-gray-600 border-t border-gray-300 pt-2 mt-16">
+                          2 | Page
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Digital Signature Section */}
+              {formData?.employeeSignature && (
+                <div className="space-y-6 mb-8">
+                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-200">
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-start gap-4 flex-1">
+                        <div className="bg-blue-100 p-3 rounded-lg flex-shrink-0">
+                          <FileText className="w-8 h-8 text-blue-600" />
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="text-lg font-semibold text-blue-800 mb-1">
+                            Digital Signature
+                          </h3>
+                          <p className="text-sm text-blue-600 mb-3">
+                            Employee signed digitally
+                          </p>
+                          {formData.employeeSignatureDate && (
+                            <p className="text-xs text-blue-600 mb-3">
+                              Signed on:{" "}
+                              {new Date(
+                                formData.employeeSignatureDate
+                              ).toLocaleDateString()}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Digital Signature Display */}
+                  <div className="space-y-4">
+                    <div className="border-2 border-gray-300 rounded-lg p-4 bg-white">
+                      <div className="w-full flex justify-center">
+                        <p
+                          className="text-3xl"
+                          style={{
+                            fontFamily: "'Southampton', cursive",
+                            fontSize: "48px",
+                            fontWeight: "400",
+                            minHeight: "60px",
+                            display: "flex",
+                            alignItems: "center",
+                          }}
+                        >
+                          {formData.employeeSignature || "No Signature"}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                      <div>
+                        <div className="flex items-center gap-2 text-blue-700 mb-1">
+                          <CheckCircle className="w-5 h-5" />
+                          <span className="font-medium">
+                            Digital signature submitted
+                          </span>
+                        </div>
+                        <p className="text-sm text-gray-600">
+                          ✍️ Digital signature • Date:{" "}
+                          {formData.employeeSignatureDate
+                            ? new Date(
+                                formData.employeeSignatureDate
+                              ).toLocaleDateString()
+                            : "N/A"}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Uploaded PDF Section */}
+              {uploadedForm ? (
+                <div className="space-y-6">
+                  <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-6 border border-green-200">
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-start gap-4 flex-1">
+                        <div className="bg-green-100 p-3 rounded-lg flex-shrink-0">
+                          <FileText className="w-8 h-8 text-green-600" />
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="text-lg font-semibold text-green-800 mb-1">
+                            Signed PDF Document
+                          </h3>
+                          <p className="text-sm text-green-600 mb-3">
+                            {uploadedForm.filename ||
+                              "Signed Non-Compete Agreement"}
+                          </p>
+                          <p className="text-xs text-green-600 mb-3">
+                            Uploaded:{" "}
+                            {uploadedForm.uploadedAt
+                              ? new Date(
+                                  uploadedForm.uploadedAt
+                                ).toLocaleDateString()
+                              : "N/A"}
+                          </p>
+                          <div className="flex gap-3">
+                            <button
+                              onClick={handleDownload}
+                              className="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium"
+                            >
+                              <Download className="w-4 h-4" />
+                              Download Signed PDF
+                            </button>
+                            <button
+                              onClick={handleClear}
+                              className="inline-flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-medium"
+                            >
+                              Clear
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Signed PDF Preview */}
+                  {uploadedForm?.filePath && (
+                    <div className="space-y-4">
+                      <div className="border-2 border-gray-300 rounded-lg p-4 bg-white">
+                        {uploadedForm.filePath.endsWith(".png") ||
+                        uploadedForm.filePath.endsWith(".jpg") ||
+                        uploadedForm.filePath.endsWith(".jpeg") ? (
+                          <div
+                            className="w-full bg-gray-100 rounded border-2 border-gray-200 overflow-auto"
+                            style={{ maxHeight: "600px" }}
+                          >
+                            <img
+                              src={`${baseURL}/${uploadedForm.filePath.replace(
+                                /\\/g,
+                                "/"
+                              )}`}
+                              alt="Employee Signed Non-Compete Agreement"
+                              className="w-full object-contain"
+                            />
+                          </div>
+                        ) : uploadedForm.filePath.endsWith(".pdf") ? (
+                          <div className="w-full h-96 flex items-center justify-center bg-red-50 rounded border-2 border-red-200">
+                            <div className="text-center">
+                              <div className="text-red-600 font-medium text-sm mb-1">
+                                PDF Document
+                              </div>
+                              <div className="text-red-500 text-xs">
+                                {uploadedForm.filename}
+                              </div>
+                              <a
+                                href={`${baseURL}/${uploadedForm.filePath.replace(
+                                  /\\/g,
+                                  "/"
+                                )}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-block mt-2 px-3 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700 transition-colors"
+                              >
+                                View PDF
+                              </a>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="w-full h-96 flex items-center justify-center bg-gray-100 rounded border-2 border-dashed border-gray-300">
+                            <div className="text-center">
+                              <div className="text-gray-600 font-medium text-sm mb-1">
+                                Uploaded Document
+                              </div>
+                              <div className="text-gray-500 text-xs">
+                                {uploadedForm.filename}
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="flex items-center justify-between p-4 bg-green-50 border border-green-200 rounded-lg">
+                        <div>
+                          <div className="flex items-center gap-2 text-green-700 mb-1">
+                            <CheckCircle className="w-5 h-5" />
+                            <span className="font-medium">
+                              PDF document submitted
+                            </span>
+                          </div>
+                          <p className="text-sm text-gray-600">
+                            📄{" "}
+                            {uploadedForm.filename ||
+                              "Signed Non-Compete Agreement"}{" "}
+                            • Submitted on:{" "}
+                            {uploadedForm.uploadedAt
+                              ? new Date(
+                                  uploadedForm.uploadedAt
+                                ).toLocaleDateString()
+                              : "N/A"}
+                          </p>
+                        </div>
+                        <a
+                          href={`${baseURL}/${uploadedForm.filePath.replace(
+                            /\\/g,
+                            "/"
+                          )}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-2 px-4 py-2 bg-[#1F3A93] text-white rounded-lg hover:bg-[#16307E] transition-colors"
+                        >
+                          <Download className="w-4 h-4" />
+                          Download
+                        </a>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : !formData?.employeeSignature ? (
+                <div className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl p-6 border border-amber-200">
+                  <div className="flex items-start gap-4">
+                    <div className="bg-amber-100 p-3 rounded-lg">
+                      <AlertCircle className="w-8 h-8 text-amber-600" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-amber-800 mb-1">
+                        No Document or Signature Submitted
+                      </h3>
+                      <p className="text-sm text-amber-600">
+                        The employee has not submitted a signed Non-Compete
+                        Agreement yet.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ) : null}
+            </div>
+
+            <div className="p-8 border-t">
+              <HRNotesInput
+                formType="non-compete-agreement"
+                employeeId={employeeId}
+                existingNote={formData?.hrFeedback?.comment}
+                existingReviewedAt={formData?.hrFeedback?.reviewedAt}
+                onNoteSaved={loadData}
+                formData={formData}
+              />
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Signature Modal */}
+      {selectedSignature && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-lg max-w-md w-full p-6">
+            <h3 className="text-lg font-semibold text-gray-800 mb-4">
+              Employee Signature
+            </h3>
+            <div className="bg-gray-50 border border-gray-300 rounded-lg p-4 mb-4">
+              {selectedSignature && (
+                <img
+                  src={getSignatureSrc(selectedSignature)}
+                  alt="Employee Signature"
+                  className="w-full h-auto"
+                />
+              )}
+            </div>
+            <button
+              onClick={() => setSelectedSignature(null)}
+              className="w-full px-4 py-2 bg-[#1F3A93] text-white rounded-lg hover:bg-[#16307E] transition-colors"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
+
+      <Toaster position="top-right" />
+    </Layout>
+  );
+};
+
+export default NonCompeteAgreementHR;

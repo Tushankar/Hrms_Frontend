@@ -1,0 +1,439 @@
+import React, { useState } from 'react';
+
+export default function GemaltoRegistrationForm() {
+  const [formData, setFormData] = useState({
+    lastName: '',
+    firstName: '',
+    middleInitial: '',
+    ssn: '',
+    height: '',
+    weight: '',
+    eyeColor: '',
+    hairColor: '',
+    dob: '',
+    sex: '',
+    race: '',
+    streetAddress: '',
+    city: '',
+    state: '',
+    zip: '',
+    provider: '',
+    position: '',
+    signature: '',
+    date: '',
+    providerName: '',
+    applicantName: '',
+    directContact: '',
+    contactPhone: '',
+    emailAddress: ''
+  });
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+  };
+
+  const LogoHeader = () => (
+    <div className="flex items-start mb-6">
+      <div className="w-32 h-32 flex items-center justify-center mr-6 flex-shrink-0 relative" style={{backgroundColor: '#1D1A53'}}>
+        <svg width="128" height="128" viewBox="0 0 128 128" className="absolute inset-0">
+          <g transform="translate(64, 45)">
+            {[0, 45, 90, 135, 180, 225, 270, 315].map((angle, i) => {
+              const rad = (angle * Math.PI) / 180;
+              const x2 = Math.cos(rad) * 25;
+              const y2 = Math.sin(rad) * 25;
+              return (
+                <line
+                  key={i}
+                  x1="0"
+                  y1="0"
+                  x2={x2}
+                  y2={y2}
+                  stroke="#FDB714"
+                  strokeWidth="2.5"
+                />
+              );
+            })}
+            <circle cx="0" cy="0" r="3" fill="#FDB714" />
+          </g>
+        </svg>
+        <div className="text-white font-bold text-xl mt-16 relative z-10">DBHDD</div>
+      </div>
+      <div className="flex-1">
+        <h1 className="text-xl font-bold text-right mb-1">
+          Georgia Department of Behavioral Health & Developmental Disabilities
+        </h1>
+        <p className="text-sm text-right italic mb-3">Judy Fitzgerald, Commissioner</p>
+        <div className="border-t-2 border-black pt-2">
+          <h2 className="text-center font-bold">Office of Enterprise Compliance</h2>
+          <p className="text-xs text-center">
+            Two Peachtree Street, NW • 2nd Floor • Atlanta, Georgia 30303-3142 • Telephone: 404-463-2507 • Fax: 770-339-5473
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="bg-gray-200 p-8">
+      {/* PAGE 1 - Registration Form */}
+      <div className="w-[816px] min-h-[1056px] mx-auto p-12 bg-white shadow-lg mb-8">
+        <LogoHeader />
+
+        <h2 className="text-2xl font-bold text-center mb-8">Gemalto Applicant Registration Form</h2>
+
+        <div className="space-y-4">
+          {/* Name Row */}
+          <div className="grid grid-cols-12 gap-4">
+            <div className="col-span-5">
+              <label className="block text-xs mb-1">Last Name</label>
+              <input
+                type="text"
+                name="lastName"
+                value={formData.lastName}
+                onChange={handleChange}
+                className="w-full border-b-2 border-black focus:outline-none focus:border-blue-600 pb-1"
+              />
+            </div>
+            <div className="col-span-5">
+              <label className="block text-xs mb-1">First Name</label>
+              <input
+                type="text"
+                name="firstName"
+                value={formData.firstName}
+                onChange={handleChange}
+                className="w-full border-b-2 border-black focus:outline-none focus:border-blue-600 pb-1"
+              />
+            </div>
+            <div className="col-span-2">
+              <label className="block text-xs mb-1">Middle Initial</label>
+              <input
+                type="text"
+                name="middleInitial"
+                value={formData.middleInitial}
+                onChange={handleChange}
+                maxLength={1}
+                className="w-full border-b-2 border-black focus:outline-none focus:border-blue-600 pb-1"
+              />
+            </div>
+          </div>
+
+          {/* Physical Details Row */}
+          <div className="grid grid-cols-12 gap-4">
+            <div className="col-span-3">
+              <label className="block text-xs mb-1">Social Security No.</label>
+              <input
+                type="text"
+                name="ssn"
+                value={formData.ssn}
+                onChange={handleChange}
+                className="w-full border-b-2 border-black focus:outline-none focus:border-blue-600 pb-1"
+              />
+            </div>
+            <div className="col-span-2">
+              <label className="block text-xs mb-1">Height</label>
+              <input
+                type="text"
+                name="height"
+                value={formData.height}
+                onChange={handleChange}
+                className="w-full border-b-2 border-black focus:outline-none focus:border-blue-600 pb-1"
+              />
+            </div>
+            <div className="col-span-2">
+              <label className="block text-xs mb-1">Weight</label>
+              <input
+                type="text"
+                name="weight"
+                value={formData.weight}
+                onChange={handleChange}
+                className="w-full border-b-2 border-black focus:outline-none focus:border-blue-600 pb-1"
+              />
+            </div>
+            <div className="col-span-2">
+              <label className="block text-xs mb-1">Eye color</label>
+              <input
+                type="text"
+                name="eyeColor"
+                value={formData.eyeColor}
+                onChange={handleChange}
+                className="w-full border-b-2 border-black focus:outline-none focus:border-blue-600 pb-1"
+              />
+            </div>
+            <div className="col-span-3">
+              <label className="block text-xs mb-1">Hair Color</label>
+              <input
+                type="text"
+                name="hairColor"
+                value={formData.hairColor}
+                onChange={handleChange}
+                className="w-full border-b-2 border-black focus:outline-none focus:border-blue-600 pb-1"
+              />
+            </div>
+          </div>
+
+          {/* DOB, Sex, Race Row */}
+          <div className="grid grid-cols-12 gap-4">
+            <div className="col-span-4">
+              <label className="block text-xs mb-1">Date of Birth</label>
+              <input
+                type="text"
+                name="dob"
+                value={formData.dob}
+                onChange={handleChange}
+                className="w-full border-b-2 border-black focus:outline-none focus:border-blue-600 pb-1"
+              />
+            </div>
+            <div className="col-span-3">
+              <label className="block text-xs mb-1">Sex</label>
+              <input
+                type="text"
+                name="sex"
+                value={formData.sex}
+                onChange={handleChange}
+                className="w-full border-b-2 border-black focus:outline-none focus:border-blue-600 pb-1"
+              />
+            </div>
+            <div className="col-span-5">
+              <label className="block text-xs mb-1">Race</label>
+              <input
+                type="text"
+                name="race"
+                value={formData.race}
+                onChange={handleChange}
+                className="w-full border-b-2 border-black focus:outline-none focus:border-blue-600 pb-1"
+              />
+            </div>
+          </div>
+
+          {/* Address Row */}
+          <div className="grid grid-cols-12 gap-4">
+            <div className="col-span-5">
+              <label className="block text-xs mb-1">Street Address</label>
+              <input
+                type="text"
+                name="streetAddress"
+                value={formData.streetAddress}
+                onChange={handleChange}
+                className="w-full border-b-2 border-black focus:outline-none focus:border-blue-600 pb-1"
+              />
+            </div>
+            <div className="col-span-3">
+              <label className="block text-xs mb-1">City</label>
+              <input
+                type="text"
+                name="city"
+                value={formData.city}
+                onChange={handleChange}
+                className="w-full border-b-2 border-black focus:outline-none focus:border-blue-600 pb-1"
+              />
+            </div>
+            <div className="col-span-2">
+              <label className="block text-xs mb-1">State</label>
+              <input
+                type="text"
+                name="state"
+                value={formData.state}
+                onChange={handleChange}
+                className="w-full border-b-2 border-black focus:outline-none focus:border-blue-600 pb-1"
+              />
+            </div>
+            <div className="col-span-2">
+              <label className="block text-xs mb-1">Zip</label>
+              <input
+                type="text"
+                name="zip"
+                value={formData.zip}
+                onChange={handleChange}
+                className="w-full border-b-2 border-black focus:outline-none focus:border-blue-600 pb-1"
+              />
+            </div>
+          </div>
+
+          {/* Provider and Position Row */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs mb-1">Provider</label>
+              <input
+                type="text"
+                name="provider"
+                value={formData.provider}
+                onChange={handleChange}
+                className="w-full border-b-2 border-black focus:outline-none focus:border-blue-600 pb-1"
+              />
+            </div>
+            <div>
+              <label className="block text-xs mb-1">Position Applied For</label>
+              <input
+                type="text"
+                name="position"
+                value={formData.position}
+                onChange={handleChange}
+                className="w-full border-b-2 border-black focus:outline-none focus:border-blue-600 pb-1"
+              />
+            </div>
+          </div>
+
+          {/* Consent Text */}
+          <div className="text-xs leading-relaxed my-6">
+            <p className="text-justify">
+              I am aware that a fingerprint-based background check is required for employment with a 
+              DBHDD network provider under Policy 04-104. I have read and accepted the terms of 
+              the Applicant Privacy Rights and Privacy Act Statement. I understand that DBHDD 
+              Criminal History Background Section (CHBC) must approve all applicant registrations 
+              prior to a fingerprint submission. I also understand that registrations will be approved 
+              or rejected based upon information submitted. In either case, I will receive an email 
+              from Gemalto explaining the status of my request. I understand that incomplete forms 
+              or inaccurate information will delay approval process.
+            </p>
+          </div>
+
+          {/* Signature and Date */}
+          <div className="grid grid-cols-1 gap-4 mt-8">
+            <div>
+              <label className="block text-xs mb-1">Signature</label>
+              <input
+                type="text"
+                name="signature"
+                value={formData.signature}
+                onChange={handleChange}
+                className="w-full border-b-2 border-black focus:outline-none focus:border-blue-600 pb-1"
+              />
+            </div>
+            <div>
+              <label className="block text-xs mb-1">Date</label>
+              <input
+                type="text"
+                name="date"
+                value={formData.date}
+                onChange={handleChange}
+                className="w-full border-b-2 border-black focus:outline-none focus:border-blue-600 pb-1"
+              />
+            </div>
+          </div>
+
+          {/* Footer */}
+          <div className="text-center text-xs mt-8 pt-4 border-t">
+            <p>2 Peachtree Street, NW • Atlanta, Georgia 30303 • 404.657.2252</p>
+            <p>dbhdd.georgia.gov • Facebook: Georgia DBHDD • Twitter: @DBHDD</p>
+          </div>
+        </div>
+      </div>
+
+      {/* PAGE 2 - Notification Form */}
+      <div className="w-[816px] min-h-[1056px] mx-auto p-12 bg-white shadow-lg">
+        <LogoHeader />
+
+        <div className="space-y-6">
+          {/* TO/FROM/RE Section */}
+          <div className="space-y-3">
+            <div className="flex">
+              <div className="font-bold w-24">TO:</div>
+              <div>DBHDD Provider Network</div>
+            </div>
+            <div className="flex">
+              <div className="font-bold w-24">FROM:</div>
+              <div>
+                <div>DBHDD Office of Enterprise Compliance</div>
+                <div>Criminal History Background Checks Section</div>
+              </div>
+            </div>
+            <div className="flex">
+              <div className="font-bold w-24">RE:</div>
+              <div>Gemalto Applicant Registration Notification</div>
+            </div>
+          </div>
+
+          {/* Notification Text */}
+          <div className="text-sm">
+            <p>
+              Please send notification forms to CHBC by facsimile to (404), 656-0008 or via email at{' '}
+              <span className="text-blue-600 underline font-bold">
+                DBHDD.REG@DBHDD.GA.GOV
+              </span>{' '}
+              with this Cover Sheet after completing the information required below:
+            </p>
+          </div>
+
+          {/* Form Fields */}
+          <div className="space-y-4 mt-8">
+            <div className="flex items-center">
+              <label className="font-bold w-64">Provider Name</label>
+              <input
+                type="text"
+                name="providerName"
+                value={formData.providerName}
+                onChange={handleChange}
+                className="flex-1 border-b-2 border-black focus:outline-none focus:border-blue-600 pb-1"
+              />
+            </div>
+
+            <div className="flex items-center">
+              <label className="font-bold w-64">Applicant Name</label>
+              <input
+                type="text"
+                name="applicantName"
+                value={formData.applicantName}
+                onChange={handleChange}
+                className="flex-1 border-b-2 border-black focus:outline-none focus:border-blue-600 pb-1"
+              />
+            </div>
+
+            <div className="flex items-center">
+              <label className="font-bold w-64">Name of Direct Contact</label>
+              <input
+                type="text"
+                name="directContact"
+                value={formData.directContact}
+                onChange={handleChange}
+                className="flex-1 border-b-2 border-black focus:outline-none focus:border-blue-600 pb-1"
+              />
+            </div>
+
+            <div className="flex items-center">
+              <label className="font-bold w-64">Contact Phone Number</label>
+              <input
+                type="text"
+                name="contactPhone"
+                value={formData.contactPhone}
+                onChange={handleChange}
+                className="flex-1 border-b-2 border-black focus:outline-none focus:border-blue-600 pb-1"
+              />
+            </div>
+
+            <div className="flex items-center">
+              <label className="font-bold w-64">Email address</label>
+              <input
+                type="text"
+                name="emailAddress"
+                value={formData.emailAddress}
+                onChange={handleChange}
+                className="flex-1 border-b-2 border-black focus:outline-none focus:border-blue-600 pb-1"
+              />
+            </div>
+          </div>
+
+          {/* Mandatory Notice */}
+          <div className="text-center text-sm font-bold mt-8">
+            ***The Notification Form and Cover Letter are Mandatory for Processing***
+          </div>
+
+          {/* Contact Information */}
+          <div className="text-sm mt-6">
+            <p>
+              If you have questions, please contact our office at 404-232-1541, 404-463-2507 or 404-232-1641.
+            </p>
+          </div>
+
+          {/* Footer */}
+          <div className="text-center text-xs mt-12 pt-4 border-t">
+            <p className="font-bold">Georgia Department of Behavioral Health & Developmental Disabilities</p>
+            <p>2 Peachtree Street, NW • Atlanta, Georgia 30303 • 404.657.2252 dbhdd.georgia.gov • Facebook: GeorgiaDBHDD • Twitter: @DBHDD</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

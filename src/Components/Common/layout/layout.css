@@ -1,0 +1,7 @@
+.sideBarMainWrapper:hover .tabLink .linkTitle {
+  display: inline-flex;
+  opacity: 1;
+
+  transition: all 0.6s linear;
+  transition-delay: 0.6;
+}
