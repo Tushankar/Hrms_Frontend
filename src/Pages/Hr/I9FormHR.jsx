@@ -14,6 +14,8 @@ import Navbar from "../../Components/Common/Navbar/Navbar";
 import HRNotesInput from "../../Components/Common/HRNotesInput/HRNotesInput";
 import axios from "axios";
 import Cookies from "js-cookie";
+import html2canvas from "html2canvas";
+import { jsPDF } from "jspdf";
 
 function FormI9({ initialFormData = {}, readOnly = false }) {
   const [formData, setFormData] = useState(initialFormData);
@@ -52,7 +54,9 @@ function FormI9({ initialFormData = {}, readOnly = false }) {
 
   return (
     <>
-      <div className="max-w-[8.5in] mx-auto py-[0.5in] px-[0.5in] bg-white font-[Arial,sans-serif] text-[10pt] leading-[1.2]">
+      <div
+        className={`max-w-[8.5in] mx-auto py-[0.5in] px-[0.5in] bg-white font-[Arial,sans-serif] text-[10pt] leading-[1.2] i9-page`}
+      >
         {/* === HEADER === */}
         <header className="flex justify-between items-start mb-1 pb-1 border-b-4 border-black">
           <div className="flex-shrink-0">
@@ -1010,48 +1014,6 @@ function FormI9({ initialFormData = {}, readOnly = false }) {
                 <tr>
                   <td className="border border-black p-[2px]">
                     <div className="text-[7pt] whitespace-nowrap">
-                      Last Name, First Name and Title of Employer or Authorized
-                      Representative
-                    </div>
-                    <input
-                      type="text"
-                      name="employerName"
-                      value={formData.employerName || ""}
-                      onChange={handleChange}
-                      className="w-full border-0 p-0 focus:outline-none text-[7pt] bg-transparent"
-                      disabled={readOnly}
-                    />
-                  </td>
-                  <td className="border border-black p-[2px]" colSpan="2">
-                    <div className="text-[7pt] whitespace-nowrap">
-                      Signature of Employer or Authorized Representative
-                    </div>
-                    <input
-                      type="text"
-                      name="employerSignature"
-                      value={formData.employerSignature || ""}
-                      onChange={handleChange}
-                      className="w-full border-0 p-0 focus:outline-none text-[7pt] bg-transparent"
-                      disabled={readOnly}
-                    />
-                  </td>
-                  <td className="border border-black p-[2px]" colSpan="2">
-                    <div className="text-[7pt] whitespace-nowrap">
-                      Today's Date (mm/dd/yyyy)
-                    </div>
-                    <input
-                      type="text"
-                      name="employerSignatureDate"
-                      value={formData.employerSignatureDate || ""}
-                      onChange={handleChange}
-                      className="w-full border-0 p-0 focus:outline-none text-[7pt] bg-transparent"
-                      disabled={readOnly}
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <td className="border border-black p-[2px]">
-                    <div className="text-[7pt] whitespace-nowrap">
                       Employer's Business or Organization Name
                     </div>
                     <input
@@ -1093,7 +1055,9 @@ function FormI9({ initialFormData = {}, readOnly = false }) {
         </footer>
       </div>
       {/* === PAGE 2 === */}
-      <div className="max-w-[8.5in] mx-auto py-[0.5in] px-[0.5in] bg-white">
+      <div
+        className={`max-w-[8.5in] mx-auto py-[0.5in] px-[0.5in] bg-white i9-page`}
+      >
         <img
           src="/i9_page2.png"
           alt="I-9 Form Page 2"
@@ -1101,7 +1065,9 @@ function FormI9({ initialFormData = {}, readOnly = false }) {
         />
       </div>
       {/* === PAGE 3 === */}
-      <div className="max-w-[8.5in] mx-auto py-[0.5in] px-[0.5in] bg-white font-[Arial,sans-serif] text-[7pt] leading-[1.2]">
+      <div
+        className={`max-w-[8.5in] mx-auto py-[0.5in] px-[0.5in] bg-white font-[Arial,sans-serif] text-[7pt] leading-[1.2] i9-page`}
+      >
         <header className="flex justify-between items-start mb-0 pb-1 border-b-4 border-black">
           <div className="flex-shrink-0">
             <img
@@ -1361,7 +1327,9 @@ function FormI9({ initialFormData = {}, readOnly = false }) {
         </footer>
       </div>
       {/* === PAGE 4 === */}
-      <div className="max-w-[8.5in] mx-auto py-[0.5in] px-[0.5in] bg-white font-[Arial,sans-serif] text-[7pt] leading-[1.2]">
+      <div
+        className={`max-w-[8.5in] mx-auto py-[0.5in] px-[0.5in] bg-white font-[Arial,sans-serif] text-[7pt] leading-[1.2] i9-page`}
+      >
         <header className="flex justify-between items-start mb-0 pb-1 border-b-4 border-black">
           <div className="flex-shrink-0">
             <img
@@ -1591,45 +1559,6 @@ function FormI9({ initialFormData = {}, readOnly = false }) {
                   </td>
                 </tr>
                 <tr>
-                  <td className="border border-black p-[2px]">
-                    <div className="text-[7pt]">
-                      Name of Employer or Authorized Representative
-                    </div>
-                    <input
-                      type="text"
-                      name={`rev${num}EmployerName`}
-                      value={formData[`rev${num}EmployerName`] || ""}
-                      onChange={handleChange}
-                      className="w-full border-0 p-0 focus:outline-none"
-                      disabled={readOnly}
-                    />
-                  </td>
-                  <td className="border border-black p-[2px]" colSpan="2">
-                    <div className="text-[7pt]">
-                      Signature of Employer or Authorized Representative
-                    </div>
-                    <input
-                      type="text"
-                      name={`rev${num}EmployerSignature`}
-                      value={formData[`rev${num}EmployerSignature`] || ""}
-                      onChange={handleChange}
-                      className="w-full border-0 p-0 focus:outline-none"
-                      disabled={readOnly}
-                    />
-                  </td>
-                  <td className="border border-black p-[2px]">
-                    <div className="text-[7pt]">Today's Date (mm/dd/yyyy)</div>
-                    <input
-                      type="text"
-                      name={`rev${num}EmployerDate`}
-                      value={formData[`rev${num}EmployerDate`] || ""}
-                      onChange={handleChange}
-                      className="w-full border-0 p-0 focus:outline-none"
-                      disabled={readOnly}
-                    />
-                  </td>
-                </tr>
-                <tr>
                   <td className="border border-black p-[2px]" colSpan="4">
                     <div className="flex gap-2">
                       <div className="flex-1">
@@ -1697,6 +1626,7 @@ const I9FormHR = () => {
   const [isNonCitizen, setIsNonCitizen] = useState(false);
   const [hasWorkAuthorization, setHasWorkAuthorization] = useState(false);
   const [formData, setFormData] = useState({});
+  const [downloading, setDownloading] = useState(false);
   const baseURL = import.meta.env.VITE__BASEURL;
 
   useEffect(() => {
@@ -1808,6 +1738,43 @@ const I9FormHR = () => {
     }
   };
 
+  const handleDownloadFormAsPDF = async () => {
+    setDownloading(true);
+    try {
+      const pdf = new jsPDF("p", "in", [8.5, 20]);
+      const pages = document.querySelectorAll(".i9-page");
+
+      for (let i = 0; i < pages.length; i++) {
+        const canvas = await html2canvas(pages[i], {
+          scale: 4,
+          useCORS: true,
+          backgroundColor: "#ffffff",
+          allowTaint: true,
+          letterRendering: true,
+          logging: false,
+        });
+        const imgData = canvas.toDataURL("image/png");
+
+        const pageWidth = 8.5;
+        const aspectRatio = canvas.width / canvas.height;
+
+        const finalWidth = pageWidth;
+        const finalHeight = pageWidth / aspectRatio;
+
+        if (i > 0) pdf.addPage();
+        pdf.addImage(imgData, "PNG", 0, 0, finalWidth, finalHeight);
+      }
+
+      pdf.save("I9_Form.pdf");
+      toast.success("Form downloaded as PDF");
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+      toast.error("Failed to download PDF");
+    } finally {
+      setDownloading(false);
+    }
+  };
+
   return (
     <Layout>
       <Navbar />
@@ -1826,7 +1793,7 @@ const I9FormHR = () => {
               I-9 Form Management
             </h1>
             <p className="text-gray-600">
-              Upload I-9 template and view employee submissions
+              Review employee I-9 form submissions
             </p>
           </div>
 
@@ -1844,83 +1811,6 @@ const I9FormHR = () => {
                 </div>
               )}
               <div className="space-y-8">
-                <div className="border border-gray-200 rounded-lg p-6">
-                  <h2 className="text-xl font-semibold text-gray-800 mb-4">
-                    Upload I-9 Template
-                  </h2>
-
-                  {template && (
-                    <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <FileText className="w-5 h-5 text-blue-600" />
-                          <span className="text-sm text-gray-700">
-                            Current template: {template.filename}
-                          </span>
-                        </div>
-                        <button
-                          onClick={handleDownloadTemplate}
-                          className="inline-flex items-center gap-2 px-3 py-1.5 bg-[#1F3A93] text-white rounded hover:bg-[#16307E] transition-colors text-sm"
-                        >
-                          <Download className="w-4 h-4" />
-                          Download
-                        </button>
-                      </div>
-                    </div>
-                  )}
-
-                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center mb-4">
-                    <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                    <input
-                      type="file"
-                      accept=".pdf"
-                      onChange={handleFileChange}
-                      className="hidden"
-                      id="file-upload"
-                    />
-                    <label
-                      htmlFor="file-upload"
-                      className="cursor-pointer inline-flex items-center gap-2 px-6 py-3 bg-[#1F3A93] text-white rounded-lg hover:bg-[#16307E] transition-colors"
-                    >
-                      <FileText className="w-5 h-5" />
-                      Select New Template
-                    </label>
-                    {file && (
-                      <div className="mt-4 flex items-center justify-center gap-2 text-green-600">
-                        <CheckCircle className="w-5 h-5" />
-                        <span className="font-medium">{file.name}</span>
-                      </div>
-                    )}
-                  </div>
-
-                  <button
-                    onClick={handleUpload}
-                    disabled={!file || uploading}
-                    className="w-full py-3 bg-gradient-to-r from-[#1F3A93] to-[#2748B4] text-white font-semibold rounded-lg hover:from-[#16306e] hover:to-[#1F3A93] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
-                  >
-                    {uploading ? "Uploading..." : "Upload Template"}
-                  </button>
-                </div>
-
-                <div className="border border-gray-200 rounded-lg p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-xl font-semibold text-gray-800">
-                      Employee Submissions
-                    </h2>
-                    <button
-                      onClick={() => navigate("/hr/i9-submissions")}
-                      className="inline-flex items-center gap-2 px-4 py-2 bg-[#1F3A93] text-white rounded-lg hover:bg-[#16307E] transition-colors"
-                    >
-                      <Eye className="w-4 h-4" />
-                      View All Submissions
-                    </button>
-                  </div>
-                  <p className="text-gray-600 text-sm">
-                    Click "View All Submissions" to see all employee-submitted
-                    I-9 forms
-                  </p>
-                </div>
-
                 {employeeId && submission && (
                   <div className="border border-gray-200 rounded-lg p-6">
                     <h2 className="text-xl font-semibold text-gray-800 mb-4">
@@ -1953,6 +1843,20 @@ const I9FormHR = () => {
                           Download Submission
                         </button>
                       )}
+                      <button
+                        onClick={handleDownloadFormAsPDF}
+                        disabled={downloading}
+                        className="inline-flex items-center gap-2 px-3 py-1.5 bg-[#1F3A93] text-white rounded hover:bg-[#16307E] transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {downloading ? (
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                        ) : (
+                          <Download className="w-4 h-4" />
+                        )}
+                        {downloading
+                          ? "Downloading..."
+                          : "Download Form as PDF"}
+                      </button>
                     </div>
                     <HRNotesInput
                       formType="i9"
@@ -1961,6 +1865,7 @@ const I9FormHR = () => {
                       existingReviewedAt={submission?.hrFeedback?.reviewedAt}
                       onNoteSaved={fetchSubmission}
                       formData={submission}
+                      showSignature={false} // hide HR signature area for I-9 HR view
                     />
                   </div>
                 )}

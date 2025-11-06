@@ -146,7 +146,7 @@ const PCAJobDescriptionTemplate = ({
   return (
     <div className="p-8 bg-white">
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Southampton:wght@400&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Great+Vibes:wght@400&family=Dancing+Script:wght@400;700&family=Pacifico&display=swap');
       `}</style>
 
       <div className="border-2 border-gray-900 p-8 space-y-6">
@@ -243,9 +243,10 @@ const PCAJobDescriptionTemplate = ({
               <div className="border-b border-gray-900 pb-1 min-h-8">
                 <p
                   style={{
-                    fontFamily: "'Southampton', cursive",
-                    fontSize: "16px",
+                    fontFamily: "'Great Vibes', cursive",
+                    fontSize: "28px",
                     fontWeight: "400",
+                    letterSpacing: "0.5px",
                   }}
                   className="text-gray-800"
                 >

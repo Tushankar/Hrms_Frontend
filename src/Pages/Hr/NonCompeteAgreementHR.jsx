@@ -88,9 +88,9 @@ const NonCompeteAgreementHR = () => {
   return (
     <Layout>
       <Navbar />
-      {/* Add Southampton Script font */}
+      {/* Add cursive signature fonts */}
       <link
-        href="https://fonts.googleapis.com/css2?family=Southampton:wght@400&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Great+Vibes:wght@400&family=Dancing+Script:wght@400;700&family=Pacifico&display=swap"
         rel="stylesheet"
       />
 
@@ -367,9 +367,10 @@ const NonCompeteAgreementHR = () => {
                                 <p
                                   className="text-lg"
                                   style={{
-                                    fontFamily: "'Southampton', cursive",
-                                    fontSize: "24px",
+                                    fontFamily: "'Great Vibes', cursive",
+                                    fontSize: "28px",
                                     fontWeight: "400",
+                                    letterSpacing: "0.5px",
                                   }}
                                 >
                                   {formData.employeeSignature || "No Signature"}
@@ -434,9 +435,10 @@ const NonCompeteAgreementHR = () => {
                         <p
                           className="text-3xl"
                           style={{
-                            fontFamily: "'Southampton', cursive",
+                            fontFamily: "'Great Vibes', cursive",
                             fontSize: "48px",
                             fontWeight: "400",
+                            letterSpacing: "0.5px",
                             minHeight: "60px",
                             display: "flex",
                             alignItems: "center",

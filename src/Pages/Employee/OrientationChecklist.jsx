@@ -378,7 +378,7 @@ const OrientationChecklist = () => {
 
       {/* Add Southampton Script font */}
       <link
-        href="https://fonts.googleapis.com/css2?family=Southampton:wght@400&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap"
         rel="stylesheet"
       />
 
@@ -573,14 +573,13 @@ const OrientationChecklist = () => {
                                 placeholder="Type your full name as signature"
                                 className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
                                 style={{
-                                  fontFamily: "'Southampton', cursive",
-                                  fontSize: "18px",
-                                  fontWeight: "400",
+                                  fontFamily: "'Great Vibes', cursive",
+                                  fontSize: "28px",
+                                  letterSpacing: "0.5px",
                                 }}
                               />
                               <p className="text-xs text-gray-500 mt-1">
-                                Your signature will appear in Southampton Script
-                                font
+                                Your signature will appear in Great Vibes font
                               </p>
                             </div>
                             <div>

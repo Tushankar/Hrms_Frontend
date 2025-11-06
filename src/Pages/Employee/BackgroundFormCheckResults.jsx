@@ -137,7 +137,7 @@ const GemaltoRegistrationForm = ({ onFormDataChange, initialData }) => {
   return (
     <div className="bg-gray-200 p-2">
       <link
-        href="https://fonts.googleapis.com/css2?family=Southampton:wght@400&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap"
         rel="stylesheet"
       />
       {/* PAGE 1 - Registration Form */}
@@ -368,8 +368,9 @@ const GemaltoRegistrationForm = ({ onFormDataChange, initialData }) => {
                 onChange={handleChange}
                 placeholder="Sign here"
                 style={{
-                  fontFamily: "'Southampton', cursive",
-                  fontSize: "18px",
+                  fontFamily: "'Great Vibes', cursive",
+                  fontSize: "28px",
+                  letterSpacing: "0.5px",
                 }}
                 className="w-full border-b-2 border-black focus:outline-none focus:border-blue-600 pb-1"
               />

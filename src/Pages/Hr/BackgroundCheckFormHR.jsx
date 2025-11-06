@@ -68,7 +68,7 @@ const GemaltoRegistrationForm = ({ formData, readOnly = false }) => {
   return (
     <div className="bg-gray-200 p-2">
       <link
-        href="https://fonts.googleapis.com/css2?family=Southampton:wght@400&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap"
         rel="stylesheet"
       />
       {/* PAGE 1 - Registration Form */}
@@ -315,8 +315,9 @@ const GemaltoRegistrationForm = ({ formData, readOnly = false }) => {
               <label className="block text-xs mb-1">Signature</label>
               <p
                 style={{
-                  fontFamily: "'Southampton', cursive",
-                  fontSize: "24px",
+                  fontFamily: "'Great Vibes', cursive",
+                  fontSize: "48px",
+                  letterSpacing: "0.5px",
                 }}
                 className="w-full border-b-2 border-black pb-1 h-10 flex items-center"
               >

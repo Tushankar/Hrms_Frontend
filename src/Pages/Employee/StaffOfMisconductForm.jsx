@@ -343,7 +343,7 @@ const StaffOfMisconductForm = () => {
     <Layout>
       <Navbar />
       <link
-        href="https://fonts.googleapis.com/css2?family=Southampton:wght@400&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap"
         rel="stylesheet"
       />
       <div className="max-w-4xl mx-auto px-4 sm:px-6 md:px-8 pt-6 pb-8">
@@ -575,8 +575,9 @@ const StaffOfMisconductForm = () => {
                               }
                               placeholder="Sign here"
                               style={{
-                                fontFamily: "'Southampton', cursive",
-                                fontSize: "18px",
+                                fontFamily: "'Great Vibes', cursive",
+                                fontSize: "28px",
+                                letterSpacing: "0.5px",
                               }}
                               className="border-b border-black flex-1 px-1 focus:outline-none focus:border-b-2"
                             />
@@ -658,8 +659,9 @@ const StaffOfMisconductForm = () => {
                             }
                             placeholder="Sign here"
                             style={{
-                              fontFamily: "'Southampton', cursive",
-                              fontSize: "18px",
+                              fontFamily: "'Great Vibes', cursive",
+                              fontSize: "28px",
+                              letterSpacing: "0.5px",
                             }}
                             className="border-b border-black flex-1 px-1 focus:outline-none focus:border-b-2"
                           />

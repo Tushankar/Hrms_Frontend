@@ -316,9 +316,9 @@ const LegalDisclosures = () => {
     <Layout>
       <div className="h-full flex flex-col">
         <Navbar />
-        {/* Add Southampton Script font */}
+        {/* Add cursive signature fonts */}
         <link
-          href="https://fonts.googleapis.com/css2?family=Southampton:wght@400&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Great+Vibes:wght@400&family=Dancing+Script:wght@400;700&family=Pacifico&display=swap"
           rel="stylesheet"
         />
         <div className="pt-6 pb-12 px-4 sm:px-6 lg:px-8">
@@ -464,9 +464,10 @@ const LegalDisclosures = () => {
                               : "border-gray-300"
                           }`}
                           style={{
-                            fontFamily: "'Southampton', cursive",
-                            fontSize: "18px",
+                            fontFamily: "'Great Vibes', cursive",
+                            fontSize: "28px",
                             fontWeight: "400",
+                            letterSpacing: "0.5px",
                           }}
                         />
                         {errors.applicantSignature && (
@@ -475,7 +476,7 @@ const LegalDisclosures = () => {
                           </p>
                         )}
                         <p className="text-xs text-gray-500 mt-1">
-                          Your signature will appear in Southampton Script font
+                          Your signature will appear in Great Vibes cursive font
                         </p>
                       </div>
                       <div>

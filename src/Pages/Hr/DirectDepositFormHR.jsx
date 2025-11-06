@@ -1,12 +1,21 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, Target, CheckCircle, FileText, Send } from "lucide-react";
+import {
+  ArrowLeft,
+  Target,
+  CheckCircle,
+  FileText,
+  Send,
+  Loader2,
+} from "lucide-react";
 import toast, { Toaster } from "react-hot-toast";
 import { Layout } from "../../Components/Common/layout/Layout";
 import Navbar from "../../Components/Common/Navbar/Navbar";
 import axios from "axios";
 import Cookies from "js-cookie";
 import { jwtDecode } from "jwt-decode";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
 
 const FORM_KEYS = [
   "personalInformation",
@@ -42,6 +51,7 @@ export default function DirectDepositFormHR() {
   const [isFormCompleted, setIsFormCompleted] = useState(false);
   const [notes, setNotes] = useState("");
   const [existingFeedback, setExistingFeedback] = useState(null);
+  const [downloading, setDownloading] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     address: "",
@@ -231,6 +241,54 @@ export default function DirectDepositFormHR() {
     }
   };
 
+  const handleDownloadFormAsPDF = async () => {
+    setDownloading(true);
+    try {
+      const element = document.querySelector(".direct-deposit-page");
+      if (!element) {
+        toast.error("Form element not found");
+        return;
+      }
+
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: "#ffffff",
+        width: element.scrollWidth,
+        height: element.scrollHeight,
+      });
+
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF("p", "mm", "a4");
+
+      const imgWidth = 210; // A4 width in mm
+      const pageHeight = 295; // A4 height in mm
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      let heightLeft = imgHeight;
+
+      let position = 0;
+
+      pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+
+      while (heightLeft >= 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+
+      pdf.save("Direct_Deposit_Form.pdf");
+      toast.success("PDF downloaded successfully!");
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+      toast.error("Failed to download PDF. Please try again.");
+    } finally {
+      setDownloading(false);
+    }
+  };
+
   const handlePrevious = () => {
     navigate(-1);
   };
@@ -300,7 +358,7 @@ export default function DirectDepositFormHR() {
             </p>
           </div>
 
-          <div className="p-4 bg-white font-sans">
+          <div className="p-4 bg-white font-sans direct-deposit-page">
             {/* Header */}
             <div className="flex justify-between items-start mb-4">
               <div className="text-[9px] leading-tight">
@@ -1207,6 +1265,26 @@ export default function DirectDepositFormHR() {
                 presenting a false statement or making a fraudulent claim.
               </div>
             </div>
+          </div>
+
+          {/* Download PDF Button */}
+          <div className="flex justify-center mt-6">
+            <button
+              onClick={handleDownloadFormAsPDF}
+              disabled={downloading}
+              className={`inline-flex items-center gap-2 px-6 py-3 rounded-lg font-medium text-white transition-all duration-200 ${
+                downloading
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-gradient-to-r from-[#1F3A93] to-[#2748B4] hover:from-[#16306e] hover:to-[#1F3A93] shadow-md hover:shadow-lg"
+              }`}
+            >
+              {downloading ? (
+                <Loader2 className="w-5 h-5 animate-spin" />
+              ) : (
+                <FileText className="w-5 h-5" />
+              )}
+              {downloading ? "Generating PDF..." : "Download as PDF"}
+            </button>
           </div>
 
           {/* Progress Section */}

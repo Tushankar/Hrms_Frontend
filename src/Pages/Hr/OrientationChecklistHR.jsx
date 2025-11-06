@@ -280,7 +280,7 @@ const OrientationChecklistHR = () => {
     <Layout>
       {/* Add Southampton Script font */}
       <link
-        href="https://fonts.googleapis.com/css2?family=Southampton:wght@400&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap"
         rel="stylesheet"
       />
       <div className="h-full flex flex-col">
@@ -439,14 +439,14 @@ const OrientationChecklistHR = () => {
                             placeholder="Employee signature (display only)"
                             className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
                             style={{
-                              fontFamily: "'Southampton', cursive",
-                              fontSize: "18px",
-                              fontWeight: "400",
+                              fontFamily: "'Great Vibes', cursive",
+                              fontSize: "48px",
+                              letterSpacing: "0.5px",
                             }}
                             readOnly
                           />
                           <p className="text-xs text-gray-500 mt-1">
-                            Displayed in Southampton Script font
+                            Displayed in Great Vibes font
                           </p>
                         </div>
                         <div>
@@ -489,13 +489,13 @@ const OrientationChecklistHR = () => {
                             placeholder="Type agency representative signature"
                             className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
                             style={{
-                              fontFamily: "'Southampton', cursive",
-                              fontSize: "18px",
-                              fontWeight: "400",
+                              fontFamily: "'Great Vibes', cursive",
+                              fontSize: "28px",
+                              letterSpacing: "0.5px",
                             }}
                           />
                           <p className="text-xs text-gray-500 mt-1">
-                            Will appear in Southampton Script font
+                            Will appear in Great Vibes font
                           </p>
                         </div>
                         <div>

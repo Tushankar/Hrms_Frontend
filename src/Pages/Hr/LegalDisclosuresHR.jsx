@@ -69,9 +69,9 @@ const LegalDisclosuresHR = () => {
   return (
     <Layout>
       <div className="max-w-6xl mx-auto p-6">
-        {/* Add Southampton Script font */}
+        {/* Add cursive signature fonts */}
         <link
-          href="https://fonts.googleapis.com/css2?family=Southampton:wght@400&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Great+Vibes:wght@400&family=Dancing+Script:wght@400;700&family=Pacifico&display=swap"
           rel="stylesheet"
         />
         <button
@@ -232,9 +232,10 @@ const LegalDisclosuresHR = () => {
                         <p
                           className="text-center text-lg text-gray-900"
                           style={{
-                            fontFamily: "'Southampton', cursive",
-                            fontSize: "24px",
+                            fontFamily: "'Great Vibes', cursive",
+                            fontSize: "28px",
                             fontWeight: "400",
+                            letterSpacing: "0.5px",
                           }}
                         >
                           {data.applicantSignature}

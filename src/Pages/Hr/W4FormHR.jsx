@@ -7,6 +7,8 @@ import Navbar from "../../Components/Common/Navbar/Navbar";
 import HRNotesInput from "../../Components/Common/HRNotesInput/HRNotesInput";
 import axios from "axios";
 import Cookies from "js-cookie";
+import html2canvas from "html2canvas";
+import { jsPDF } from "jspdf";
 
 const W4FormHR = () => {
   const navigate = useNavigate();
@@ -14,6 +16,7 @@ const W4FormHR = () => {
   const [submission, setSubmission] = useState(null);
   const [formData, setFormData] = useState({});
   const [loading, setLoading] = useState(true);
+  const [downloading, setDownloading] = useState(false);
   const baseURL = import.meta.env.VITE__BASEURL;
 
   useEffect(() => {
@@ -83,6 +86,43 @@ const W4FormHR = () => {
     deductions5: data.deductionsWorksheet?.total || "",
   });
 
+  const handleDownloadFormAsPDF = async () => {
+    setDownloading(true);
+    try {
+      const pdf = new jsPDF("p", "in", [8.5, 20]);
+      const pages = document.querySelectorAll(".w4-page");
+
+      for (let i = 0; i < pages.length; i++) {
+        const canvas = await html2canvas(pages[i], {
+          scale: 4,
+          useCORS: true,
+          backgroundColor: "#ffffff",
+          allowTaint: true,
+          letterRendering: true,
+          logging: false,
+        });
+        const imgData = canvas.toDataURL("image/png");
+
+        const pageWidth = 8.5;
+        const aspectRatio = canvas.width / canvas.height;
+
+        const finalWidth = pageWidth;
+        const finalHeight = pageWidth / aspectRatio;
+
+        if (i > 0) pdf.addPage();
+        pdf.addImage(imgData, "PNG", 0, 0, finalWidth, finalHeight);
+      }
+
+      pdf.save("W4_Form.pdf");
+      toast.success("Form downloaded as PDF");
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+      toast.error("Failed to download PDF");
+    } finally {
+      setDownloading(false);
+    }
+  };
+
   if (loading) {
     return (
       <Layout>
@@ -129,7 +169,7 @@ const W4FormHR = () => {
                   </p>
                 </div>
 
-                <div className="max-w-[8.5in] mx-auto py-[0.5in] px-[0.5in] bg-white font-[Arial,sans-serif] text-[10pt] leading-[1.2]">
+                <div className="max-w-[8.5in] mx-auto py-[0.5in] px-[0.5in] bg-white font-[Arial,sans-serif] text-[10pt] leading-[1.2] w4-page">
                   {/* Header */}
                   <table className="w-full mb-1 border-collapse">
                     <tbody>
@@ -1545,12 +1585,27 @@ const W4FormHR = () => {
                   </div>
                 </div>
 
-                <div className="max-w-[8.5in] mx-auto py-[0.5in] px-[0.5in] bg-white font-[Arial,sans-serif] text-[10pt] leading-[1.2] mt-1.5">
+                <div className="max-w-[8.5in] mx-auto py-[0.5in] px-[0.5in] bg-white font-[Arial,sans-serif] text-[10pt] leading-[1.2] mt-1.5 w4-page">
                   <img
                     src="/page-4r.svg"
                     alt="Page 4"
                     className="w-full h-auto"
                   />
+                </div>
+
+                <div className="mb-4 space-y-2">
+                  <button
+                    onClick={handleDownloadFormAsPDF}
+                    disabled={downloading}
+                    className="inline-flex items-center gap-2 px-3 py-1.5 bg-[#1F3A93] text-white rounded hover:bg-[#16307E] transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {downloading ? (
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    ) : (
+                      <Download className="w-4 h-4" />
+                    )}
+                    {downloading ? "Downloading..." : "Download Form as PDF"}
+                  </button>
                 </div>
 
                 <HRNotesInput

@@ -13,6 +13,7 @@ const HRNotesInput = ({
   onNoteSaved,
   formData,
   formId,
+  showSignature = true, // new prop: controls whether HR signature UI is shown
 }) => {
   const [note, setNote] = useState("");
   const [saving, setSaving] = useState(false);
@@ -275,7 +276,7 @@ const HRNotesInput = ({
         rows="4"
       />
 
-      {existingSignature && (
+      {showSignature && existingSignature && (
         <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
           <div className="flex items-center gap-2 mb-2">
             <span className="text-sm font-medium text-gray-900">
@@ -320,15 +321,17 @@ const HRNotesInput = ({
         </div>
       )}
 
-      <div className="mt-4">
-        <SignaturePad
-          initialValue={hrSignature}
-          onSave={(signaturePath) => setHrSignature(signaturePath)}
-          label="HR Signature"
-          width={400}
-          height={120}
-        />
-      </div>
+      {showSignature && (
+        <div className="mt-4">
+          <SignaturePad
+            initialValue={hrSignature}
+            onSave={(signaturePath) => setHrSignature(signaturePath)}
+            label="HR Signature"
+            width={400}
+            height={120}
+          />
+        </div>
+      )}
 
       <button
         onClick={handleSendToEmployee}

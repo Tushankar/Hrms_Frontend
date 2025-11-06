@@ -5,6 +5,8 @@ import toast, { Toaster } from "react-hot-toast";
 import { Layout } from "../../Components/Common/layout/Layout";
 import Navbar from "../../Components/Common/Navbar/Navbar";
 import axios from "axios";
+import html2canvas from "html2canvas";
+import { jsPDF } from "jspdf";
 
 const FORM_KEYS = [
   "personalInformation",
@@ -58,6 +60,7 @@ export default function W9FormHR() {
     signatureDate: "",
   });
   const [isFormCompleted, setIsFormCompleted] = useState(false);
+  const [downloading, setDownloading] = useState(false);
 
   // Refs for TIN inputs
   const ssnInputs = useRef([]);
@@ -211,6 +214,43 @@ export default function W9FormHR() {
     }
   };
 
+  const handleDownloadFormAsPDF = async () => {
+    setDownloading(true);
+    try {
+      const pdf = new jsPDF("p", "in", [8.5, 20]);
+      const pages = document.querySelectorAll(".w9-page");
+
+      for (let i = 0; i < pages.length; i++) {
+        const canvas = await html2canvas(pages[i], {
+          scale: 4,
+          useCORS: true,
+          backgroundColor: "#ffffff",
+          allowTaint: true,
+          letterRendering: true,
+          logging: false,
+        });
+        const imgData = canvas.toDataURL("image/png");
+
+        const pageWidth = 8.5;
+        const aspectRatio = canvas.width / canvas.height;
+
+        const finalWidth = pageWidth;
+        const finalHeight = pageWidth / aspectRatio;
+
+        if (i > 0) pdf.addPage();
+        pdf.addImage(imgData, "PNG", 0, 0, finalWidth, finalHeight);
+      }
+
+      pdf.save("W9_Form.pdf");
+      toast.success("Form downloaded as PDF");
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+      toast.error("Failed to download PDF");
+    } finally {
+      setDownloading(false);
+    }
+  };
+
   const handlePrevious = () => {
     navigate(-1);
   };
@@ -359,7 +399,7 @@ export default function W9FormHR() {
           </div>
 
           <div
-            className="p-4 bg-white text-black"
+            className="p-4 bg-white text-black w9-page"
             style={{
               fontFamily: "'Times New Roman', Times, serif",
               fontSize: "12pt",
@@ -1541,6 +1581,22 @@ export default function W9FormHR() {
                 3-2024)
               </div>
             </div>
+          </div>
+
+          {/* Download Button */}
+          <div className="mb-4 space-y-2">
+            <button
+              onClick={handleDownloadFormAsPDF}
+              disabled={downloading}
+              className="inline-flex items-center gap-2 px-3 py-1.5 bg-[#1F3A93] text-white rounded hover:bg-[#16307E] transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {downloading ? (
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+              ) : (
+                <FileText className="w-4 h-4" />
+              )}
+              {downloading ? "Downloading..." : "Download Form as PDF"}
+            </button>
           </div>
 
           {/* Progress Section */}
