@@ -1615,6 +1615,7 @@ const W4FormHR = () => {
                   existingReviewedAt={submission?.hrFeedback?.reviewedAt}
                   onNoteSaved={fetchSubmission}
                   formData={submission}
+                  showSignature={false}
                 />
               </div>
             )}
