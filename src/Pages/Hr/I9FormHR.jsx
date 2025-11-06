@@ -1738,26 +1738,756 @@ const I9FormHR = () => {
     }
   };
 
+  const generateFormHTML = (data) => {
+    const pages = [];
+
+    // Page 1 HTML
+    const page1HTML = `
+      <div style="max-width: 8.5in; margin: 0 auto; padding: 0.5in; background-color: white; font-family: Arial, sans-serif; font-size: 10pt; line-height: 1.2;">
+        <!-- HEADER -->
+        <header style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5in; padding-bottom: 0.125in; border-bottom: 4px solid black;">
+          <div style="flex-shrink: 0;">
+            <img src="/us-department-of-homeland-security.svg" alt="Department of Homeland Security" style="height: 32px; width: 32px;" />
+          </div>
+          <div style="text-align: center; flex: 1;">
+            <h1 style="font-size: 20pt; font-weight: bold;">Employment Eligibility Verification</h1>
+            <h2 style="font-size: 16pt; font-weight: bold;">Department of Homeland Security</h2>
+            <p style="font-size: 12pt;">U.S. Citizenship and Immigration Services</p>
+          </div>
+          <div style="text-align: right; flex-shrink: 0;">
+            <div style="font-weight: bold; font-size: 12pt;">USCIS</div>
+            <div style="font-weight: bold; font-size: 12pt;">Form I-9</div>
+            <div style="font-size: 10pt;">OMB No.1615-0047</div>
+            <div style="font-size: 10pt;">Expires 05/31/2027</div>
+          </div>
+        </header>
+        <!-- SECTION 1 -->
+        <section style="border: 1px solid black; margin-bottom: 0.125in;">
+          <header style="background-color: #d1d5db; color: black; padding: 5px; border-bottom: 1px solid black;">
+            <h3 style="font-size: 8.5pt; font-weight: bold;">
+              Section 1. Employee Information and Attestation: 
+              <span style="font-weight: normal;">
+                Employees must complete and sign Section 1 of Form I-9 no later than the first day of employment, but not before accepting a job offer.
+              </span>
+            </h3>
+          </header>
+          <div style="padding: 5px;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 7pt; line-height: 1.1;">
+              <tbody>
+                <tr>
+                  <td style="border: 1px solid black; padding: 2px;" colspan="2">
+                    <div style="font-size: 7pt;">Last Name (Family Name)</div>
+                    <div>${data.lastName || ""}</div>
+                  </td>
+                  <td style="border: 1px solid black; padding: 2px;" colspan="2">
+                    <div style="font-size: 7pt;">First Name (Given Name)</div>
+                    <div>${data.firstName || ""}</div>
+                  </td>
+                  <td style="border: 1px solid black; padding: 2px;">
+                    <div style="font-size: 7pt;">Middle Initial (if any)</div>
+                    <div>${data.middleInitial || ""}</div>
+                  </td>
+                  <td style="border: 1px solid black; padding: 2px;">
+                    <div style="font-size: 7pt;">Other Last Names Used (if any)</div>
+                    <div>${data.otherLastNames || ""}</div>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="border: 1px solid black; padding: 2px;" colspan="2">
+                    <div style="font-size: 7pt;">Address (Street Number and Name)</div>
+                    <div>${data.address || ""}</div>
+                  </td>
+                  <td style="border: 1px solid black; padding: 2px;">
+                    <div style="font-size: 7pt;">Apt. Number (if any)</div>
+                    <div>${data.aptNumber || ""}</div>
+                  </td>
+                  <td style="border: 1px solid black; padding: 2px;">
+                    <div style="font-size: 7pt;">City or Town</div>
+                    <div>${data.city || ""}</div>
+                  </td>
+                  <td style="border: 1px solid black; padding: 2px;">
+                    <div style="font-size: 7pt;">State</div>
+                    <div>${data.state || ""}</div>
+                  </td>
+                  <td style="border: 1px solid black; padding: 2px;">
+                    <div style="font-size: 7pt;">ZIP Code</div>
+                    <div>${data.zipCode || ""}</div>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="border: 1px solid black; padding: 2px;">
+                    <div style="font-size: 7pt;">Date of Birth (mm/dd/yyyy)</div>
+                    <div>${data.dateOfBirth || ""}</div>
+                  </td>
+                  <td style="border: 1px solid black; padding: 2px;" colspan="2">
+                    <div style="font-size: 7pt;">U.S. Social Security Number</div>
+                    <div style="display: flex; gap: 0; justify-content: center;">
+                      ${[...Array(9)]
+                        .map(
+                          (_, i) =>
+                            `<input type="text" value="${
+                              (data.socialSecurityNumber || "")[i] || ""
+                            }" style="width: 16px; height: 16px; border-right: 1px solid black; text-align: center; border-left: ${
+                              i === 0 ? "1px" : "none"
+                            } solid black; border-top: 1px solid black; border-bottom: 1px solid black;" readonly />`
+                        )
+                        .join("")}
+                    </div>
+                  </td>
+                  <td style="border: 1px solid black; padding: 2px;" colspan="2">
+                    <div style="font-size: 7pt;">Employee's Email Address</div>
+                    <div>${data.email || ""}</div>
+                  </td>
+                  <td style="border: 1px solid black; padding: 2px;">
+                    <div style="font-size: 7pt;">Employee's Telephone Number</div>
+                    <div>${data.telephone || ""}</div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <!-- Attestation -->
+            <table style="width: 100%; border-collapse: collapse; font-size: 7pt; margin-top: 0.0625in;">
+              <tbody>
+                <tr>
+                  <td style="border: 1px solid black; padding: 2px;" rowspan="6" style="width: 25%;">
+                    <strong style="font-size: 7pt;">
+                      I am aware that federal law provides for imprisonment and/or fines for false statements, or the use of false documents, in connection with the completion of this form. I attest, under penalty of perjury, that this information, including my selection of the box attesting to my citizenship or immigration status, is true and correct.
+                    </strong>
+                  </td>
+                  <td style="border: 1px solid black; padding: 2px;" colspan="3">
+                    <div style="font-size: 7pt;">
+                      Check one of the following boxes to attest to your citizenship or immigration status (See page 2 and 3 of the instructions.):
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="border: 1px solid black; padding: 2px;" colspan="3">
+                    <div style="display: flex; align-items: center; gap: 4px;">
+                      <input type="checkbox" ${
+                        data.citizenshipStatus === "citizen" ? "checked" : ""
+                      } disabled />
+                      <span>1. A citizen of the United States</span>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="border: 1px solid black; padding: 2px;" colspan="3">
+                    <div style="display: flex; align-items: center; gap: 4px;">
+                      <input type="checkbox" ${
+                        data.citizenshipStatus === "national" ? "checked" : ""
+                      } disabled />
+                      <span>2. A noncitizen national of the United States (See Instructions.)</span>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="border: 1px solid black; padding: 2px;" colspan="3">
+                    <div style="display: flex; align-items: center; gap: 4px;">
+                      <input type="checkbox" ${
+                        data.citizenshipStatus === "alien" ? "checked" : ""
+                      } disabled />
+                      <span>3. A lawful permanent resident (Enter USCIS or A-Number.)</span>
+                      <input type="text" value="${
+                        data.aNumber || ""
+                      }" style="flex: 1; border: none; border-bottom: 1px solid black; padding: 2px;" readonly />
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="border: 1px solid black; padding: 2px;" colspan="3">
+                    <div style="display: flex; align-items: flex-start; gap: 4px;">
+                      <input type="checkbox" ${
+                        data.citizenshipStatus === "authorized" ? "checked" : ""
+                      } disabled />
+                      <div style="flex: 1;">
+                        <div>4. An alien authorized to work until <input type="text" value="${
+                          data.workAuthExpDate || ""
+                        }" placeholder="(exp. date, if any)" style="width: 160px; border: none; border-bottom: 1px solid black; padding: 2px; margin-left: 8px;" readonly /></div>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="border: 1px solid black; padding: 2px;" colspan="3">
+                    <div style="font-size: 7pt; text-align: center;">If you check Item Number 4., enter one of these:</div>
+                    <div style="display: flex; align-items: flex-start; gap: 4px;">
+                      <div style="border: 1px solid black; padding: 2px; width: 20%;">
+                        <div style="font-size: 7pt; margin-bottom: 2px;">USCIS A-Number</div>
+                        <input type="text" value="${
+                          data.uscisANumber || ""
+                        }" style="width: 100%; border: none; border-bottom: 1px solid black;" readonly />
+                      </div>
+                      <div style="display: flex; align-items: center; justify-content: center; font-weight: bold;">OR</div>
+                      <div style="border: 1px solid black; padding: 2px; width: 28%;">
+                        <div style="font-size: 7pt; margin-bottom: 2px;">Form I-94 Admission Number</div>
+                        <input type="text" value="${
+                          data.i94Number || ""
+                        }" style="width: 100%; border: none; border-bottom: 1px solid black;" readonly />
+                      </div>
+                      <div style="display: flex; align-items: center; justify-content: center; font-weight: bold;">OR</div>
+                      <div style="flex: 1; border: 1px solid black; padding: 2px;">
+                        <div style="font-size: 7pt; margin-bottom: 2px;">Foreign Passport Number and Country of Issuance</div>
+                        <input type="text" value="${
+                          data.passportNumber || ""
+                        }" style="width: 100%; border: none; border-bottom: 1px solid black;" readonly />
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="border: 1px solid black; padding: 2px;" colspan="2">
+                    <div style="font-size: 7pt;">Signature of Employee</div>
+                    <div>${data.employeeSignature || ""}</div>
+                  </td>
+                  <td style="border: 1px solid black; padding: 2px;" colspan="2">
+                    <div style="font-size: 7pt;">Today's Date (mm/dd/yyyy)</div>
+                    <div>${data.employeeSignatureDate || ""}</div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <div style="margin-top: 0.0625in; padding: 2px; background-color: #f9fafb; border: 1px solid black; font-size: 7pt;">
+              <strong>
+                If a preparer and/or translator assisted you in completing Section 1, that person MUST complete the 
+                <a href="https://www.uscis.gov/i-9" target="_blank" rel="noopener noreferrer" style="color: #2563eb; text-decoration: underline;">Preparer and/or Translator Certification</a> on Page 3.
+              </strong>
+            </div>
+          </div>
+        </section>
+        <!-- SECTION 2 -->
+        <section style="border: 1px solid black; margin-top: 0.125in;">
+          <header style="background-color: #d1d5db; color: black; padding: 5px; border-bottom: 1px solid black;">
+            <h3 style="font-size: 7pt; font-weight: bold; line-height: 1.3;">
+              Section 2. Employer or Authorized Representative Review and Verification: 
+              <span style="font-weight: normal;">
+                Employers or their authorized representative must complete and sign Section 2 within three business days after the employee's first day of employment, and must physically examine, or examine consistent with an alternative procedure authorized by the Secretary of DHS, documentation from List A OR a combination of documentation from List B and List C. Enter any additional documentation in the Additional Information box; see Instructions.
+              </span>
+            </h3>
+          </header>
+          <div style="padding: 0;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 7pt; line-height: 1.3;">
+              <tbody>
+                <tr>
+                  <td style="border: 1px solid black; padding: 2px; text-align: center; font-weight: bold; background-color: #f9fafb;" style="width: 35%;">List A</td>
+                  <td style="border: 1px solid black; text-align: center; background-color: #f9fafb;" style="width: 0%;">OR</td>
+                  <td style="border: 1px solid black; padding: 2px; text-align: center; font-weight: bold; background-color: #f9fafb;" style="width: 28%;">List B</td>
+                  <td style="border: 1px solid black; text-align: center; background-color: #f9fafb;" style="width: 0%;">AND</td>
+                  <td style="border: 1px solid black; padding: 2px; text-align: center; font-weight: bold; background-color: #f9fafb;" style="width: 28%;">List C</td>
+                </tr>
+                <tr>
+                  <td style="border: 1px solid black; padding: 0;">
+                    <div style="display: flex;">
+                      <div style="background-color: #f3f4f6; padding: 2px; font-size: 7pt; flex-shrink: 0; width: 50%; font-weight: bold;">Document Title 1</div>
+                      <div style="border-left: 1px solid black; flex: 1; padding: 2px;">
+                        <div style="font-size: 7pt; background-color: transparent;">${
+                          data.listADocTitle1 || ""
+                        }</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td style="border: 1px solid black; padding: 2px; background-color: #fafafa;" rowspan="4"></td>
+                  <td style="border: 1px solid black; padding: 2px;">
+                    <div style="font-size: 7pt; background-color: transparent;">${
+                      data.listBDocTitle1 || ""
+                    }</div>
+                  </td>
+                  <td style="border: 1px solid black; padding: 2px; background-color: #fafafa;" rowspan="4"></td>
+                  <td style="border: 1px solid black; padding: 2px;">
+                    <div style="font-size: 7pt; background-color: transparent;">${
+                      data.listCDocTitle1 || ""
+                    }</div>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="border: 1px solid black; padding: 0;">
+                    <div style="display: flex;">
+                      <div style="background-color: #f3f4f6; padding: 2px; font-size: 7pt; flex-shrink: 0; width: 50%;">Issuing Authority</div>
+                      <div style="border-left: 1px solid black; flex: 1; padding: 2px;">
+                        <div style="font-size: 7pt; background-color: transparent;">${
+                          data.listAIssuingAuth1 || ""
+                        }</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td style="border: 1px solid black; padding: 2px;">
+                    <div style="font-size: 7pt; background-color: transparent;">${
+                      data.listBIssuingAuth1 || ""
+                    }</div>
+                  </td>
+                  <td style="border: 1px solid black; padding: 2px;">
+                    <div style="font-size: 7pt; background-color: transparent;">${
+                      data.listCIssuingAuth1 || ""
+                    }</div>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="border: 1px solid black; padding: 0;">
+                    <div style="display: flex;">
+                      <div style="background-color: #f3f4f6; padding: 2px; font-size: 7pt; flex-shrink: 0; width: 50%;">Document Number (if any)</div>
+                      <div style="border-left: 1px solid black; flex: 1; padding: 2px;">
+                        <div style="font-size: 7pt; background-color: transparent;">${
+                          data.listADocNumber1 || ""
+                        }</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td style="border: 1px solid black; padding: 2px;">
+                    <div style="font-size: 7pt; background-color: transparent;">${
+                      data.listBDocNumber1 || ""
+                    }</div>
+                  </td>
+                  <td style="border: 1px solid black; padding: 2px;">
+                    <div style="font-size: 7pt; background-color: transparent;">${
+                      data.listCDocNumber1 || ""
+                    }</div>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="border: 1px solid black; padding: 0;">
+                    <div style="display: flex;">
+                      <div style="background-color: #f3f4f6; padding: 2px; font-size: 7pt; flex-shrink: 0; width: 50%;">Expiration Date (if any)</div>
+                      <div style="border-left: 1px solid black; flex: 1; padding: 2px;">
+                        <div style="font-size: 7pt; background-color: transparent;">${
+                          data.listAExpDate1 || ""
+                        }</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td style="border: 1px solid black; padding: 2px;">
+                    <div style="font-size: 7pt; background-color: transparent;">${
+                      data.listBExpDate1 || ""
+                    }</div>
+                  </td>
+                  <td style="border: 1px solid black; padding: 2px;">
+                    <div style="font-size: 7pt; background-color: transparent;">${
+                      data.listCExpDate1 || ""
+                    }</div>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="border: 1px solid black; padding: 0;">
+                    <div style="display: flex;">
+                      <div style="background-color: #f3f4f6; padding: 2px; font-size: 7pt; flex-shrink: 0; width: 50%; font-weight: bold;">Document Title 2 (if any)</div>
+                      <div style="border-left: 1px solid black; flex: 1; padding: 2px;">
+                        <div style="font-size: 7pt; background-color: transparent;"></div>
+                      </div>
+                    </div>
+                  </td>
+                  <td style="border: 1px solid black; padding: 2px;" colspan="4" rowspan="8">
+                    <div style="background-color: #f3f4f6;">
+                      <div style="font-weight: bold; font-size: 7pt; margin-right: 2px; margin-left: 2px;">Additional Information</div>
+                    </div>
+                    <textarea style="width: 100%; border: none; padding: 0; font-size: 7pt; background-color: transparent; margin-top: 2px; margin-right: 2px; margin-left: 2px;" rows="7" readonly></textarea>
+                    <div style="display: flex; align-items: center; margin-right: 2px; margin-left: 2px;">
+                      <input type="checkbox" style="margin-right: 2px; width: 12px; height: 12px;" disabled />
+                      <span style="font-size: 7pt;">Check here if you used an alternative procedure authorized by DHS to examine documents.</span>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="border: 1px solid black; padding: 0;">
+                    <div style="display: flex;">
+                      <div style="background-color: #f3f4f6; padding: 2px; font-size: 7pt; flex-shrink: 0; width: 50%;">Issuing Authority</div>
+                      <div style="border-left: 1px solid black; flex: 1; padding: 2px;">
+                        <div style="font-size: 7pt; background-color: transparent;"></div>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="border: 1px solid black; padding: 0;">
+                    <div style="display: flex;">
+                      <div style="background-color: #f3f4f6; padding: 2px; font-size: 7pt; flex-shrink: 0; width: 50%;">Document Number (if any)</div>
+                      <div style="border-left: 1px solid black; flex: 1; padding: 2px;">
+                        <div style="font-size: 7pt; background-color: transparent;"></div>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="border: 1px solid black; padding: 0;">
+                    <div style="display: flex;">
+                      <div style="background-color: #f3f4f6; padding: 2px; font-size: 7pt; flex-shrink: 0; width: 50%;">Expiration Date (if any)</div>
+                      <div style="border-left: 1px solid black; flex: 1; padding: 2px;">
+                        <div style="font-size: 7pt; background-color: transparent;"></div>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="border: 1px solid black; padding: 0;">
+                    <div style="display: flex;">
+                      <div style="background-color: #f3f4f6; padding: 2px; font-size: 7pt; flex-shrink: 0; width: 50%; font-weight: bold;">Document Title 3 (if any)</div>
+                      <div style="border-left: 1px solid black; flex: 1; padding: 2px;">
+                        <div style="font-size: 7pt; background-color: transparent;">${
+                          data.listADocTitle3 || ""
+                        }</div>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="border: 1px solid black; padding: 0;">
+                    <div style="display: flex;">
+                      <div style="background-color: #f3f4f6; padding: 2px; font-size: 7pt; flex-shrink: 0; width: 50%;">Issuing Authority</div>
+                      <div style="border-left: 1px solid black; flex: 1; padding: 2px;">
+                        <div style="font-size: 7pt; background-color: transparent;">${
+                          data.listAIssuingAuth3 || ""
+                        }</div>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="border: 1px solid black; padding: 0;">
+                    <div style="display: flex;">
+                      <div style="background-color: #f3f4f6; padding: 2px; font-size: 7pt; flex-shrink: 0; width: 50%;">Document Number (if any)</div>
+                      <div style="border-left: 1px solid black; flex: 1; padding: 2px;">
+                        <div style="font-size: 7pt; background-color: transparent;">${
+                          data.listADocNumber3 || ""
+                        }</div>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="border: 1px solid black; padding: 0;">
+                    <div style="display: flex;">
+                      <div style="background-color: #f3f4f6; padding: 2px; font-size: 7pt; flex-shrink: 0; width: 50%;">Expiration Date (if any)</div>
+                      <div style="border-left: 1px solid black; flex: 1; padding: 2px;">
+                        <div style="font-size: 7pt; background-color: transparent;">${
+                          data.listAExpDate3 || ""
+                        }</div>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="border: 1px solid black; padding: 2px;" colspan="4">
+                    <div style="font-weight: bold; font-size: 7pt;">
+                      Certification: I attest, under penalty of perjury, that (1) I have examined the documentation presented by the above-named employee, (2) the above-listed documentation appears to be genuine and to relate to the employee named, and (3) to the best of my knowledge, the employee is authorized to work in the United States.
+                    </div>
+                  </td>
+                  <td style="border: 1px solid black; padding: 2px;" colspan="2">
+                    <div style="font-size: 7pt;">First Day of Employment</div>
+                    <div style="font-size: 7pt;">(mm/dd/yyyy):</div>
+                    <div style="font-size: 7pt; background-color: transparent;">${
+                      data.firstDayEmployment || ""
+                    }</div>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="border: 1px solid black; padding: 2px;" colspan="4">
+                    <div style="font-size: 7pt;">Employer's Business or Organization Name</div>
+                    <div style="font-size: 7pt; background-color: transparent;">${
+                      data.employerBusinessName || ""
+                    }</div>
+                  </td>
+                  <td style="border: 1px solid black; padding: 2px;" colspan="4">
+                    <div style="font-size: 7pt;">Employer's Business or Organization Address, City or Town, State, ZIP Code</div>
+                    <div style="font-size: 7pt; background-color: transparent;">${
+                      data.employerBusinessAddress || ""
+                    }</div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+        <!-- FOOTER -->
+        <footer style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.125in; font-size: 7pt; border-top: 1px solid black; padding-top: 0.0625in;">
+          <div>
+            For reverification or rehire, complete Supplement B, Reverification and Rehire on Page 4.
+          </div>
+          <div>Form I-9 Edition 01/20/25</div>
+          <div>Page 1 of 4</div>
+        </footer>
+      </div>
+    `;
+
+    pages.push(page1HTML);
+
+    // Page 2 - Image
+    const page2HTML = `
+      <div style="max-width: 8.5in; margin: 0 auto; padding: 0.5in; background-color: white;">
+        <img src="/i9_page2.png" alt="I-9 Form Page 2" style="width: 100%; height: auto;" />
+      </div>
+    `;
+
+    pages.push(page2HTML);
+
+    // Page 3 - Supplement A
+    const page3HTML = `
+      <div style="max-width: 8.5in; margin: 0 auto; padding: 0.5in; background-color: white; font-family: Arial, sans-serif; font-size: 7pt; line-height: 1.2;">
+        <header style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0; padding-bottom: 0.125in; border-bottom: 4px solid black;">
+          <div style="flex-shrink: 0;">
+            <img src="/us-department-of-homeland-security.svg" alt="Department of Homeland Security" style="height: 32px; width: 32px;" />
+          </div>
+          <div style="text-align: center; flex: 1;">
+            <h1 style="font-size: 20pt; font-weight: bold;">Supplement A,</h1>
+            <h2 style="font-size: 16pt; font-weight: bold;">Preparer and/or Translator Certification for Section 1</h2>
+            <p style="font-size: 12pt; margin-top: 2px;">Department of Homeland Security</p>
+            <p style="font-size: 12pt;">U.S. Citizenship and Immigration Services</p>
+          </div>
+          <div style="text-align: right; flex-shrink: 0;">
+            <div style="font-weight: bold; font-size: 12pt;">USCIS</div>
+            <div style="font-weight: bold; font-size: 12pt;">Form I-9</div>
+            <div style="font-weight: bold; font-size: 12pt;">Supplement A</div>
+            <div style="font-size: 10pt;">OMB No. 1615-0047</div>
+            <div style="font-size: 10pt;">Expires 05/31/2027</div>
+          </div>
+        </header>
+        <div style="border: 1px solid black; padding: 5px; margin-bottom: 0.125in;">
+          <table style="width: 100%; border-collapse: collapse;">
+            <tbody>
+              <tr>
+                <td style="border: 1px solid black; padding: 2px;">
+                  <div style="font-size: 7pt;">Last Name (Family Name) from Section 1.</div>
+                  <div>${data.suppALastName || ""}</div>
+                </td>
+                <td style="border: 1px solid black; padding: 2px;">
+                  <div style="font-size: 7pt;">First Name (Given Name) from Section 1.</div>
+                  <div>${data.suppAFirstName || ""}</div>
+                </td>
+                <td style="border: 1px solid black; padding: 2px;">
+                  <div style="font-size: 7pt;">Middle Initial (if any) from Section 1.</div>
+                  <div>${data.suppAMiddleInitial || ""}</div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div style="font-size: 7pt; margin-bottom: 0.125in; line-height: 1.3;">
+          <strong>Instructions:</strong> This supplement must be completed by any preparer and/or translator who assists an employee in completing Section 1 of Form I-9. The preparer and/or translator must enter the employee's name in the spaces provided above. Each preparer or translator must complete, sign, and date a separate certification area. Employers must retain completed supplement sheets with the employee's completed Form I-9.
+        </div>
+        ${[1, 2, 3, 4]
+          .map(
+            (num) => `
+          <div style="margin-bottom: 0.125in;">
+            <div style="font-weight: bold; font-size: 7pt; margin-bottom: 2px;">
+              I attest, under penalty of perjury, that I have assisted in the completion of Section 1 of this form and that to the best of my knowledge the information is true and correct.
+            </div>
+            <table style="width: 100%; border-collapse: collapse; border: 1px solid black;">
+              <tbody>
+                <tr>
+                  <td style="border: 1px solid black; padding: 2px;" colspan="3">
+                    <div style="font-size: 7pt;">Signature of Preparer or Translator</div>
+                  <div>${data["prep" + num + "Signature"] || ""}</div>
+                  </td>
+                  <td style="border: 1px solid black; padding: 2px;" colspan="3">
+                    <div style="font-size: 7pt;">Date (mm/dd/yyyy)</div>
+                    <div>${data["prep" + num + "Date"] || ""}</div>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="border: 1px solid black; padding: 2px;" colspan="2">
+                    <div style="font-size: 7pt;">Last Name (Family Name)</div>
+                    <div>${data["prep" + num + "LastName"] || ""}</div>
+                  </td>
+                  <td style="border: 1px solid black; padding: 2px;" colspan="2">
+                    <div style="font-size: 7pt;">First Name (Given Name)</div>
+                    <div>${data["prep" + num + "FirstName"] || ""}</div>
+                  </td>
+                  <td style="border: 1px solid black; padding: 2px;">
+                    <div style="font-size: 7pt;">Middle Initial (if any)</div>
+                    <div>${data["prep" + num + "MiddleInitial"] || ""}</div>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="border: 1px solid black; padding: 2px;" colspan="2">
+                    <div style="font-size: 7pt;">Address (Street Number and Name)</div>
+                    <div>${data["prep" + num + "Address"] || ""}</div>
+                  </td>
+                  <td style="border: 1px solid black; padding: 2px;">
+                    <div style="font-size: 7pt;">City or Town</div>
+                    <div>${data["prep" + num + "City"] || ""}</div>
+                  </td>
+                  <td style="border: 1px solid black; padding: 2px;">
+                    <div style="font-size: 7pt;">State</div>
+                    <div>${data["prep" + num + "State"] || ""}</div>
+                  </td>
+                  <td style="border: 1px solid black; padding: 2px;" colspan="2">
+                    <div style="font-size: 7pt;">ZIP Code</div>
+                    <div>${data["prep" + num + "ZipCode"] || ""}</div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        `
+          )
+          .join("")}
+        <footer style="display: flex; justify-content: space-between; align-items: center; margin-top: 160px; font-size: 7pt; border-top: 1px solid black; padding-top: 0.0625in;">
+          <div>Form I-9 Edition 01/20/25</div>
+          <div>Page 3 of 4</div>
+        </footer>
+      </div>
+    `;
+
+    pages.push(page3HTML);
+
+    // Page 4 - Supplement B
+    const page4HTML = `
+      <div style="max-width: 8.5in; margin: 0 auto; padding: 0.5in; background-color: white; font-family: Arial, sans-serif; font-size: 7pt; line-height: 1.2;">
+        <header style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0; padding-bottom: 0.125in; border-bottom: 4px solid black;">
+          <div style="flex-shrink: 0;">
+            <img src="/us-department-of-homeland-security.svg" alt="Department of Homeland Security" style="height: 32px; width: 32px;" />
+          </div>
+          <div style="text-align: center; flex: 1;">
+            <h1 style="font-size: 20pt; font-weight: bold;">Supplement B,</h1>
+            <h2 style="font-size: 16pt; font-weight: bold;">Reverification and Rehire (formerly Section 3)</h2>
+            <p style="font-size: 12pt; margin-top: 2px;">Department of Homeland Security</p>
+            <p style="font-size: 12pt;">U.S. Citizenship and Immigration Services</p>
+          </div>
+          <div style="text-align: right; flex-shrink: 0;">
+            <div style="font-weight: bold; font-size: 12pt;">USCIS</div>
+            <div style="font-weight: bold; font-size: 12pt;">Form I-9</div>
+            <div style="font-weight: bold; font-size: 12pt;">Supplement B</div>
+            <div style="font-size: 10pt;">OMB No. 1615-0047</div>
+            <div style="font-size: 10pt;">Expires 05/31/2027</div>
+          </div>
+        </header>
+        <div style="border: 1px solid black; padding: 5px; margin-bottom: 0.125in;">
+          <table style="width: 100%; border-collapse: collapse;">
+            <tbody>
+              <tr>
+                <td style="border: 1px solid black; padding: 2px;">
+                  <div style="font-size: 7pt;">Last Name (Family Name) from Section 1.</div>
+                  <div>${data.suppBLastName || ""}</div>
+                </td>
+                <td style="border: 1px solid black; padding: 2px;">
+                  <div style="font-size: 7pt;">First Name (Given Name) from Section 1.</div>
+                  <div>${data.suppBFirstName || ""}</div>
+                </td>
+                <td style="border: 1px solid black; padding: 2px;">
+                  <div style="font-size: 7pt;">Middle Initial (if any) from Section 1.</div>
+                  <div>${data.suppBMiddleInitial || ""}</div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div style="font-size: 7pt; margin-bottom: 0.125in; line-height: 1.3;">
+          <strong>Instructions:</strong> This supplement replaces Section 3 on the previous version of Form I-9. Only use this page if your employee requires reverification, is rehired within three years of the date the original Form I-9 was completed, or provides proof of a legal name change. Enter the employee's name in the fields above. Use a new section for each reverification or rehire. Review the Form I-9 instructions before completing this page. Keep this page as part of the employee's Form I-9 record. Additional guidance can be found in the <a href="https://www.uscis.gov/i-9-central/form-i-9-resources/handbook-for-employers-m-274" target="_blank" rel="noopener noreferrer" style="color: #2563eb; text-decoration: underline;">Handbook for Employers: Guidance for Completing Form I-9 (M-274)</a>.
+        </div>
+        ${[1, 2, 3]
+          .map(
+            (num) => `
+          <div style="margin-bottom: 0.125in;">
+            <table style="width: 100%; border-collapse: collapse; border: 1px solid black;">
+              <tbody>
+                <tr>
+                  <td style="border: 1px solid black; padding: 2px; background-color: #f9fafb;" colspan="4">
+                    <div style="font-weight: bold; font-size: 7pt; margin-bottom: 2px;">Reverification: If the employee requires reverification, your employee can choose to present any acceptable List A or List C documentation to show continued employment authorization. Enter the document information in the spaces below.</div>
+                    <table style="width: 100%; border-collapse: collapse;">
+                      <tbody>
+                        <tr>
+                          <td style="padding: 2px; border-right: 1px solid black;" style="width: 33%;">
+                            <div style="font-size: 7pt;">Document Title</div>
+                            <div style="font-size: 7pt; background-color: transparent;">${
+                              data["rev" + num + "DocTitle"] || ""
+                            }</div>
+                          </td>
+                          <td style="padding: 2px; border-right: 1px solid black;" style="width: 33%;">
+                            <div style="font-size: 7pt;">Document Number (if any)</div>
+                            <div style="font-size: 7pt; background-color: transparent;">${
+                              data["rev" + num + "DocNumber"] || ""
+                            }</div>
+                          </td>
+                          <td style="padding: 2px;" style="width: 34%;">
+                            <div style="font-size: 7pt;">Expiration Date (if any) (mm/dd/yyyy)</div>
+                            <div style="font-size: 7pt; background-color: transparent;">${
+                              data["rev" + num + "ExpDate"] || ""
+                            }</div>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="border: 1px solid black; padding: 2px;" colspan="4">
+                    <div style="font-weight: bold; font-size: 7pt; margin-bottom: 2px;">
+                      I attest, under penalty of perjury, that to the best of my knowledge, this employee is authorized to work in the United States, and if the employee presented documentation, the documentation I examined appears to be genuine and to relate to the individual who presented it.
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="border: 1px solid black; padding: 2px;" colspan="4">
+                    <div style="display: flex; gap: 8px;">
+                      <div style="flex: 1;">
+                        <div style="font-size: 7pt; margin-bottom: 2px;">Additional Information (Initial and date each notation.)</div>
+                        <div style="font-size: 7pt; background-color: transparent;">${
+                          data["rev" + num + "AdditionalInfo"] || ""
+                        }</div>
+                      </div>
+                      <div style="display: flex; align-items: flex-start;" style="width: 35%;">
+                        <input type="checkbox" ${
+                          data["rev" + num + "AltProcedure"] ? "checked" : ""
+                        } style="margin-right: 2px; width: 12px; height: 12px; margin-top: 0; flex-shrink: 0;" disabled />
+                        <span style="font-size: 7pt; line-height: 1.1;">Check here if you used an alternative procedure authorized by DHS to examine documents.</span>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        `
+          )
+          .join("")}
+        <footer style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.125in; font-size: 7pt; border-top: 1px solid black; padding-top: 0.0625in;">
+          <div>Form I-9 Edition 01/20/25</div>
+          <div>Page 4 of 4</div>
+        </footer>
+      </div>
+    `;
+
+    pages.push(page4HTML);
+
+    return pages;
+  };
+
   const handleDownloadFormAsPDF = async () => {
     setDownloading(true);
     try {
-      const pdf = new jsPDF("p", "in", [8.5, 20]);
-      const pages = document.querySelectorAll(".i9-page");
+      const pdf = new jsPDF("p", "in", [8.5, 11]);
+      const formPages = generateFormHTML(formData);
 
-      for (let i = 0; i < pages.length; i++) {
-        const canvas = await html2canvas(pages[i], {
+      for (let i = 0; i < formPages.length; i++) {
+        // Create a temporary div with the HTML content
+        const tempDiv = document.createElement("div");
+        tempDiv.innerHTML = formPages[i];
+        tempDiv.style.position = "absolute";
+        tempDiv.style.left = "-9999px";
+        tempDiv.style.top = "-9999px";
+        tempDiv.style.width = "8.5in";
+        tempDiv.style.height = "11in";
+        tempDiv.style.overflow = "hidden";
+        tempDiv.style.fontFamily = "Arial, sans-serif";
+        tempDiv.style.fontSize = "10pt";
+        tempDiv.style.lineHeight = "1.2";
+        tempDiv.style.backgroundColor = "#ffffff";
+        tempDiv.style.padding = "0.5in";
+        tempDiv.style.boxSizing = "border-box";
+        document.body.appendChild(tempDiv);
+
+        const canvas = await html2canvas(tempDiv, {
           scale: 4,
           useCORS: true,
           backgroundColor: "#ffffff",
           allowTaint: true,
           letterRendering: true,
           logging: false,
+          width: 816, // 8.5in * 96px
+          height: 1056, // 11in * 96px
         });
-        const imgData = canvas.toDataURL("image/png");
 
+        document.body.removeChild(tempDiv);
+
+        const imgData = canvas.toDataURL("image/png");
         const pageWidth = 8.5;
         const aspectRatio = canvas.width / canvas.height;
-
         const finalWidth = pageWidth;
         const finalHeight = pageWidth / aspectRatio;
 
