@@ -381,6 +381,10 @@ const TBSymptomScreenHR = () => {
   return (
     <Layout>
       <Navbar />
+      <link
+        href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap"
+        rel="stylesheet"
+      />
       <div className="min-h-screen bg-gradient-to-br from-[#F8FAFF] to-[#F0F5FF] p-2 sm:p-4 md:p-6 lg:p-8">
         <div className="max-w-5xl mx-auto">
           {/* Back Button */}
@@ -1238,31 +1242,47 @@ const TBSymptomScreenHR = () => {
                   </table>
 
                   {/* Signature Section */}
-                  <div className="space-y-3 text-xs mb-4">
+                  <div className="space-y-4 mb-4 mt-6">
                     <div>
-                      <span>Signature of Person Making the Assessment </span>
+                      <label className="block text-xs font-semibold mb-2">
+                        Signature of Person Making the Assessment
+                      </label>
                       <input
                         type="text"
-                        className="border-b border-black w-3/5 outline-none bg-transparent"
+                        className="border-b-2 border-black w-full outline-none bg-transparent pb-1"
                         value={formData.assessorSignature}
                         readOnly
+                        style={{
+                          fontFamily: "'Great Vibes', cursive",
+                          fontSize: "28px",
+                          letterSpacing: "0.5px",
+                        }}
                       />
                     </div>
-                    <div className="flex items-center gap-8">
-                      <div className="flex-1">
-                        <span>Signature of Client </span>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+                      <div>
+                        <label className="block text-xs font-semibold mb-2">
+                          Signature of Client
+                        </label>
                         <input
                           type="text"
-                          className="border-b border-black w-3/4 outline-none bg-transparent"
+                          className="border-b-2 border-black w-full outline-none bg-transparent pb-1"
                           value={formData.clientSignature}
                           readOnly
+                          style={{
+                            fontFamily: "'Great Vibes', cursive",
+                            fontSize: "28px",
+                            letterSpacing: "0.5px",
+                          }}
                         />
                       </div>
-                      <div className="flex-1">
-                        <span>Date </span>
+                      <div>
+                        <label className="block text-xs font-semibold mb-2">
+                          Date
+                        </label>
                         <input
                           type="text"
-                          className="border-b border-black w-3/4 outline-none bg-transparent"
+                          className="border-b-2 border-black w-full outline-none bg-transparent pb-1"
                           value={formData.signatureDate}
                           readOnly
                         />

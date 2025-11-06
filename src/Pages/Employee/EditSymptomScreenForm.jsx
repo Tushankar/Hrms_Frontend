@@ -87,6 +87,14 @@ const TBSymptomScreen = ({ onFormDataChange, initialData }) => {
   useEffect(() => {
     if (initialData && Object.keys(initialData).length > 0) {
       setFormData(initialData);
+    } else {
+      // Set default date to today if not provided
+      const today = new Date();
+      const todayDate = today.toISOString().slice(0, 10);
+      setFormData((prev) => ({
+        ...prev,
+        signatureDate: todayDate,
+      }));
     }
   }, [initialData]);
 
@@ -111,9 +119,15 @@ const TBSymptomScreen = ({ onFormDataChange, initialData }) => {
       className="max-w-6xl mx-auto p-3 sm:p-6 bg-white text-xs sm:text-sm"
       onClick={(e) => e.stopPropagation()}
     >
+      <link
+        href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap"
+        rel="stylesheet"
+      />
       {/* Header */}
       <div className="bg-gray-300 text-center py-2 sm:py-3 mb-3 sm:mb-4">
-        <h1 className="text-base sm:text-xl font-bold">Tuberculosis (TB) Symptom Screen</h1>
+        <h1 className="text-base sm:text-xl font-bold">
+          Tuberculosis (TB) Symptom Screen
+        </h1>
       </div>
 
       {/* Basic Information Section */}
@@ -801,7 +815,9 @@ const TBSymptomScreen = ({ onFormDataChange, initialData }) => {
       {/* Action Taken Section */}
       <div className="bg-gray-300 py-2 px-3 mb-2">
         <span className="font-bold">Action Taken</span>
-        <span className="text-[10px] sm:text-xs ml-1">(check all that apply)</span>
+        <span className="text-[10px] sm:text-xs ml-1">
+          (check all that apply)
+        </span>
       </div>
 
       <table className="w-full border border-black text-[10px] sm:text-xs mb-4">
@@ -982,35 +998,51 @@ const TBSymptomScreen = ({ onFormDataChange, initialData }) => {
       </table>
 
       {/* Signature Section */}
-      <div className="space-y-3 text-[10px] sm:text-xs mb-4">
+      <div className="space-y-3 sm:space-y-4 mb-4 mt-6">
         <div>
-          <span>Signature of Person Making the Assessment </span>
+          <label className="block text-xs font-semibold mb-2">
+            Signature of Person Making the Assessment
+          </label>
           <input
             type="text"
-            className="border-b border-black w-full sm:w-3/5 outline-none bg-transparent"
+            className="border-b-2 border-black w-full focus:outline-none focus:border-blue-600 pb-1 bg-transparent"
             value={formData.assessorSignature}
             onChange={(e) =>
               handleInputChange("assessorSignature", e.target.value)
             }
+            placeholder="Sign here"
+            style={{
+              fontFamily: "'Great Vibes', cursive",
+              fontSize: "28px",
+              letterSpacing: "0.5px",
+            }}
           />
         </div>
-        <div className="flex items-center gap-8">
-          <div className="flex-1">
-            <span>Signature of Client </span>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-6">
+          <div>
+            <label className="block text-xs font-semibold mb-2">
+              Signature of Client
+            </label>
             <input
               type="text"
-              className="border-b border-black w-3/4 outline-none bg-transparent"
+              className="border-b-2 border-black w-full focus:outline-none focus:border-blue-600 pb-1 bg-transparent"
               value={formData.clientSignature}
               onChange={(e) =>
                 handleInputChange("clientSignature", e.target.value)
               }
+              placeholder="Sign here"
+              style={{
+                fontFamily: "'Great Vibes', cursive",
+                fontSize: "28px",
+                letterSpacing: "0.5px",
+              }}
             />
           </div>
-          <div className="flex-1">
-            <span>Date </span>
+          <div>
+            <label className="block text-xs font-semibold mb-2">Date</label>
             <input
-              type="text"
-              className="border-b border-black w-3/4 outline-none bg-transparent"
+              type="date"
+              className="border-b-2 border-black w-full focus:outline-none focus:border-blue-600 pb-1 bg-transparent"
               value={formData.signatureDate}
               onChange={(e) =>
                 handleInputChange("signatureDate", e.target.value)
@@ -1396,11 +1428,13 @@ const EditSymptomScreenForm = () => {
                 <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-4 sm:p-8">
                   {/* Status Banner */}
                   {!loading && (
-                    <div className={`mb-6 p-4 rounded-lg border ${
-                      tbFormData && Object.keys(tbFormData).length > 0
-                        ? 'bg-green-50 border-green-200'
-                        : 'bg-red-50 border-red-200'
-                    }`}>
+                    <div
+                      className={`mb-6 p-4 rounded-lg border ${
+                        tbFormData && Object.keys(tbFormData).length > 0
+                          ? "bg-green-50 border-green-200"
+                          : "bg-red-50 border-red-200"
+                      }`}
+                    >
                       <div className="flex items-center justify-center gap-3">
                         {tbFormData && Object.keys(tbFormData).length > 0 ? (
                           <CheckCircle className="w-6 h-6 text-green-600 flex-shrink-0" />
@@ -1414,7 +1448,8 @@ const EditSymptomScreenForm = () => {
                             </p>
                           ) : (
                             <p className="text-base font-semibold text-red-800">
-                              ⚠️ Not filled yet - Complete this form to update your progress
+                              ⚠️ Not filled yet - Complete this form to update
+                              your progress
                             </p>
                           )}
                         </div>

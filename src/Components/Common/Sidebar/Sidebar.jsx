@@ -403,12 +403,16 @@ export const Sidebar = ({
 
         completionMap["job-description-pca"] = jobDescStatus;
 
-        // Check for employee details upload (employeeUploadedForm field in job description)
+        // Check for employee details upload (employeeUploadedForms array in job description)
         const employeeDetailsStatus =
-          forms.jobDescriptionPCA?.employeeUploadedForm ||
-          forms.jobDescriptionCNA?.employeeUploadedForm ||
-          forms.jobDescriptionLPN?.employeeUploadedForm ||
-          forms.jobDescriptionRN?.employeeUploadedForm;
+          (forms.jobDescriptionPCA?.employeeUploadedForms &&
+            forms.jobDescriptionPCA.employeeUploadedForms.length > 0) ||
+          (forms.jobDescriptionCNA?.employeeUploadedForms &&
+            forms.jobDescriptionCNA.employeeUploadedForms.length > 0) ||
+          (forms.jobDescriptionLPN?.employeeUploadedForms &&
+            forms.jobDescriptionLPN.employeeUploadedForms.length > 0) ||
+          (forms.jobDescriptionRN?.employeeUploadedForms &&
+            forms.jobDescriptionRN.employeeUploadedForms.length > 0);
 
         completionMap["employee-details-upload"] = employeeDetailsStatus
           ? true
@@ -698,7 +702,7 @@ export const Sidebar = ({
                       )} font-semibold block transition-all duration-200 ease-linear whitespace-nowrap tracking-wide ${
                         isDesktopCollapsed ? "md:hidden" : ""
                       }`}
-                      style={{ fontFamily: 'Inter, system-ui, sans-serif' }}
+                      style={{ fontFamily: "Inter, system-ui, sans-serif" }}
                     >
                       Overview
                     </h4>
@@ -734,7 +738,7 @@ export const Sidebar = ({
                       )} font-semibold block transition-all duration-200 ease-linear whitespace-nowrap tracking-wide ${
                         isDesktopCollapsed ? "md:hidden" : ""
                       }`}
-                      style={{ fontFamily: 'Inter, system-ui, sans-serif' }}
+                      style={{ fontFamily: "Inter, system-ui, sans-serif" }}
                     >
                       Personal Details
                     </h4>
@@ -789,7 +793,7 @@ export const Sidebar = ({
                       )} font-semibold block transition-all duration-200 ease-linear whitespace-nowrap tracking-wide ${
                         isDesktopCollapsed ? "md:hidden" : ""
                       }`}
-                      style={{ fontFamily: 'Inter, system-ui, sans-serif' }}
+                      style={{ fontFamily: "Inter, system-ui, sans-serif" }}
                     >
                       My Applications
                     </h4>
@@ -850,7 +854,13 @@ export const Sidebar = ({
                                 d="M9 5l7 7-7 7"
                               />
                             </svg>
-                            <h4 className="text-sm font-bold text-white whitespace-nowrap tracking-wider" style={{ fontFamily: 'Roboto, sans-serif', letterSpacing: '0.5px' }}>
+                            <h4
+                              className="text-sm font-bold text-white whitespace-nowrap tracking-wider"
+                              style={{
+                                fontFamily: "Roboto, sans-serif",
+                                letterSpacing: "0.5px",
+                              }}
+                            >
                               {part.title}
                             </h4>
                           </div>
@@ -892,7 +902,10 @@ export const Sidebar = ({
                                           ? "text-[#1F3A93]"
                                           : "text-white"
                                       }`}
-                                      style={{ fontFamily: 'Inter, system-ui, sans-serif' }}
+                                      style={{
+                                        fontFamily:
+                                          "Inter, system-ui, sans-serif",
+                                      }}
                                     >
                                       {form.name}
                                     </h4>
@@ -936,7 +949,7 @@ export const Sidebar = ({
                       )} font-semibold block transition-all duration-200 ease-linear whitespace-nowrap tracking-wide ${
                         isDesktopCollapsed ? "md:hidden" : ""
                       }`}
-                      style={{ fontFamily: 'Inter, system-ui, sans-serif' }}
+                      style={{ fontFamily: "Inter, system-ui, sans-serif" }}
                     >
                       Communication
                     </h4>
@@ -1397,7 +1410,7 @@ export const Sidebar = ({
                 className={`text-xs md:text-sm text-white font-semibold block transition-all duration-200 ease-linear whitespace-nowrap tracking-wide ${
                   isDesktopCollapsed ? "md:hidden" : ""
                 }`}
-                style={{ fontFamily: 'Inter, system-ui, sans-serif' }}
+                style={{ fontFamily: "Inter, system-ui, sans-serif" }}
               >
                 Settings
               </h4>
@@ -1416,7 +1429,7 @@ export const Sidebar = ({
                   className={`text-xs md:text-sm text-white font-semibold block transition-all duration-200 ease-linear whitespace-nowrap tracking-wide ${
                     isDesktopCollapsed ? "md:hidden" : ""
                   }`}
-                  style={{ fontFamily: 'Inter, system-ui, sans-serif' }}
+                  style={{ fontFamily: "Inter, system-ui, sans-serif" }}
                 >
                   Log out
                 </h4>
