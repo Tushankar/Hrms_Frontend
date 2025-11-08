@@ -1386,49 +1386,53 @@ const PersonalInformation = () => {
                           </div>
                         </div>
 
-                        {/* Authorized to Work Question */}
-                        <div>
-                          <label className="block text-sm font-semibold text-gray-700 mb-3">
-                            If no, are you authorized to work in the U.S.?{" "}
-                            <span className="text-red-500">*</span>
-                          </label>
-                          <div className="flex gap-6">
-                            <label className="flex items-center cursor-pointer">
-                              <input
-                                type="radio"
-                                name="isAuthorizedToWork"
-                                value="YES"
-                                checked={formData.isAuthorizedToWork === "YES"}
-                                onChange={(e) =>
-                                  handleInputChange(
-                                    "isAuthorizedToWork",
-                                    e.target.value
-                                  )
-                                }
-                                className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
-                                required
-                              />
-                              <span className="ml-2 text-gray-700">YES</span>
+                        {/* Authorized to Work Question - Only show if NOT a US Citizen */}
+                        {formData.isUSCitizen === "NO" && (
+                          <div>
+                            <label className="block text-sm font-semibold text-gray-700 mb-3">
+                              If no, are you authorized to work in the U.S.?{" "}
+                              <span className="text-red-500">*</span>
                             </label>
-                            <label className="flex items-center cursor-pointer">
-                              <input
-                                type="radio"
-                                name="isAuthorizedToWork"
-                                value="NO"
-                                checked={formData.isAuthorizedToWork === "NO"}
-                                onChange={(e) =>
-                                  handleInputChange(
-                                    "isAuthorizedToWork",
-                                    e.target.value
-                                  )
-                                }
-                                className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
-                                required
-                              />
-                              <span className="ml-2 text-gray-700">NO</span>
-                            </label>
+                            <div className="flex gap-6">
+                              <label className="flex items-center cursor-pointer">
+                                <input
+                                  type="radio"
+                                  name="isAuthorizedToWork"
+                                  value="YES"
+                                  checked={
+                                    formData.isAuthorizedToWork === "YES"
+                                  }
+                                  onChange={(e) =>
+                                    handleInputChange(
+                                      "isAuthorizedToWork",
+                                      e.target.value
+                                    )
+                                  }
+                                  className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                                  required
+                                />
+                                <span className="ml-2 text-gray-700">YES</span>
+                              </label>
+                              <label className="flex items-center cursor-pointer">
+                                <input
+                                  type="radio"
+                                  name="isAuthorizedToWork"
+                                  value="NO"
+                                  checked={formData.isAuthorizedToWork === "NO"}
+                                  onChange={(e) =>
+                                    handleInputChange(
+                                      "isAuthorizedToWork",
+                                      e.target.value
+                                    )
+                                  }
+                                  className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                                  required
+                                />
+                                <span className="ml-2 text-gray-700">NO</span>
+                              </label>
+                            </div>
                           </div>
-                        </div>
+                        )}
 
                         {/* Worked Here Before Question */}
                         <div>

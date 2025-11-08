@@ -334,7 +334,7 @@ const EmployeeDetailsUpload = () => {
       // Small delay to ensure data is processed before navigation
       await new Promise((resolve) => setTimeout(resolve, 300));
 
-      navigate("/employee/driving-license-upload");
+      navigate("/employee/cpr-first-aid-certificate");
     } catch (error) {
       console.error("Error in Save & Next:", error);
       toast.error("Failed to save and proceed");
@@ -388,10 +388,10 @@ const EmployeeDetailsUpload = () => {
 
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-gray-800 mb-2">
-              Proffessional Certificate Document Upload
+              Professional Certificate Document Upload
             </h1>
             <p className="text-gray-600">
-              Upload your signed Proffessional document for {positionType}
+              Upload your professional LPN Certificate
             </p>
           </div>
 

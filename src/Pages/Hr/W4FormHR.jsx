@@ -734,6 +734,9 @@ const W4FormHR = () => {
                                   type="text"
                                   disabled
                                   className="w-full border-0 border-b border-black outline-none text-[8pt] py-0.5 h-5 bg-transparent"
+                                  style={{
+                                    fontFamily: "Brush Script MT, cursive",
+                                  }}
                                 />
                                 <div className="text-[7pt] mt-0.5">
                                   <span className="font-bold">

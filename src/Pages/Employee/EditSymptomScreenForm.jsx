@@ -137,7 +137,7 @@ const TBSymptomScreen = ({ onFormDataChange, initialData }) => {
             <span>Name: </span>
             <input
               type="text"
-              className="border-b border-black w-full sm:w-3/4 outline-none bg-transparent"
+              className="border-0 border-b border-black w-full sm:w-3/4 px-1 focus:outline-none focus:border-b-2 bg-transparent"
               value={formData.name}
               onChange={(e) => handleInputChange("name", e.target.value)}
             />
@@ -164,7 +164,7 @@ const TBSymptomScreen = ({ onFormDataChange, initialData }) => {
             <span>Date of Birth: </span>
             <input
               type="text"
-              className="border-b border-black w-full sm:w-1/2 outline-none bg-transparent"
+              className="border-0 border-b border-black w-full sm:w-1/2 px-1 focus:outline-none focus:border-b-2 bg-transparent"
               value={formData.dateOfBirth}
               onChange={(e) => handleInputChange("dateOfBirth", e.target.value)}
             />
@@ -176,7 +176,7 @@ const TBSymptomScreen = ({ onFormDataChange, initialData }) => {
             <span>Last skin test: </span>
             <input
               type="text"
-              className="border-b border-black w-full sm:w-5/6 outline-none bg-transparent"
+              className="border-0 border-b border-black w-full sm:w-5/6 px-1 focus:outline-none focus:border-b-2 bg-transparent"
               value={formData.lastSkinTest}
               onChange={(e) =>
                 handleInputChange("lastSkinTest", e.target.value)
@@ -194,7 +194,7 @@ const TBSymptomScreen = ({ onFormDataChange, initialData }) => {
             <span className="whitespace-nowrap">Test Date:</span>
             <input
               type="text"
-              className="border-b border-black w-20 outline-none bg-transparent"
+              className="border-0 border-b border-black w-20 px-1 focus:outline-none focus:border-b-2 bg-transparent"
               value={formData.testDate}
               onChange={(e) => handleInputChange("testDate", e.target.value)}
             />
@@ -203,7 +203,7 @@ const TBSymptomScreen = ({ onFormDataChange, initialData }) => {
             <span>Results</span>
             <input
               type="text"
-              className="border-b border-black w-12 outline-none bg-transparent"
+              className="border-0 border-b border-black w-12 px-1 focus:outline-none focus:border-b-2 bg-transparent"
               value={formData.testResults}
               onChange={(e) => handleInputChange("testResults", e.target.value)}
             />
@@ -274,7 +274,7 @@ const TBSymptomScreen = ({ onFormDataChange, initialData }) => {
           <span> #Months </span>
           <input
             type="text"
-            className="border-b border-black w-12 outline-none bg-transparent mx-1"
+            className="border-0 border-b border-black w-12 px-1 focus:outline-none focus:border-b-2 bg-transparent mx-1"
             value={formData.monthsLTBI}
             onChange={(e) => handleInputChange("monthsLTBI", e.target.value)}
           />
@@ -300,7 +300,7 @@ const TBSymptomScreen = ({ onFormDataChange, initialData }) => {
           <span> #Months </span>
           <input
             type="text"
-            className="border-b border-black w-12 outline-none bg-transparent mx-1"
+            className="border-0 border-b border-black w-12 px-1 focus:outline-none focus:border-b-2 bg-transparent mx-1"
             value={formData.monthsTB}
             onChange={(e) => handleInputChange("monthsTB", e.target.value)}
           />
@@ -312,7 +312,7 @@ const TBSymptomScreen = ({ onFormDataChange, initialData }) => {
           </span>
           <input
             type="text"
-            className="border-b border-black w-32 outline-none bg-transparent"
+            className="border-0 border-b border-black w-32 px-1 focus:outline-none focus:border-b-2 bg-transparent"
             value={formData.whenTreated}
             onChange={(e) => handleInputChange("whenTreated", e.target.value)}
           />
@@ -321,7 +321,7 @@ const TBSymptomScreen = ({ onFormDataChange, initialData }) => {
           </span>
           <input
             type="text"
-            className="border-b border-black w-96 outline-none bg-transparent"
+            className="border-0 border-b border-black w-96 px-1 focus:outline-none focus:border-b-2 bg-transparent"
             value={formData.whereTreated}
             onChange={(e) => handleInputChange("whereTreated", e.target.value)}
           />
@@ -331,7 +331,7 @@ const TBSymptomScreen = ({ onFormDataChange, initialData }) => {
           <span>Name of Medications: </span>
           <input
             type="text"
-            className="border-b border-black w-full sm:w-5/6 outline-none bg-transparent"
+            className="border-0 border-b border-black w-full sm:w-5/6 px-1 focus:outline-none focus:border-b-2 bg-transparent"
             value={formData.medications}
             onChange={(e) => handleInputChange("medications", e.target.value)}
           />
@@ -341,7 +341,7 @@ const TBSymptomScreen = ({ onFormDataChange, initialData }) => {
           <span className="font-bold">Today's Date </span>
           <input
             type="text"
-            className="border-b border-black w-full sm:w-48 outline-none bg-transparent ml-0 sm:ml-2"
+            className="border-0 border-b border-black w-full sm:w-48 px-1 focus:outline-none focus:border-b-2 bg-transparent ml-0 sm:ml-2"
             value={formData.todaysDate}
             onChange={(e) => handleInputChange("todaysDate", e.target.value)}
           />
@@ -383,7 +383,7 @@ const TBSymptomScreen = ({ onFormDataChange, initialData }) => {
               <span># Days</span>
               <input
                 type="text"
-                className="border-b border-black w-12 outline-none bg-transparent"
+                className="border-0 border-b border-black w-12 px-1 focus:outline-none focus:border-b-2 bg-transparent"
                 value={formData.coughDurationDays}
                 onChange={(e) =>
                   handleInputChange("coughDurationDays", e.target.value)
@@ -394,7 +394,7 @@ const TBSymptomScreen = ({ onFormDataChange, initialData }) => {
               <span># Weeks</span>
               <input
                 type="text"
-                className="border-b border-black w-12 outline-none bg-transparent"
+                className="border-0 border-b border-black w-12 px-1 focus:outline-none focus:border-b-2 bg-transparent"
                 value={formData.coughDurationWeeks}
                 onChange={(e) =>
                   handleInputChange("coughDurationWeeks", e.target.value)
@@ -405,7 +405,7 @@ const TBSymptomScreen = ({ onFormDataChange, initialData }) => {
               <span># Months</span>
               <input
                 type="text"
-                className="border-b border-black w-12 outline-none bg-transparent"
+                className="border-0 border-b border-black w-12 px-1 focus:outline-none focus:border-b-2 bg-transparent"
                 value={formData.coughDurationMonths}
                 onChange={(e) =>
                   handleInputChange("coughDurationMonths", e.target.value)
@@ -420,7 +420,7 @@ const TBSymptomScreen = ({ onFormDataChange, initialData }) => {
             <span>What color is the mucus?</span>
             <input
               type="text"
-              className="border-b border-black w-28 outline-none bg-transparent"
+              className="border-0 border-b border-black w-28 px-1 focus:outline-none focus:border-b-2 bg-transparent"
               value={formData.mucusColor}
               onChange={(e) => handleInputChange("mucusColor", e.target.value)}
             />
@@ -529,7 +529,7 @@ const TBSymptomScreen = ({ onFormDataChange, initialData }) => {
               <span># Pounds</span>
               <input
                 type="text"
-                className="border-b border-black w-12 outline-none bg-transparent"
+                className="border-0 border-b border-black w-12 px-1 focus:outline-none focus:border-b-2 bg-transparent"
                 value={formData.weightLost}
                 onChange={(e) =>
                   handleInputChange("weightLost", e.target.value)
@@ -572,7 +572,7 @@ const TBSymptomScreen = ({ onFormDataChange, initialData }) => {
               <span># Days</span>
               <input
                 type="text"
-                className="border-b border-black w-12 outline-none bg-transparent"
+                className="border-0 border-b border-black w-12 px-1 focus:outline-none focus:border-b-2 bg-transparent"
                 value={formData.tirednessDurationDays}
                 onChange={(e) =>
                   handleInputChange("tirednessDurationDays", e.target.value)
@@ -583,7 +583,7 @@ const TBSymptomScreen = ({ onFormDataChange, initialData }) => {
               <span># Weeks</span>
               <input
                 type="text"
-                className="border-b border-black w-12 outline-none bg-transparent"
+                className="border-0 border-b border-black w-12 px-1 focus:outline-none focus:border-b-2 bg-transparent"
                 value={formData.tirednessDurationWeeks}
                 onChange={(e) =>
                   handleInputChange("tirednessDurationWeeks", e.target.value)
@@ -594,7 +594,7 @@ const TBSymptomScreen = ({ onFormDataChange, initialData }) => {
               <span># Months</span>
               <input
                 type="text"
-                className="border-b border-black w-12 outline-none bg-transparent"
+                className="border-0 border-b border-black w-12 px-1 focus:outline-none focus:border-b-2 bg-transparent"
                 value={formData.tirednessDurationMonths}
                 onChange={(e) =>
                   handleInputChange("tirednessDurationMonths", e.target.value)
@@ -637,7 +637,7 @@ const TBSymptomScreen = ({ onFormDataChange, initialData }) => {
               <span># Days</span>
               <input
                 type="text"
-                className="border-b border-black w-12 outline-none bg-transparent"
+                className="border-0 border-b border-black w-12 px-1 focus:outline-none focus:border-b-2 bg-transparent"
                 value={formData.chestPainDurationDays}
                 onChange={(e) =>
                   handleInputChange("chestPainDurationDays", e.target.value)
@@ -648,7 +648,7 @@ const TBSymptomScreen = ({ onFormDataChange, initialData }) => {
               <span># Weeks</span>
               <input
                 type="text"
-                className="border-b border-black w-12 outline-none bg-transparent"
+                className="border-0 border-b border-black w-12 px-1 focus:outline-none focus:border-b-2 bg-transparent"
                 value={formData.chestPainDurationWeeks}
                 onChange={(e) =>
                   handleInputChange("chestPainDurationWeeks", e.target.value)
@@ -659,7 +659,7 @@ const TBSymptomScreen = ({ onFormDataChange, initialData }) => {
               <span># Months</span>
               <input
                 type="text"
-                className="border-b border-black w-12 outline-none bg-transparent"
+                className="border-0 border-b border-black w-12 px-1 focus:outline-none focus:border-b-2 bg-transparent"
                 value={formData.chestPainDurationMonths}
                 onChange={(e) =>
                   handleInputChange("chestPainDurationMonths", e.target.value)
@@ -704,7 +704,7 @@ const TBSymptomScreen = ({ onFormDataChange, initialData }) => {
               <span># Days</span>
               <input
                 type="text"
-                className="border-b border-black w-12 outline-none bg-transparent"
+                className="border-0 border-b border-black w-12 px-1 focus:outline-none focus:border-b-2 bg-transparent"
                 value={formData.shortnessOfBreathDurationDays}
                 onChange={(e) =>
                   handleInputChange(
@@ -718,7 +718,7 @@ const TBSymptomScreen = ({ onFormDataChange, initialData }) => {
               <span># Weeks</span>
               <input
                 type="text"
-                className="border-b border-black w-12 outline-none bg-transparent"
+                className="border-0 border-b border-black w-12 px-1 focus:outline-none focus:border-b-2 bg-transparent"
                 value={formData.shortnessOfBreathDurationWeeks}
                 onChange={(e) =>
                   handleInputChange(
@@ -732,7 +732,7 @@ const TBSymptomScreen = ({ onFormDataChange, initialData }) => {
               <span># Months</span>
               <input
                 type="text"
-                className="border-b border-black w-12 outline-none bg-transparent"
+                className="border-0 border-b border-black w-12 px-1 focus:outline-none focus:border-b-2 bg-transparent"
                 value={formData.shortnessOfBreathDurationMonths}
                 onChange={(e) =>
                   handleInputChange(
@@ -782,7 +782,7 @@ const TBSymptomScreen = ({ onFormDataChange, initialData }) => {
             <span>Name</span>
             <input
               type="text"
-              className="border-b border-black w-40 outline-none bg-transparent"
+              className="border-0 border-b border-black w-40 px-1 focus:outline-none focus:border-b-2 bg-transparent"
               value={formData.contactName}
               onChange={(e) => handleInputChange("contactName", e.target.value)}
             />
@@ -791,7 +791,7 @@ const TBSymptomScreen = ({ onFormDataChange, initialData }) => {
             <span>Address</span>
             <input
               type="text"
-              className="border-b border-black w-80 outline-none bg-transparent"
+              className="border-0 border-b border-black w-80 px-1 focus:outline-none focus:border-b-2 bg-transparent"
               value={formData.contactAddress}
               onChange={(e) =>
                 handleInputChange("contactAddress", e.target.value)
@@ -802,7 +802,7 @@ const TBSymptomScreen = ({ onFormDataChange, initialData }) => {
             <span>Phone</span>
             <input
               type="text"
-              className="border-b border-black w-32 outline-none bg-transparent"
+              className="border-0 border-b border-black w-32 px-1 focus:outline-none focus:border-b-2 bg-transparent"
               value={formData.contactPhone}
               onChange={(e) =>
                 handleInputChange("contactPhone", e.target.value)
@@ -1702,7 +1702,7 @@ const EditSymptomScreenForm = () => {
                                 );
 
                                 setTimeout(() => {
-                                  navigate("/employee/emergency-contact");
+                                  navigate("/employee/i9-form");
                                 }, 1500);
                               }
                             } catch (error) {

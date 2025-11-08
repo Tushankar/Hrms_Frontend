@@ -527,6 +527,7 @@ function FormI9({ initialFormData = {}, onFormDataChange }) {
                       value={formData.employeeSignature || ""}
                       onChange={handleChange}
                       className="w-full border-0 focus:outline-none"
+                      style={{ fontFamily: "Brush Script MT, cursive" }}
                     />
                   </td>
                   <td className="border border-black p-[2px]" colSpan="2">
@@ -1001,6 +1002,7 @@ function FormI9({ initialFormData = {}, onFormDataChange }) {
                       value={formData.employerSignature || ""}
                       onChange={handleChange}
                       className="w-full border-0 p-0 focus:outline-none text-[7pt] bg-transparent"
+                      style={{ fontFamily: "Brush Script MT, cursive" }}
                     />
                   </td>
                   <td className="border border-black p-[2px]" colSpan="2">
@@ -1080,7 +1082,9 @@ function FormI9({ initialFormData = {}, onFormDataChange }) {
             <h2 className="text-base font-bold">
               Preparer and/or Translator Certification for Section 1
             </h2>
-            <p className="text-sm mt-1 font-bold">Department of Homeland Security</p>
+            <p className="text-sm mt-1 font-bold">
+              Department of Homeland Security
+            </p>
             <p className="text-sm">U.S. Citizenship and Immigration Services</p>
           </div>
           <div className="text-right flex-shrink-0">
@@ -1136,13 +1140,15 @@ function FormI9({ initialFormData = {}, onFormDataChange }) {
           </table>
         </div>
         <div className="text-[7pt] mb-2 leading-[1.3]">
-          <strong>Instructions: This supplement must be completed by
-          any preparer and/or translator who assists an employee in completing
-          Section 1 of Form I-9. The preparer and/or translator must enter the
-          employee's name in the spaces provided above. Each preparer or
-          translator must complete, sign, and date a separate certification
-          area. Employers must retain completed supplement sheets with the
-          employee's completed Form I-9.</strong>
+          <strong>
+            Instructions: This supplement must be completed by any preparer
+            and/or translator who assists an employee in completing Section 1 of
+            Form I-9. The preparer and/or translator must enter the employee's
+            name in the spaces provided above. Each preparer or translator must
+            complete, sign, and date a separate certification area. Employers
+            must retain completed supplement sheets with the employee's
+            completed Form I-9.
+          </strong>
         </div>
         {[1, 2, 3, 4].map((num) => (
           <div key={num} className="mb-2">
@@ -1164,6 +1170,7 @@ function FormI9({ initialFormData = {}, onFormDataChange }) {
                       value={formData[`prep${num}Signature`] || ""}
                       onChange={handleChange}
                       className="w-full border-0 p-0 focus:outline-none"
+                      style={{ fontFamily: "Brush Script MT, cursive" }}
                     />
                   </td>
                   <td className="border border-black p-[2px]" colSpan="3">
@@ -1328,7 +1335,9 @@ function FormI9({ initialFormData = {}, onFormDataChange }) {
             <h2 className="text-base font-bold">
               Reverification and Rehire (formerly Section 3)
             </h2>
-            <p className="text-sm mt-1 font-bold">Department of Homeland Security</p>
+            <p className="text-sm mt-1 font-bold">
+              Department of Homeland Security
+            </p>
             <p className="text-sm">U.S. Citizenship and Immigration Services</p>
           </div>
           <div className="text-right flex-shrink-0">
@@ -1384,23 +1393,25 @@ function FormI9({ initialFormData = {}, onFormDataChange }) {
           </table>
         </div>
         <div className="text-[7pt] mb-2 leading-[1.3]">
-          <strong>Instructions: This supplement replaces Section 3 on
-          the previous version of Form I-9. Only use this page if your employee
-          requires reverification, is rehired within three years of the date the
-          original Form I-9 was completed, or provides proof of a legal name
-          change. Enter the employee's name in the fields above. Use a new
-          section for each reverification or rehire. Review the Form I-9
-          instructions before completing this page. Keep this page as part of
-          the employee's Form I-9 record. Additional guidance can be found in
-          the{" "}
-          <a
-            href="https://www.uscis.gov/i-9-central/form-i-9-resources/handbook-for-employers-m-274"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-blue-600 underline"
-          >
-            Handbook for Employers: Guidance for Completing Form I-9 (M-274)
-          </a></strong>
+          <strong>
+            Instructions: This supplement replaces Section 3 on the previous
+            version of Form I-9. Only use this page if your employee requires
+            reverification, is rehired within three years of the date the
+            original Form I-9 was completed, or provides proof of a legal name
+            change. Enter the employee's name in the fields above. Use a new
+            section for each reverification or rehire. Review the Form I-9
+            instructions before completing this page. Keep this page as part of
+            the employee's Form I-9 record. Additional guidance can be found in
+            the{" "}
+            <a
+              href="https://www.uscis.gov/i-9-central/form-i-9-resources/handbook-for-employers-m-274"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 underline"
+            >
+              Handbook for Employers: Guidance for Completing Form I-9 (M-274)
+            </a>
+          </strong>
           .
         </div>
         {[1, 2, 3].map((num) => (
@@ -1463,7 +1474,10 @@ function FormI9({ initialFormData = {}, onFormDataChange }) {
                   </td>
                 </tr>
                 <tr>
-                  <td className="border border-black p-[2px] bg-gray-300" colSpan="4">
+                  <td
+                    className="border border-black p-[2px] bg-gray-300"
+                    colSpan="4"
+                  >
                     <div className="font-bold text-[7pt] mb-1">
                       Reverification: If the employee requires reverification,
                       your employee can choose to present any acceptable List A
@@ -1478,7 +1492,6 @@ function FormI9({ initialFormData = {}, onFormDataChange }) {
                     className="border border-black p-[2px] bg-gray-100"
                     colSpan="4"
                   >
-                    
                     <table className="w-full border-collapse">
                       <tbody>
                         <tr>
@@ -1528,7 +1541,10 @@ function FormI9({ initialFormData = {}, onFormDataChange }) {
                   </td>
                 </tr>
                 <tr>
-                  <td className="border border-black p-[2px] bg-gray-300" colSpan="4">
+                  <td
+                    className="border border-black p-[2px] bg-gray-300"
+                    colSpan="4"
+                  >
                     <div className="font-bold text-[7pt] mb-1">
                       I attest, under penalty of perjury, that to the best of my
                       knowledge, this employee is authorized to work in the
@@ -1561,6 +1577,7 @@ function FormI9({ initialFormData = {}, onFormDataChange }) {
                       value={formData[`rev${num}EmployerSignature`] || ""}
                       onChange={handleChange}
                       className="w-full border-0 p-0 focus:outline-none"
+                      style={{ fontFamily: "Brush Script MT, cursive" }}
                     />
                   </td>
                   <td className="border border-black p-[2px]">

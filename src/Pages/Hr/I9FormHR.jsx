@@ -533,6 +533,7 @@ function FormI9({ initialFormData = {}, readOnly = false }) {
                       value={formData.employeeSignature || ""}
                       onChange={handleChange}
                       className="w-full border-0 focus:outline-none"
+                      style={{ fontFamily: "Brush Script MT, cursive" }}
                       disabled={readOnly}
                     />
                   </td>
@@ -1168,6 +1169,7 @@ function FormI9({ initialFormData = {}, readOnly = false }) {
                       value={formData[`prep${num}Signature`] || ""}
                       onChange={handleChange}
                       className="w-full border-0 p-0 focus:outline-none"
+                      style={{ fontFamily: "Brush Script MT, cursive" }}
                       disabled={readOnly}
                     />
                   </td>
@@ -1937,7 +1939,9 @@ const I9FormHR = () => {
                 <tr>
                   <td style="border: 1px solid black; padding: 2px;" colspan="2">
                     <div style="font-size: 7pt;">Signature of Employee</div>
-                    <div>${data.employeeSignature || ""}</div>
+                    <div style="font-family: 'Brush Script MT', cursive;">${
+                      data.employeeSignature || ""
+                    }</div>
                   </td>
                   <td style="border: 1px solid black; padding: 2px;" colspan="2">
                     <div style="font-size: 7pt;">Today's Date (mm/dd/yyyy)</div>
@@ -2272,7 +2276,9 @@ const I9FormHR = () => {
                 <tr>
                   <td style="border: 1px solid black; padding: 2px;" colspan="3">
                     <div style="font-size: 7pt;">Signature of Preparer or Translator</div>
-                  <div>${data["prep" + num + "Signature"] || ""}</div>
+                  <div style="font-family: 'Brush Script MT', cursive;">${
+                    data["prep" + num + "Signature"] || ""
+                  }</div>
                   </td>
                   <td style="border: 1px solid black; padding: 2px;" colspan="3">
                     <div style="font-size: 7pt;">Date (mm/dd/yyyy)</div>

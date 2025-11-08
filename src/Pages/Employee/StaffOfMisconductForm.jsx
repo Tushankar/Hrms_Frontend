@@ -465,23 +465,15 @@ const StaffOfMisconductForm = () => {
                         onChange={(e) =>
                           handleChange("staffTitle", e.target.value)
                         }
-                        className="border-b border-black w-full sm:flex-1 px-1 focus:outline-none focus:border-b-2 text-xs"
+                        className="border-0 border-b border-black w-full sm:flex-1 px-1 focus:outline-none focus:border-b-2 text-xs bg-transparent"
                       />
                     </div>
 
                     <div className="space-y-3 sm:space-y-4 leading-relaxed text-[10px] sm:text-xs">
                       <p>
                         I <u>understand and acknowledge</u> that I must comply
-                        with Pacific Health Systems LLC{" "}
-                        <input
-                          type="text"
-                          value={formData.companyName}
-                          onChange={(e) =>
-                            handleChange("companyName", e.target.value)
-                          }
-                          className="border-b border-black w-16 sm:w-20 mx-1 px-1 focus:outline-none focus:border-b-2"
-                        />
-                        , Code of Conduct and Abuse & Misconduct program.
+                        with Pacific Health Systems LLC, Code of Conduct and
+                        Abuse & Misconduct program.
                       </p>
 
                       <p>
@@ -498,32 +490,9 @@ const StaffOfMisconductForm = () => {
                       </p>
 
                       <p>
-                        I{" "}
-                        <input
-                          type="text"
-                          value={formData.employeeNameParagraph}
-                          onChange={(e) =>
-                            handleChange(
-                              "employeeNameParagraph",
-                              e.target.value
-                            )
-                          }
-                          className="border-b border-black w-full sm:w-64 mx-1 px-1 focus:outline-none focus:border-b-2"
-                        />
-                        , as an employee of Pacific Health Systems LLC{" "}
-                        <input
-                          type="text"
-                          value={formData.employeeNameParagraph}
-                          onChange={(e) =>
-                            handleChange(
-                              "employeeNameParagraph",
-                              e.target.value
-                            )
-                          }
-                          className="border-b border-black w-full sm:w-16 mx-1 px-1 focus:outline-none focus:border-b-2"
-                        />
-                        , I hereby state that, I have never shown any misconduct
-                        nor have a history of abuse and neglect of others.
+                        I, as an employee of Pacific Health Systems LLC, I
+                        hereby state that, I have never shown any misconduct nor
+                        have a history of abuse and neglect of others.
                       </p>
 
                       <p className="mb-6">
@@ -543,7 +512,7 @@ const StaffOfMisconductForm = () => {
                             onChange={(e) =>
                               handleChange("employeeName", e.target.value)
                             }
-                            className="border-b border-black w-full sm:flex-1 px-1 focus:outline-none focus:border-b-2"
+                            className="border-0 border-b border-black w-full sm:flex-1 px-1 focus:outline-none focus:border-b-2 bg-transparent"
                           />
                         </div>
 
@@ -557,7 +526,7 @@ const StaffOfMisconductForm = () => {
                             onChange={(e) =>
                               handleChange("employmentPosition", e.target.value)
                             }
-                            className="border-b border-black w-full sm:flex-1 px-1 focus:outline-none focus:border-b-2"
+                            className="border-0 border-b border-black w-full sm:flex-1 px-1 focus:outline-none focus:border-b-2 bg-transparent"
                           />
                         </div>
 
@@ -579,7 +548,7 @@ const StaffOfMisconductForm = () => {
                                 fontSize: "28px",
                                 letterSpacing: "0.5px",
                               }}
-                              className="border-b border-black flex-1 px-1 focus:outline-none focus:border-b-2"
+                              className="border-0 border-b border-black flex-1 px-1 focus:outline-none focus:border-b-2 bg-transparent"
                             />
                           </div>
                           <div className="flex items-baseline w-full sm:w-auto">
@@ -590,7 +559,7 @@ const StaffOfMisconductForm = () => {
                               onChange={(e) =>
                                 handleChange("dateField1", e.target.value)
                               }
-                              className="border-b border-black w-full sm:w-32 px-1 focus:outline-none focus:border-b-2"
+                              className="border-0 border-b border-black w-full sm:w-32 px-1 focus:outline-none focus:border-b-2 bg-transparent"
                             />
                           </div>
                         </div>
@@ -608,7 +577,7 @@ const StaffOfMisconductForm = () => {
                             onChange={(e) =>
                               handleChange("exhibitName", e.target.value)
                             }
-                            className="border-b border-black w-full px-1 focus:outline-none focus:border-b-2"
+                            className="border-0 border-b border-black w-full px-1 focus:outline-none focus:border-b-2 bg-transparent"
                           />
                           <span> has never been shown to have exhibited</span>
                         </div>
@@ -617,7 +586,7 @@ const StaffOfMisconductForm = () => {
                           grossly negligent misconduct{" "}
                           <input
                             type="text"
-                            className="border-b border-black w-24 mx-1 px-1 focus:outline-none focus:border-b-2"
+                            className="border-0 border-b border-black w-24 mx-1 px-1 focus:outline-none focus:border-b-2 bg-transparent"
                           />
                           .
                         </p>
@@ -643,7 +612,7 @@ const StaffOfMisconductForm = () => {
                             onChange={(e) =>
                               handleChange("printName", e.target.value)
                             }
-                            className="border-b border-black w-full sm:flex-1 px-1 focus:outline-none focus:border-b-2"
+                            className="border-0 border-b border-black w-full sm:flex-1 px-1 focus:outline-none focus:border-b-2 bg-transparent"
                           />
                         </div>
                         <div className="flex items-baseline w-full sm:flex-1">
@@ -663,7 +632,7 @@ const StaffOfMisconductForm = () => {
                               fontSize: "28px",
                               letterSpacing: "0.5px",
                             }}
-                            className="border-b border-black flex-1 px-1 focus:outline-none focus:border-b-2"
+                            className="border-0 border-b border-black flex-1 px-1 focus:outline-none focus:border-b-2 bg-transparent"
                           />
                         </div>
                       </div>
@@ -676,7 +645,7 @@ const StaffOfMisconductForm = () => {
                           onChange={(e) =>
                             handleChange("dateField2", e.target.value)
                           }
-                          className="border-b border-black w-full sm:w-48 px-1 focus:outline-none focus:border-b-2"
+                          className="border-0 border-b border-black w-full sm:w-48 px-1 focus:outline-none focus:border-b-2 bg-transparent"
                         />
                       </div>
 
@@ -694,7 +663,7 @@ const StaffOfMisconductForm = () => {
                             onChange={(e) =>
                               handleChange("notaryDay", e.target.value)
                             }
-                            className="border-b border-black w-full sm:w-16 mx-0 sm:mx-1 px-1 focus:outline-none focus:border-b-2"
+                            className="border-0 border-b border-black w-full sm:w-16 mx-0 sm:mx-1 px-1 focus:outline-none focus:border-b-2 bg-transparent"
                           />
                           <span className="mx-0 sm:mx-1">day of</span>
                           <input
@@ -703,7 +672,7 @@ const StaffOfMisconductForm = () => {
                             onChange={(e) =>
                               handleChange("notaryMonth", e.target.value)
                             }
-                            className="border-b border-black w-full sm:w-24 mx-0 sm:mx-1 px-1 focus:outline-none focus:border-b-2"
+                            className="border-0 border-b border-black w-full sm:w-24 mx-0 sm:mx-1 px-1 focus:outline-none focus:border-b-2 bg-transparent"
                           />
                           <span className="mx-0 sm:mx-1">Year</span>
                           <input
@@ -712,7 +681,7 @@ const StaffOfMisconductForm = () => {
                             onChange={(e) =>
                               handleChange("notaryYear", e.target.value)
                             }
-                            className="border-b border-black w-full sm:w-20 mx-0 sm:mx-1 px-1 focus:outline-none focus:border-b-2"
+                            className="border-0 border-b border-black w-full sm:w-20 mx-0 sm:mx-1 px-1 focus:outline-none focus:border-b-2 bg-transparent"
                           />
                         </div>
 

@@ -791,6 +791,7 @@ const W4Form = () => {
                         type="text"
                         placeholder="Sign here"
                         className="w-full border-0 border-b border-black outline-none text-[8pt] py-0.5 h-5 placeholder:text-gray-400"
+                        style={{ fontFamily: "Brush Script MT, cursive" }}
                       />
                       <div className="text-[7pt] mt-0.5">
                         <span className="font-bold">Employee's signature</span>{" "}

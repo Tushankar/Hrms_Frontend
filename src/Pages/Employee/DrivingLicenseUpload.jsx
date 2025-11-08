@@ -250,11 +250,13 @@ const DrivingLicenseUpload = () => {
         <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-8">
           {/* Status Banner */}
           {!loading && (
-            <div className={`mb-6 p-4 rounded-lg border ${
-              submission
-                ? 'bg-green-50 border-green-200'
-                : 'bg-red-50 border-red-200'
-            }`}>
+            <div
+              className={`mb-6 p-4 rounded-lg border ${
+                submission
+                  ? "bg-green-50 border-green-200"
+                  : "bg-red-50 border-red-200"
+              }`}
+            >
               <div className="flex items-center justify-center gap-3">
                 {submission ? (
                   <CheckCircle className="w-6 h-6 text-green-600 flex-shrink-0" />
@@ -264,11 +266,13 @@ const DrivingLicenseUpload = () => {
                 <div>
                   {submission ? (
                     <p className="text-base font-semibold text-green-800">
-                      ✅ Progress Updated - Uploaded Successfully on {new Date(submission.uploadedAt).toLocaleDateString()}
+                      ✅ Progress Updated - Uploaded Successfully on{" "}
+                      {new Date(submission.uploadedAt).toLocaleDateString()}
                     </p>
                   ) : (
                     <p className="text-base font-semibold text-red-800">
-                      ⚠️ Not filled yet - Upload your document to complete your progress
+                      ⚠️ Not filled yet - Upload your document to complete your
+                      progress
                     </p>
                   )}
                 </div>
@@ -294,14 +298,7 @@ const DrivingLicenseUpload = () => {
                     governmentIdType.charAt(0).toUpperCase() +
                     governmentIdType.slice(1)
                   } as a means of identification.`
-                : "Upload your government-issued Picture ID as a means of identification."}{" "}
-              {governmentIdType === "driver's license"
-                ? "This document should include both front and back sides."
-                : governmentIdType === "passport"
-                ? "This should be a clear scan or photo of your passport information page."
-                : governmentIdType === "state id"
-                ? "This document should include both front and back sides."
-                : "This document can be a Driver's License, Passport, State ID etc."}
+                : "Upload your government-issued Picture ID as a means of identification."}
             </p>
           </div>
 
