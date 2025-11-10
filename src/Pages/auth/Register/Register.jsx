@@ -398,8 +398,8 @@ export const Register = () => {
                 Create an account
               </h3>
               <p className="text-[#505050] font-[Poppins] font-[400] text-xs sm:text-sm lg:text-base">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam ac
-                lectus nec enim tempor suscipit.
+                Join HRMS and unlock your employee portal. Create your account
+                to access onboarding, benefits management, and more.
               </p>
             </div>
             <div className="mt-3 sm:mt-5">
