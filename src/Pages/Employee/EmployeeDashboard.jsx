@@ -88,6 +88,15 @@ export const EmployeeDashboard = () => {
   const [otpEnabled, setOtpEnabled] = useState(userData?.otpEnabled || false);
   const [isTogglingOtp, setIsTogglingOtp] = useState(false);
 
+  // Change Password State
+  const [showChangePassword, setShowChangePassword] = useState(false);
+  const [changePasswordData, setChangePasswordData] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  });
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
+
   const router = useNavigate();
 
   const getEmployeeInfo = async (token) => {
@@ -1289,6 +1298,71 @@ export const EmployeeDashboard = () => {
     }
   };
 
+  const handleChangePassword = async () => {
+    // Validate required fields
+    if (!changePasswordData.currentPassword.trim()) {
+      return toast.error("Please enter your current password");
+    }
+
+    if (!changePasswordData.newPassword.trim()) {
+      return toast.error("Please enter your new password");
+    }
+
+    if (!changePasswordData.confirmPassword.trim()) {
+      return toast.error("Please confirm your new password");
+    }
+
+    if (changePasswordData.newPassword !== changePasswordData.confirmPassword) {
+      return toast.error("New passwords do not match");
+    }
+
+    if (changePasswordData.newPassword.length < 6) {
+      return toast.error("New password must be at least 6 characters long");
+    }
+
+    setIsChangingPassword(true);
+    try {
+      const userToken = Cookies.get("session");
+      const response = await axios.post(
+        `${baseURL}/auth/change-password`,
+        {
+          currentPassword: changePasswordData.currentPassword,
+          newPassword: changePasswordData.newPassword,
+        },
+        {
+          headers: {
+            Authorization: userToken,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (response.data.status === "Success") {
+        toast.success("Password changed successfully!");
+        setShowChangePassword(false);
+        setChangePasswordData({
+          currentPassword: "",
+          newPassword: "",
+          confirmPassword: "",
+        });
+      }
+    } catch (error) {
+      console.error("Change password error:", error);
+
+      // Handle specific error messages from backend
+      const errorMessage = error.response?.data?.message;
+      if (errorMessage === "Current password is incorrect") {
+        toast.error("Current password is incorrect. Please try again.");
+      } else if (errorMessage) {
+        toast.error(errorMessage);
+      } else {
+        toast.error("Failed to change password. Please try again.");
+      }
+    } finally {
+      setIsChangingPassword(false);
+    }
+  };
+
   const overallProgress = calculateOverallProgress();
 
   const getFormRoute = (taskId) => {
@@ -1484,6 +1558,133 @@ export const EmployeeDashboard = () => {
                   : "OTP is currently disabled. Enable for additional security."}
               </p>
             </div>
+          </div>
+
+          {/* Change Password Section */}
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                <Shield size={20} className="text-green-600" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Change Password
+                </h3>
+                <p className="text-sm text-gray-600">
+                  Update your account password for better security
+                </p>
+              </div>
+            </div>
+
+            <div className="bg-gradient-to-r from-gray-50 to-gray-100 p-4 rounded-xl border border-gray-200">
+              <h4 className="text-base font-semibold text-gray-800 mb-2 flex items-center gap-2">
+                <Shield size={20} className="text-green-600" />
+                Password Security
+              </h4>
+              <p className="text-sm text-gray-700 mb-3 leading-relaxed">
+                Regularly changing your password helps keep your account secure.
+              </p>
+              <button
+                onClick={() => setShowChangePassword(!showChangePassword)}
+                className="inline-flex items-center gap-2 bg-gradient-to-r from-green-500 to-green-600 text-white px-6 py-2.5 rounded-lg hover:from-green-600 hover:to-green-700 transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 font-medium text-sm"
+              >
+                <Shield size={16} />
+                {showChangePassword ? "Cancel" : "Change Password"}
+              </button>
+              <p className="text-xs text-gray-500 mt-2">
+                Click to securely update your password
+              </p>
+            </div>
+
+            {showChangePassword && (
+              <div className="mt-4 p-4 border border-gray-200 rounded-lg bg-white">
+                <h4 className="text-base font-semibold text-gray-800 mb-3">
+                  Update Password
+                </h4>
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Current Password
+                    </label>
+                    <input
+                      type="password"
+                      value={changePasswordData.currentPassword}
+                      onChange={(e) =>
+                        setChangePasswordData({
+                          ...changePasswordData,
+                          currentPassword: e.target.value,
+                        })
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      placeholder="Enter current password"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      New Password
+                    </label>
+                    <input
+                      type="password"
+                      value={changePasswordData.newPassword}
+                      onChange={(e) =>
+                        setChangePasswordData({
+                          ...changePasswordData,
+                          newPassword: e.target.value,
+                        })
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      placeholder="Enter new password"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Confirm New Password
+                    </label>
+                    <input
+                      type="password"
+                      value={changePasswordData.confirmPassword}
+                      onChange={(e) =>
+                        setChangePasswordData({
+                          ...changePasswordData,
+                          confirmPassword: e.target.value,
+                        })
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      placeholder="Confirm new password"
+                    />
+                  </div>
+                  <div className="flex items-center justify-end gap-3 pt-2">
+                    <button
+                      onClick={() => {
+                        setShowChangePassword(false);
+                        setChangePasswordData({
+                          currentPassword: "",
+                          newPassword: "",
+                          confirmPassword: "",
+                        });
+                      }}
+                      className="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleChangePassword}
+                      disabled={isChangingPassword}
+                      className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                    >
+                      {isChangingPassword ? (
+                        <>
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                          Updating...
+                        </>
+                      ) : (
+                        "Update Password"
+                      )}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* HR Notes Section */}

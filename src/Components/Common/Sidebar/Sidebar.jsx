@@ -1,5 +1,7 @@
 import React, { useEffect, useState, useMemo } from "react";
-import TempLogo from "../../../assets/TempLogo.png";
+// Using external logo URL instead of local TempLogo
+const SIDEBAR_LOGO_URL =
+  "https://i.pinimg.com/1200x/fd/81/16/fd81160d9bb6751db8d120e675069b10.jpg";
 import {
   CalendarIcon,
   CommunicationIcon,
@@ -1354,10 +1356,10 @@ export const Sidebar = ({
           } items-center py-4 px-3 border-b border-[#BDC3C7] shadow-md relative h-[87px]`}
         >
           {!isDesktopCollapsed && (
-            <div className="w-12 h-10 transition-all duration-300">
+            <div className="w-12 h-12 transition-all duration-300">
               <img
-                src={TempLogo}
-                alt="temp-logo"
+                src={SIDEBAR_LOGO_URL}
+                alt="logo"
                 className="object-contain w-full h-full"
               />
             </div>

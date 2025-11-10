@@ -22,6 +22,13 @@ export const Login = () => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isResendingOtp, setIsResendingOtp] = useState(false);
   const router = useNavigate();
+  // Forgot password states
+  const [forgotMode, setForgotMode] = useState(false);
+  const [forgotOtp, setForgotOtp] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [isSendingForgotOtp, setIsSendingForgotOtp] = useState(false);
+  const [isVerifyingForgotOtp, setIsVerifyingForgotOtp] = useState(false);
+  const [isResendingForgotOtp, setIsResendingForgotOtp] = useState(false);
 
   // Carousel images
   const carouselImages = [
@@ -252,6 +259,93 @@ export const Login = () => {
     }
   };
 
+  // Forgot password: send OTP for password reset
+  const sendForgotOtp = async () => {
+    if (!loginInfo.email || !EmailValidator.validate(loginInfo.email)) {
+      return toast.error("Please enter a valid email to reset password");
+    }
+
+    setIsSendingForgotOtp(true);
+    try {
+      const baseUrl = import.meta.env.VITE__BASEURL;
+      if (!baseUrl) {
+        setIsSendingForgotOtp(false);
+        return toast.error("Internal Error, please try again later!");
+      }
+
+      const req = await axios.post(
+        `${baseUrl}/auth/forgot-password`,
+        { email: loginInfo.email },
+        { headers: { "Content-Type": "application/json" } }
+      );
+
+      toast.success(req?.data?.message || "OTP sent to your email");
+    } catch (error) {
+      toast.error(error?.response?.data?.message || "Failed to send OTP");
+    } finally {
+      setIsSendingForgotOtp(false);
+    }
+  };
+
+  const resendForgotOtp = async () => {
+    setIsResendingForgotOtp(true);
+    try {
+      const baseUrl = import.meta.env.VITE__BASEURL;
+      if (!baseUrl) {
+        setIsResendingForgotOtp(false);
+        return toast.error("Internal Error, please try again later!");
+      }
+
+      const req = await axios.post(
+        `${baseUrl}/auth/forgot-password`,
+        { email: loginInfo.email },
+        { headers: { "Content-Type": "application/json" } }
+      );
+
+      toast.success(req?.data?.message || "OTP resent to your email");
+    } catch (error) {
+      toast.error(error?.response?.data?.message || "Failed to resend OTP");
+    } finally {
+      setIsResendingForgotOtp(false);
+    }
+  };
+
+  // Verify forgot OTP and reset password
+  const verifyForgotOtp = async () => {
+    if (!forgotOtp.trim() || !newPassword.trim()) {
+      return toast.error("Please provide OTP and a new password");
+    }
+
+    setIsVerifyingForgotOtp(true);
+    try {
+      const baseUrl = import.meta.env.VITE__BASEURL;
+      if (!baseUrl) {
+        setIsVerifyingForgotOtp(false);
+        return toast.error("Internal Error, please try again later!");
+      }
+
+      const req = await axios.post(
+        `${baseUrl}/auth/verify-forgot-otp`,
+        {
+          email: loginInfo.email,
+          otp: forgotOtp.trim(),
+          newPassword: newPassword,
+        },
+        { headers: { "Content-Type": "application/json" } }
+      );
+
+      toast.success(req?.data?.message || "Password reset successful");
+      // reset forgot states and exit forgot mode
+      setForgotMode(false);
+      setForgotOtp("");
+      setNewPassword("");
+    } catch (error) {
+      toast.error(error?.response?.data?.message || "Failed to reset password");
+    } finally {
+      setIsVerifyingForgotOtp(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex font-[Poppins]">
       {/* Left Carousel Section */}
@@ -457,13 +551,126 @@ export const Login = () => {
                   Remember me
                 </label>
               </div>
-              <Link
-                to="/forgot-password"
+              <button
+                type="button"
+                onClick={() => setForgotMode(true)}
                 className="text-sm text-blue-600 hover:text-blue-500 font-medium"
               >
                 Forgot password?
-              </Link>
+              </button>
             </div>
+
+            {/* Inline Forgot Password Flow */}
+            {forgotMode && (
+              <div className="mt-4 p-4 border border-gray-200 rounded-lg bg-white">
+                <h3 className="text-lg font-medium text-gray-800 mb-2">
+                  Reset Password
+                </h3>
+                <p className="text-sm text-gray-600 mb-3">
+                  Enter the email you registered with and we will send an OTP to
+                  reset your password.
+                </p>
+
+                <div className="mb-3">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Email address
+                  </label>
+                  <input
+                    type="email"
+                    name="email"
+                    required
+                    value={loginInfo.email}
+                    onChange={handleOnChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 bg-white"
+                    placeholder="Enter your email"
+                  />
+                </div>
+
+                <div className="flex items-center justify-end mb-3">
+                  <button
+                    type="button"
+                    onClick={sendForgotOtp}
+                    disabled={isSendingForgotOtp}
+                    className="text-sm text-blue-600 hover:text-blue-500 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isSendingForgotOtp ? (
+                      <div className="flex items-center">
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-1"></div>
+                        Sending...
+                      </div>
+                    ) : (
+                      "Send OTP"
+                    )}
+                  </button>
+                </div>
+
+                <div className="mb-3">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    OTP
+                  </label>
+                  <input
+                    type="text"
+                    value={forgotOtp}
+                    onChange={(e) => setForgotOtp(e.target.value)}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 bg-white"
+                    placeholder="Enter 6-digit OTP"
+                    maxLength="6"
+                  />
+                  <div className="mt-2 text-right">
+                    <button
+                      type="button"
+                      onClick={resendForgotOtp}
+                      disabled={isResendingForgotOtp}
+                      className="text-sm text-blue-600 hover:text-blue-500 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {isResendingForgotOtp ? (
+                        <div className="flex items-center">
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-1"></div>
+                          Resending...
+                        </div>
+                      ) : (
+                        "Resend OTP"
+                      )}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="mb-3">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    New Password
+                  </label>
+                  <input
+                    type="password"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 bg-white"
+                    placeholder="Enter new password"
+                  />
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setForgotMode(false);
+                      setForgotOtp("");
+                      setNewPassword("");
+                    }}
+                    className="text-sm text-gray-600 hover:text-gray-700"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={verifyForgotOtp}
+                    disabled={isVerifyingForgotOtp}
+                    className="py-2 px-4 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isVerifyingForgotOtp ? "Resetting..." : "Reset Password"}
+                  </button>
+                </div>
+              </div>
+            )}
 
             {/* Sign In Button */}
             <button
