@@ -30,8 +30,7 @@ const OrientationChecklist = () => {
   const [applicationStatus, setApplicationStatus] = useState({});
   const [overallProgress, setOverallProgress] = useState(0);
 
-  const baseURL =
-    import.meta.env.VITE__BASEURL || "https://api-hrms-backend.kyptronix.us";
+  const baseURL = import.meta.env.VITE__BASEURL || "http://localhost:1111";
 
   useEffect(() => {
     initializeForm();

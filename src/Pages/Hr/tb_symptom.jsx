@@ -11,20 +11,17 @@ import axios from "axios";
 import { Layout } from "../../Components/Common/layout/Layout";
 import Navbar from "../../Components/Common/Navbar/Navbar";
 import toast, { Toaster } from "react-hot-toast";
-import SignaturePad from "../../Components/Common/SignaturePad";
 
 const TBSymptomScreenHR = () => {
   const navigate = useNavigate();
   const { employeeId } = useParams(); // Changed from userId to employeeId
 
   // Base URL configuration
-  const baseURL =
-    import.meta.env.VITE__BASEURL || "https://api-hrms-backend.kyptronix.us";
+  const baseURL = import.meta.env.VITE__BASEURL || "http://localhost:1111";
 
   // State for notes section
   const [notes, setNotes] = useState("");
   const [existingFeedback, setExistingFeedback] = useState(null);
-  const [clientSignature, setClientSignature] = useState("");
 
   // State for application data
   const [applicationData, setApplicationData] = useState(null);
@@ -1294,26 +1291,6 @@ const TBSymptomScreenHR = () => {
                   <div className="flex justify-between text-xs text-gray-600 mt-6">
                     <span>GA DPH TB Unit</span>
                     <span>Rev. 12/2011</span>
-                  </div>
-                </div>
-
-                {/* HR Client Signature capture */}
-                <div className="bg-[#F8FAFF] p-6 rounded-xl border border-[#E8EDFF]">
-                  <h3 className="text-lg sm:text-xl font-bold text-[#1F3A93] mb-4 sm:mb-6">
-                    Client Signature (HR only)
-                  </h3>
-                  <div className="space-y-3">
-                    <SignaturePad
-                      label="Draw client's signature"
-                      initialValue={clientSignature}
-                      onSave={(imagePath) => setClientSignature(imagePath)}
-                      width={400}
-                      height={150}
-                    />
-                    <p className="text-xs text-gray-500">
-                      This signature will be visible to the employee alongside
-                      HR notes.
-                    </p>
                   </div>
                 </div>
 

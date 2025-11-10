@@ -422,6 +422,7 @@ const CodeOfEthicsHR = () => {
                 existingReviewedAt={existingFeedback?.reviewedAt}
                 onNoteSaved={loadFormData}
                 formData={formData}
+                showSignature={false}
               />
             </div>
           </div>

@@ -10,8 +10,7 @@ const OrientationChecklistHR = () => {
   const { employeeId } = useParams(); // Changed from userId to employeeId
 
   // Base URL configuration
-  const baseURL =
-    import.meta.env.VITE__BASEURL || "https://api-hrms-backend.kyptronix.us";
+  const baseURL = import.meta.env.VITE__BASEURL || "http://localhost:1111";
 
   // State for form fields
   const [formData, setFormData] = useState({
@@ -25,8 +24,6 @@ const OrientationChecklistHR = () => {
     handbook: false,
     applicantSignature: "",
     signatureDate: "",
-    agencySignature: "",
-    agencyDate: "",
   });
 
   // State for notes section
@@ -88,12 +85,6 @@ const OrientationChecklistHR = () => {
               applicantSignature: applicationData.applicantSignature || "",
               signatureDate: applicationData.signatureDate
                 ? new Date(applicationData.signatureDate)
-                    .toISOString()
-                    .slice(0, 10)
-                : "",
-              agencySignature: applicationData.agencySignature || "",
-              agencyDate: applicationData.agencyDate
-                ? new Date(applicationData.agencyDate)
                     .toISOString()
                     .slice(0, 10)
                 : "",
@@ -183,7 +174,6 @@ const OrientationChecklistHR = () => {
         notes: notes.trim(),
         formType: "OrientationChecklist",
         timestamp: new Date().toISOString(),
-        agencySignature: formData.agencySignature || undefined,
       };
 
       console.log("📝 Notes payload:", payload);
@@ -417,7 +407,7 @@ const OrientationChecklistHR = () => {
                     <h3 className="text-lg font-semibold text-gray-800 mb-4">
                       Signatures
                     </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div className="grid grid-cols-1 gap-8">
                       <div>
                         <div className="mb-4">
                           <label
@@ -465,54 +455,6 @@ const OrientationChecklistHR = () => {
                             }
                             className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
                             readOnly
-                          />
-                        </div>
-                      </div>
-                      <div>
-                        <div className="mb-4">
-                          <label
-                            className="block text-sm font-medium text-gray-700 mb-1"
-                            htmlFor="agencySignature"
-                          >
-                            Agency Representative Signature
-                          </label>
-                          <input
-                            id="agencySignature"
-                            type="text"
-                            value={formData.agencySignature}
-                            onChange={(e) =>
-                              handleInputChange(
-                                "agencySignature",
-                                e.target.value
-                              )
-                            }
-                            placeholder="Type agency representative signature"
-                            className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
-                            style={{
-                              fontFamily: "'Great Vibes', cursive",
-                              fontSize: "28px",
-                              letterSpacing: "0.5px",
-                            }}
-                          />
-                          <p className="text-xs text-gray-500 mt-1">
-                            Will appear in Great Vibes font
-                          </p>
-                        </div>
-                        <div>
-                          <label
-                            className="block text-sm font-medium text-gray-700 mb-1"
-                            htmlFor="agencyDate"
-                          >
-                            Agency Date
-                          </label>
-                          <input
-                            id="agencyDate"
-                            type="date"
-                            value={formData.agencyDate}
-                            onChange={(e) =>
-                              handleInputChange("agencyDate", e.target.value)
-                            }
-                            className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
                           />
                         </div>
                       </div>

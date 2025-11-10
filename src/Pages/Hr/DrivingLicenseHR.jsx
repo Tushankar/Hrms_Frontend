@@ -24,9 +24,9 @@ const DrivingLicenseHR = () => {
     try {
       const response = await axios.get(
         `${baseURL}/onboarding/get-application/${employeeId}`,
-        { 
+        {
           withCredentials: true,
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         }
       );
       const drivingLicenseData = response.data?.data?.forms?.drivingLicense;
@@ -71,7 +71,9 @@ const DrivingLicenseHR = () => {
             <>
               {!submission && (
                 <div className="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg text-center">
-                  <p className="text-yellow-800">No driving license submission found for this employee.</p>
+                  <p className="text-yellow-800">
+                    No driving license submission found for this employee.
+                  </p>
                 </div>
               )}
               {submission && (
@@ -80,16 +82,37 @@ const DrivingLicenseHR = () => {
                     Employee Driving License
                   </h2>
                   <div className="mb-4 space-y-2">
-                    <p className="text-sm text-gray-600">Status: <span className="capitalize px-2 py-1 rounded bg-green-100 text-green-800">submitted</span></p>
+                    <p className="text-sm text-gray-600">
+                      Status:{" "}
+                      <span className="capitalize px-2 py-1 rounded bg-green-100 text-green-800">
+                        submitted
+                      </span>
+                    </p>
                     {submission.filename && (
-                      <p className="text-sm text-gray-600">File: <span className="font-medium">{submission.filename}</span></p>
+                      <p className="text-sm text-gray-600">
+                        File:{" "}
+                        <span className="font-medium">
+                          {submission.filename}
+                        </span>
+                      </p>
                     )}
                     {submission.uploadedAt && (
-                      <p className="text-sm text-gray-600">Uploaded: <span className="font-medium">{new Date(submission.uploadedAt).toLocaleDateString()}</span></p>
+                      <p className="text-sm text-gray-600">
+                        Uploaded:{" "}
+                        <span className="font-medium">
+                          {new Date(submission.uploadedAt).toLocaleDateString()}
+                        </span>
+                      </p>
                     )}
                     {(submission.filePath || submission.fileUrl) && (
                       <button
-                        onClick={() => window.open(submission.fileUrl || `${baseURL}/${submission.filePath}`, '_blank')}
+                        onClick={() =>
+                          window.open(
+                            submission.fileUrl ||
+                              `${baseURL}/${submission.filePath}`,
+                            "_blank"
+                          )
+                        }
                         className="inline-flex items-center gap-2 px-3 py-1.5 bg-[#1F3A93] text-white rounded hover:bg-[#16307E] transition-colors text-sm"
                       >
                         <Download className="w-4 h-4" />
@@ -104,6 +127,7 @@ const DrivingLicenseHR = () => {
                     existingReviewedAt={submission?.hrFeedback?.reviewedAt}
                     onNoteSaved={fetchSubmission}
                     formData={submission}
+                    showSignature={false}
                   />
                 </div>
               )}

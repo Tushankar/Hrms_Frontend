@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   ArrowLeft,
-  Download,
   FileText,
   AlertCircle,
   Eye,
@@ -21,7 +20,6 @@ const NonCompeteAgreementHR = () => {
   const baseURL = import.meta.env.VITE__BASEURL;
 
   const [loading, setLoading] = useState(true);
-  const [uploadedForm, setUploadedForm] = useState(null);
   const [employeeName, setEmployeeName] = useState("");
   const [formId, setFormId] = useState(null);
   const [formData, setFormData] = useState(null);
@@ -37,9 +35,7 @@ const NonCompeteAgreementHR = () => {
       if (response.data?.data?.forms?.nonCompeteAgreement) {
         const data = response.data.data.forms.nonCompeteAgreement;
         console.log("📄 Non-Compete Form Data:", data);
-        console.log("📄 Uploaded Form:", data.employeeUploadedForm);
         setFormId(data._id);
-        setUploadedForm(data.employeeUploadedForm);
         setEmployeeName(data.employeeName || "Employee");
         setFormData(data);
       }
@@ -54,36 +50,6 @@ const NonCompeteAgreementHR = () => {
   useEffect(() => {
     loadData();
   }, [employeeId]);
-
-  const handleDownload = () => {
-    if (uploadedForm?.filePath) {
-      const url = uploadedForm.filePath.startsWith("http")
-        ? uploadedForm.filePath
-        : `${baseURL}/${uploadedForm.filePath}`;
-      window.open(url, "_blank");
-    } else {
-      toast.error("File path not found");
-    }
-  };
-
-  const handleClear = async () => {
-    if (
-      !window.confirm("Are you sure you want to clear this uploaded document?")
-    )
-      return;
-
-    try {
-      await axios.delete(
-        `${baseURL}/onboarding/hr-clear-non-compete-submission/${formId}`,
-        { withCredentials: true }
-      );
-      toast.success("Document cleared successfully");
-      setUploadedForm(null);
-    } catch (error) {
-      console.error("Error clearing document:", error);
-      toast.error("Failed to clear document");
-    }
-  };
 
   return (
     <Layout>
@@ -471,172 +437,18 @@ const NonCompeteAgreementHR = () => {
                 </div>
               )}
 
-              {/* Uploaded PDF Section */}
-              {uploadedForm ? (
-                <div className="space-y-6">
-                  <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-6 border border-green-200">
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-start gap-4 flex-1">
-                        <div className="bg-green-100 p-3 rounded-lg flex-shrink-0">
-                          <FileText className="w-8 h-8 text-green-600" />
-                        </div>
-                        <div className="flex-1">
-                          <h3 className="text-lg font-semibold text-green-800 mb-1">
-                            Signed PDF Document
-                          </h3>
-                          <p className="text-sm text-green-600 mb-3">
-                            {uploadedForm.filename ||
-                              "Signed Non-Compete Agreement"}
-                          </p>
-                          <p className="text-xs text-green-600 mb-3">
-                            Uploaded:{" "}
-                            {uploadedForm.uploadedAt
-                              ? new Date(
-                                  uploadedForm.uploadedAt
-                                ).toLocaleDateString()
-                              : "N/A"}
-                          </p>
-                          <div className="flex gap-3">
-                            <button
-                              onClick={handleDownload}
-                              className="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium"
-                            >
-                              <Download className="w-4 h-4" />
-                              Download Signed PDF
-                            </button>
-                            <button
-                              onClick={handleClear}
-                              className="inline-flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-medium"
-                            >
-                              Clear
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Signed PDF Preview */}
-                  {uploadedForm?.filePath && (
-                    <div className="space-y-4">
-                      <div className="border-2 border-gray-300 rounded-lg p-4 bg-white">
-                        {uploadedForm.filePath.endsWith(".png") ||
-                        uploadedForm.filePath.endsWith(".jpg") ||
-                        uploadedForm.filePath.endsWith(".jpeg") ? (
-                          <div
-                            className="w-full bg-gray-100 rounded border-2 border-gray-200 overflow-auto"
-                            style={{ maxHeight: "600px" }}
-                          >
-                            <img
-                              src={`${baseURL}/${uploadedForm.filePath.replace(
-                                /\\/g,
-                                "/"
-                              )}`}
-                              alt="Employee Signed Non-Compete Agreement"
-                              className="w-full object-contain"
-                            />
-                          </div>
-                        ) : uploadedForm.filePath.endsWith(".pdf") ? (
-                          <div className="w-full h-96 flex items-center justify-center bg-red-50 rounded border-2 border-red-200">
-                            <div className="text-center">
-                              <div className="text-red-600 font-medium text-sm mb-1">
-                                PDF Document
-                              </div>
-                              <div className="text-red-500 text-xs">
-                                {uploadedForm.filename}
-                              </div>
-                              <a
-                                href={`${baseURL}/${uploadedForm.filePath.replace(
-                                  /\\/g,
-                                  "/"
-                                )}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-block mt-2 px-3 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700 transition-colors"
-                              >
-                                View PDF
-                              </a>
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="w-full h-96 flex items-center justify-center bg-gray-100 rounded border-2 border-dashed border-gray-300">
-                            <div className="text-center">
-                              <div className="text-gray-600 font-medium text-sm mb-1">
-                                Uploaded Document
-                              </div>
-                              <div className="text-gray-500 text-xs">
-                                {uploadedForm.filename}
-                              </div>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-
-                      <div className="flex items-center justify-between p-4 bg-green-50 border border-green-200 rounded-lg">
-                        <div>
-                          <div className="flex items-center gap-2 text-green-700 mb-1">
-                            <CheckCircle className="w-5 h-5" />
-                            <span className="font-medium">
-                              PDF document submitted
-                            </span>
-                          </div>
-                          <p className="text-sm text-gray-600">
-                            📄{" "}
-                            {uploadedForm.filename ||
-                              "Signed Non-Compete Agreement"}{" "}
-                            • Submitted on:{" "}
-                            {uploadedForm.uploadedAt
-                              ? new Date(
-                                  uploadedForm.uploadedAt
-                                ).toLocaleDateString()
-                              : "N/A"}
-                          </p>
-                        </div>
-                        <a
-                          href={`${baseURL}/${uploadedForm.filePath.replace(
-                            /\\/g,
-                            "/"
-                          )}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-2 px-4 py-2 bg-[#1F3A93] text-white rounded-lg hover:bg-[#16307E] transition-colors"
-                        >
-                          <Download className="w-4 h-4" />
-                          Download
-                        </a>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ) : !formData?.employeeSignature ? (
-                <div className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl p-6 border border-amber-200">
-                  <div className="flex items-start gap-4">
-                    <div className="bg-amber-100 p-3 rounded-lg">
-                      <AlertCircle className="w-8 h-8 text-amber-600" />
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-semibold text-amber-800 mb-1">
-                        No Document or Signature Submitted
-                      </h3>
-                      <p className="text-sm text-amber-600">
-                        The employee has not submitted a signed Non-Compete
-                        Agreement yet.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              ) : null}
-            </div>
-
-            <div className="p-8 border-t">
-              <HRNotesInput
-                formType="non-compete-agreement"
-                employeeId={employeeId}
-                existingNote={formData?.hrFeedback?.comment}
-                existingReviewedAt={formData?.hrFeedback?.reviewedAt}
-                onNoteSaved={loadData}
-                formData={formData}
-              />
+              {/* HR Notes Section */}
+              <div className="p-8 border-t">
+                <HRNotesInput
+                  formType="non-compete-agreement"
+                  employeeId={employeeId}
+                  existingNote={formData?.hrFeedback?.comment}
+                  existingReviewedAt={formData?.hrFeedback?.reviewedAt}
+                  onNoteSaved={loadData}
+                  formData={formData}
+                  showSignature={false}
+                />
+              </div>
             </div>
           </div>
         )}

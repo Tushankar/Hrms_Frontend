@@ -393,6 +393,12 @@ const ProfessionalExperience = () => {
             : "Professional experience completed successfully!";
 
         toast.success(message);
+
+        // Refresh progress data after successful save
+        await fetchProgressData(user._id);
+
+        // Dispatch event to update sidebar after successful save
+        window.dispatchEvent(new Event("formStatusUpdated"));
       }
     } catch (error) {
       console.error("Error saving form:", error);
@@ -407,11 +413,12 @@ const ProfessionalExperience = () => {
     // Mark as completed
     const status = "completed";
     await saveForm(status);
-    window.dispatchEvent(new Event("formStatusUpdated"));
+
+    // Wait a moment for the sidebar to update before navigating
     setTimeout(() => {
       const nextPath = getNextFormPath("/employee/professional-experience");
       navigate(nextPath);
-    }, 100);
+    }, 500);
   };
 
   const handleBack = () => {

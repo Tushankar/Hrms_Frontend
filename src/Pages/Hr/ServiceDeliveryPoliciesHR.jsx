@@ -31,14 +31,14 @@ export default function ServiceDeliveryPoliciesHR() {
   const fetchEmployeeData = async () => {
     try {
       setLoading(true);
-      // Get employee's service delivery policy data
+      // Get employee's service delivery policy data from application
       const response = await axios.get(
-        `${baseURL}/onboarding/get-service-delivery-policy/${employeeId}`,
+        `${baseURL}/onboarding/get-application/${employeeId}`,
         { withCredentials: true }
       );
 
-      if (response.data?.serviceDeliveryPolicy) {
-        const policyData = response.data.serviceDeliveryPolicy;
+      if (response.data?.data?.forms?.serviceDeliveryPolicies) {
+        const policyData = response.data.data.forms.serviceDeliveryPolicies;
 
         // Set signature data
         if (policyData.employeeSignature) {
@@ -310,6 +310,7 @@ export default function ServiceDeliveryPoliciesHR() {
                 formType="service-delivery-policies"
                 employeeId={employeeId}
                 onNoteSaved={fetchEmployeeData}
+                showSignature={false}
               />
             </div>
           </div>

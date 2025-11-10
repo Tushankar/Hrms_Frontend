@@ -297,6 +297,7 @@ const EmployeeDetailsUploadHR = () => {
                 existingReviewedAt={formData?.hrFeedback?.reviewedAt}
                 onNoteSaved={fetchSubmission}
                 formData={formData}
+                showSignature={false}
               />
             </>
           )}

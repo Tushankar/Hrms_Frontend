@@ -614,6 +614,7 @@ const BackgroundCheckFormHR = () => {
                     onNoteSaved={loadData}
                     formData={originalFormData}
                     formId={formId}
+                    showSignature={false}
                   />
                 </div>
               )}

@@ -1,13 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import {
-  ArrowLeft,
-  Upload,
-  Download,
-  FileText,
-  CheckCircle,
-  Eye,
-} from "lucide-react";
+import { ArrowLeft, Download, CheckCircle, Eye } from "lucide-react";
 import toast, { Toaster } from "react-hot-toast";
 import { Layout } from "../../Components/Common/layout/Layout";
 import Navbar from "../../Components/Common/Navbar/Navbar";
@@ -274,9 +267,6 @@ const PCAJobDescriptionTemplate = ({
 const PersonalCare = () => {
   const navigate = useNavigate();
   const { employeeId } = useParams();
-  const [file, setFile] = useState(null);
-  const [uploading, setUploading] = useState(false);
-  const [template, setTemplate] = useState(null);
   const [submission, setSubmission] = useState(null);
   const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState(null);
@@ -284,25 +274,12 @@ const PersonalCare = () => {
   const baseURL = import.meta.env.VITE__BASEURL;
 
   useEffect(() => {
-    fetchTemplate();
     if (employeeId) {
       fetchEmployeeSubmission();
-    }
-  }, [employeeId]);
-
-  const fetchTemplate = async () => {
-    try {
-      const response = await axios.get(
-        `${baseURL}/onboarding/get-pca-job-description-template`,
-        { withCredentials: true }
-      );
-      setTemplate(response.data.template);
-    } catch (error) {
-      console.error("Error fetching template:", error);
-    } finally {
+    } else {
       setLoading(false);
     }
-  };
+  }, [employeeId]);
 
   const fetchEmployeeSubmission = async () => {
     try {
@@ -324,58 +301,8 @@ const PersonalCare = () => {
       }
     } catch (error) {
       console.error("Error fetching submission:", error);
-    }
-  };
-
-  const handleFileChange = (e) => {
-    const selectedFile = e.target.files[0];
-    if (selectedFile && selectedFile.type === "application/pdf") {
-      setFile(selectedFile);
-    } else {
-      toast.error("Please select a PDF file");
-    }
-  };
-
-  const handleUpload = async () => {
-    if (!file) {
-      toast.error("Please select a file first");
-      return;
-    }
-
-    setUploading(true);
-    try {
-      const userCookie = Cookies.get("user");
-      const user = userCookie ? JSON.parse(userCookie) : null;
-
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("uploadedBy", user?._id || "");
-
-      const response = await axios.post(
-        `${baseURL}/onboarding/hr-upload-pca-job-description-template`,
-        formData,
-        {
-          headers: { "Content-Type": "multipart/form-data" },
-          withCredentials: true,
-        }
-      );
-
-      if (response.data) {
-        toast.success("Template uploaded successfully!");
-        setFile(null);
-        fetchTemplate();
-      }
-    } catch (error) {
-      console.error("Error uploading template:", error);
-      toast.error("Failed to upload template");
     } finally {
-      setUploading(false);
-    }
-  };
-
-  const handleDownloadTemplate = () => {
-    if (template) {
-      window.open(`${baseURL}/${template.filePath}`, "_blank");
+      setLoading(false);
     }
   };
 
@@ -403,7 +330,7 @@ const PersonalCare = () => {
               Job Description
             </h1>
             <p className="text-gray-600">
-              Upload job description template and view employee submissions
+              View employee job description submissions
             </p>
           </div>
 
@@ -413,64 +340,6 @@ const PersonalCare = () => {
             </div>
           ) : (
             <div className="space-y-8">
-              <div className="border border-gray-200 rounded-lg p-6">
-                <h2 className="text-xl font-semibold text-gray-800 mb-4">
-                  Upload Job Description Template
-                </h2>
-
-                {template && (
-                  <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <FileText className="w-5 h-5 text-blue-600" />
-                        <span className="text-sm text-gray-700">
-                          Current template: {template.filename}
-                        </span>
-                      </div>
-                      <button
-                        onClick={handleDownloadTemplate}
-                        className="inline-flex items-center gap-2 px-3 py-1.5 bg-[#1F3A93] text-white rounded hover:bg-[#16307E] transition-colors text-sm"
-                      >
-                        <Download className="w-4 h-4" />
-                        Download
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center mb-4">
-                  <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                  <input
-                    type="file"
-                    accept=".pdf"
-                    onChange={handleFileChange}
-                    className="hidden"
-                    id="file-upload"
-                  />
-                  <label
-                    htmlFor="file-upload"
-                    className="cursor-pointer inline-flex items-center gap-2 px-6 py-3 bg-[#1F3A93] text-white rounded-lg hover:bg-[#16307E] transition-colors"
-                  >
-                    <FileText className="w-5 h-5" />
-                    Select New Template
-                  </label>
-                  {file && (
-                    <div className="mt-4 flex items-center justify-center gap-2 text-green-600">
-                      <CheckCircle className="w-5 h-5" />
-                      <span className="font-medium">{file.name}</span>
-                    </div>
-                  )}
-                </div>
-
-                <button
-                  onClick={handleUpload}
-                  disabled={!file || uploading}
-                  className="w-full py-3 bg-gradient-to-r from-[#1F3A93] to-[#2748B4] text-white font-semibold rounded-lg hover:from-[#16306e] hover:to-[#1F3A93] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
-                >
-                  {uploading ? "Uploading..." : "Upload Template"}
-                </button>
-              </div>
-
               {employeeId && (
                 <div className="border border-gray-200 rounded-lg p-6">
                   <h2 className="text-xl font-semibold text-gray-800 mb-6">
@@ -524,6 +393,7 @@ const PersonalCare = () => {
                         existingNote={formData?.hrFeedback?.comment}
                         existingReviewedAt={formData?.hrFeedback?.reviewedAt}
                         onNoteSaved={fetchEmployeeSubmission}
+                        showSignature={false}
                       />
                     </div>
                   ) : (

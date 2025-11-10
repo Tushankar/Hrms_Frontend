@@ -22,6 +22,8 @@ export const Register = () => {
     address: "",
     dateOfBirth: "",
   });
+  const [otp, setOtp] = useState("");
+  const [showOtpInput, setShowOtpInput] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const router = useNavigate();
 
@@ -40,7 +42,7 @@ export const Register = () => {
       }
       if (!EmailValidator.validate(registerInfo.email)) {
         setIsLoading(false);
-        return toast.error("Please a correct email !!");
+        return toast.error("Please enter a correct email !!");
       }
 
       if (registerInfo.password !== registerInfo.confirmPassword) {
@@ -48,7 +50,7 @@ export const Register = () => {
         return toast.error("Incorrect confirm-password !!");
       }
 
-      const reqToRegister = await axios.post(
+      const reqToSendOTP = await axios.post(
         `${baseUrl}/auth/register`,
         {
           fullName: registerInfo?.fullName,
@@ -68,7 +70,43 @@ export const Register = () => {
       );
 
       setIsLoading(false);
-      toast.success(reqToRegister?.data.message);
+      toast.success(reqToSendOTP?.data.message);
+      setShowOtpInput(true);
+    } catch (error) {
+      setIsLoading(false);
+      console.error(error?.response.data);
+      toast.error(error?.response.data.message);
+    }
+  };
+
+  const verifyOTP = async () => {
+    if (!otp.trim()) {
+      return toast.error("Please enter the OTP");
+    }
+
+    setIsLoading(true);
+    try {
+      const baseUrl = import.meta.env.VITE__BASEURL;
+      if (!baseUrl) {
+        setIsLoading(false);
+        return toast.error("Internal Error, please try again later !");
+      }
+
+      const reqToVerify = await axios.post(
+        `${baseUrl}/auth/verify-otp`,
+        {
+          email: registerInfo.email,
+          otp: otp.trim(),
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      setIsLoading(false);
+      toast.success(reqToVerify?.data.message);
       router("/auth/log-in");
     } catch (error) {
       setIsLoading(false);
@@ -308,11 +346,11 @@ export const Register = () => {
                   >
                     {isLoading ? (
                       <>
-                        Saving
+                        Sending OTP
                         <CircularProgress size={20} color="#7EC2F3" />
                       </>
                     ) : (
-                      "Sign Up"
+                      "Create an account"
                     )}
                   </button>
                   <p className="font-[Poppins] font-[400] text-sm md:text-base mt-3">
@@ -324,6 +362,46 @@ export const Register = () => {
                 </div>
               </div>
             </div>
+
+            {showOtpInput && (
+              <div className="mt-5 p-4 border border-[#95A5A6] rounded-lg">
+                <h3 className="text-[#505050] font-[Poppins] font-[700] text-base sm:text-lg lg:text-xl mb-3">
+                  Email Verification
+                </h3>
+                <p className="text-[#505050] font-[Poppins] font-[400] text-sm mb-4">
+                  Please enter the 6-digit OTP sent to your email:{" "}
+                  <strong>{registerInfo.email}</strong>
+                </p>
+                <div className="flex flex-col gap-2 mb-4">
+                  <label className="text-[#505050] font-[600] font-[Poppins] text-sm md:text-base">
+                    OTP
+                  </label>
+                  <input
+                    type="text"
+                    value={otp}
+                    onChange={(e) => setOtp(e.target.value)}
+                    className="border border-[#95A5A6] placeholder:text-[#95A5A6] font-[Poppins] text-sm md:text-base font-[400] rounded-lg outline-none py-2 px-2"
+                    placeholder="Enter 6-digit OTP"
+                    maxLength="6"
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={verifyOTP}
+                  disabled={!otp.trim() || otp.length !== 6}
+                  className="w-full sm:w-auto bg-[#34495E] flex justify-center items-center gap-5 text-white hover:text-[#34495E] hover:bg-white transition-all duration-200 ease-linear border border-[#34495E] font-[Poppins] font-[600] px-8 sm:px-16 py-2 sm:py-2.5 rounded-full disabled:cursor-not-allowed disabled:opacity-70 disabled:pointer-events-none text-sm sm:text-base"
+                >
+                  {isLoading ? (
+                    <>
+                      Verifying
+                      <CircularProgress size={20} color="#7EC2F3" />
+                    </>
+                  ) : (
+                    "Verify OTP"
+                  )}
+                </button>
+              </div>
+            )}
 
             <div className="flex justify-between items-center my-4 sm:my-6">
               <div className="bg-[#D9D9D9] h-0.5 sm:h-1 w-[30%] sm:w-[35%] rounded-3xl" />

@@ -37,6 +37,7 @@ import {
   XCircle,
   User,
   Building,
+  Shield,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -44,6 +45,10 @@ export const EmployeeDashboard = () => {
   const userToken = Cookies.get("session");
   const decodedToken = userToken && jwtDecode(userToken);
   const user = decodedToken?.user;
+
+  // Get user data from cookie for latest OTP status
+  const userCookie = Cookies.get("user");
+  const userData = userCookie ? JSON.parse(userCookie) : user;
   const baseURL = import.meta.env.VITE__BASEURL;
   const navigate = useNavigate();
   const [employeeInfo, setEmployeeInfo] = useState(null);
@@ -78,6 +83,10 @@ export const EmployeeDashboard = () => {
   });
   const [selectedProfileImage, setSelectedProfileImage] = useState(null);
   const [profileImagePreview, setProfileImagePreview] = useState(null);
+
+  // OTP State
+  const [otpEnabled, setOtpEnabled] = useState(userData?.otpEnabled || false);
+  const [isTogglingOtp, setIsTogglingOtp] = useState(false);
 
   const router = useNavigate();
 
@@ -1242,6 +1251,44 @@ export const EmployeeDashboard = () => {
     setShowEditProfile(true);
   };
 
+  const handleToggleOTP = async () => {
+    setIsTogglingOtp(true);
+    try {
+      const userToken = Cookies.get("session");
+      const response = await axios.post(
+        `${baseURL}/auth/toggle-otp`,
+        {
+          userId: user?._id,
+          otpEnabled: !otpEnabled,
+        },
+        {
+          headers: {
+            Authorization: userToken,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (response.data.status === "Success") {
+        setOtpEnabled(!otpEnabled);
+        // Update user cookie
+        const updatedUser = { ...user, otpEnabled: !otpEnabled };
+        Cookies.set("user", JSON.stringify(updatedUser), {
+          expires: 7,
+          path: "/",
+        });
+        toast.success(
+          `OTP ${!otpEnabled ? "enabled" : "disabled"} successfully!`
+        );
+      }
+    } catch (error) {
+      console.error("OTP toggle error:", error);
+      toast.error(error.response?.data?.message || "Failed to toggle OTP");
+    } finally {
+      setIsTogglingOtp(false);
+    }
+  };
+
   const overallProgress = calculateOverallProgress();
 
   const getFormRoute = (taskId) => {
@@ -1387,6 +1434,55 @@ export const EmployeeDashboard = () => {
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
+
+          {/* OTP Verification Section */}
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                <Shield size={20} className="text-blue-600" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Two-Factor Authentication
+                </h3>
+                <p className="text-sm text-gray-600">
+                  Enhance your account security with OTP verification
+                </p>
+              </div>
+            </div>
+
+            <div className="bg-gradient-to-r from-gray-50 to-gray-100 p-4 rounded-xl border border-gray-200">
+              <h4 className="text-base font-semibold text-gray-800 mb-2 flex items-center gap-2">
+                <Shield size={20} className="text-blue-600" />
+                OTP Verification Settings
+              </h4>
+              <p className="text-sm text-gray-700 mb-3 leading-relaxed">
+                Do you want OTP verification after every login for enhanced
+                security?
+              </p>
+              <button
+                onClick={handleToggleOTP}
+                disabled={isTogglingOtp}
+                className={`inline-flex items-center gap-2 px-6 py-2.5 rounded-lg transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 font-medium text-sm ${
+                  otpEnabled
+                    ? "bg-gradient-to-r from-red-500 to-red-600 text-white hover:from-red-600 hover:to-red-700"
+                    : "bg-gradient-to-r from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700"
+                } disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none`}
+              >
+                <Shield size={16} />
+                {isTogglingOtp
+                  ? "Updating..."
+                  : otpEnabled
+                  ? "Disable OTP"
+                  : "Enable OTP"}
+              </button>
+              <p className="text-xs text-gray-500 mt-2">
+                {otpEnabled
+                  ? "OTP is currently enabled. You'll receive a code via email on each login."
+                  : "OTP is currently disabled. Enable for additional security."}
+              </p>
             </div>
           </div>
 

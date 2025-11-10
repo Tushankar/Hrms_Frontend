@@ -2,7 +2,14 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Layout } from "../../Components/Common/layout/Layout";
 import Navbar from "../../Components/Common/Navbar/Navbar";
-import { ArrowLeft, FileText, RotateCcw, Upload, CheckCircle, XCircle } from "lucide-react";
+import {
+  ArrowLeft,
+  FileText,
+  RotateCcw,
+  Upload,
+  CheckCircle,
+  XCircle,
+} from "lucide-react";
 import { toast } from "react-hot-toast";
 import axios from "axios";
 import Cookies from "js-cookie";
@@ -32,7 +39,7 @@ const OrientationPresentationHR = () => {
         axios.get(`${baseURL}/onboarding/orientation-presentation/document`, {
           headers: { Authorization: `Bearer ${token}` },
           withCredentials: true,
-        })
+        }),
       ]);
 
       if (formResponse.data?.data?.forms?.orientationPresentation) {
@@ -64,13 +71,17 @@ const OrientationPresentationHR = () => {
       formData.append("file", file);
       formData.append("uploadedBy", user._id || user.id);
 
-      await axios.post(`${baseURL}/onboarding/orientation-presentation/upload`, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${token}`,
-        },
-        withCredentials: true,
-      });
+      await axios.post(
+        `${baseURL}/onboarding/orientation-presentation/upload`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${token}`,
+          },
+          withCredentials: true,
+        }
+      );
 
       toast.success("Orientation presentation uploaded successfully");
       fetchData();
@@ -81,8 +92,6 @@ const OrientationPresentationHR = () => {
       setUploadingFile(false);
     }
   };
-
-
 
   if (loading) {
     return (
@@ -118,8 +127,12 @@ const OrientationPresentationHR = () => {
                 <div className="flex items-center justify-center gap-3">
                   <FileText className="w-8 h-8" />
                   <div>
-                    <h1 className="text-2xl md:text-3xl font-bold">ORIENTATION PRESENTATION - HR</h1>
-                    <p className="text-blue-100">Upload & Manage Training Document</p>
+                    <h1 className="text-2xl md:text-3xl font-bold">
+                      ORIENTATION PRESENTATION - HR
+                    </h1>
+                    <p className="text-blue-100">
+                      Upload & Manage Training Document
+                    </p>
                   </div>
                 </div>
               </div>
@@ -127,13 +140,20 @@ const OrientationPresentationHR = () => {
               <div className="p-6 md:p-8">
                 <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-gray-700">Employee Status:</span>
-                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                      formData?.status === "approved" ? "bg-green-100 text-green-700" :
-                      formData?.status === "rejected" ? "bg-red-100 text-red-700" :
-                      formData?.status === "under_review" ? "bg-yellow-100 text-yellow-700" :
-                      "bg-gray-100 text-gray-700"
-                    }`}>
+                    <span className="text-sm font-medium text-gray-700">
+                      Employee Status:
+                    </span>
+                    <span
+                      className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                        formData?.status === "approved"
+                          ? "bg-green-100 text-green-700"
+                          : formData?.status === "rejected"
+                          ? "bg-red-100 text-red-700"
+                          : formData?.status === "under_review"
+                          ? "bg-yellow-100 text-yellow-700"
+                          : "bg-gray-100 text-gray-700"
+                      }`}
+                    >
                       {formData?.viewed ? "VIEWED" : "NOT VIEWED"}
                     </span>
                   </div>
@@ -145,12 +165,19 @@ const OrientationPresentationHR = () => {
                 </div>
 
                 <div className="mb-6 p-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
-                  <h3 className="text-lg font-semibold text-gray-800 mb-4">Upload Orientation Presentation</h3>
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                    Upload Orientation Presentation
+                  </h3>
                   {document && (
                     <div className="mb-4 p-3 bg-white rounded border border-gray-200">
                       <p className="text-sm text-gray-600">Current Document:</p>
-                      <p className="font-medium text-gray-900">{document.fileName}</p>
-                      <p className="text-xs text-gray-500">Uploaded: {new Date(document.createdAt).toLocaleDateString()}</p>
+                      <p className="font-medium text-gray-900">
+                        {document.fileName}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        Uploaded:{" "}
+                        {new Date(document.createdAt).toLocaleDateString()}
+                      </p>
                     </div>
                   )}
                   <label className="block">
@@ -171,10 +198,14 @@ const OrientationPresentationHR = () => {
                       ) : (
                         <Upload className="w-5 h-5" />
                       )}
-                      {uploadingFile ? "Uploading..." : "Upload New Presentation"}
+                      {uploadingFile
+                        ? "Uploading..."
+                        : "Upload New Presentation"}
                     </label>
                   </label>
-                  <p className="text-xs text-gray-500 mt-2">Accepted formats: PPT, PPTX, PDF</p>
+                  <p className="text-xs text-gray-500 mt-2">
+                    Accepted formats: PPT, PPTX, PDF
+                  </p>
                 </div>
 
                 <HRNotesInput
@@ -184,6 +215,7 @@ const OrientationPresentationHR = () => {
                   existingReviewedAt={formData?.hrFeedback?.reviewedAt}
                   onNoteSaved={fetchData}
                   formData={formData}
+                  showSignature={false}
                 />
               </div>
             </div>

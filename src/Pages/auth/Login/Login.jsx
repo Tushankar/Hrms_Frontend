@@ -15,9 +15,12 @@ export const Login = () => {
     email: "",
     password: "",
   });
+  const [otp, setOtp] = useState("");
+  const [showOtpInput, setShowOtpInput] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [isResendingOtp, setIsResendingOtp] = useState(false);
   const router = useNavigate();
 
   // Carousel images
@@ -99,6 +102,13 @@ export const Login = () => {
         }
       );
 
+      if (reqToLogin?.data?.otpRequired) {
+        setIsLoading(false);
+        toast.success(reqToLogin?.data.message);
+        setShowOtpInput(true);
+        return;
+      }
+
       const session = reqToLogin?.headers["authorization"];
 
       if (!session) {
@@ -140,6 +150,105 @@ export const Login = () => {
     } catch (error) {
       setIsLoading(false);
       toast.error(error?.response?.data?.message || "Login failed");
+    }
+  };
+
+  const verifyOTP = async () => {
+    if (!otp.trim()) {
+      return toast.error("Please enter the OTP");
+    }
+
+    setIsLoading(true);
+    try {
+      const baseUrl = import.meta.env.VITE__BASEURL;
+      if (!baseUrl) {
+        setIsLoading(false);
+        return toast.error("Internal Error, please try again later!");
+      }
+
+      const reqToVerify = await axios.post(
+        `${baseUrl}/auth/verify-login-otp`,
+        {
+          email: loginInfo.email,
+          otp: otp.trim(),
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      const session = reqToVerify?.headers["authorization"];
+
+      if (!session) {
+        return toast.error("Session not found");
+      }
+      if (reqToVerify?.data.userInfo.accountStatus === "inactive") {
+        toast.error("Your Account is Restricted, Please Contact Admin");
+        return;
+      }
+
+      // Set session cookie
+      Cookies.set("session", session, {
+        path: "/",
+        expiresIn: "2d",
+      });
+
+      // Set user data cookie
+      Cookies.set("user", JSON.stringify(reqToVerify.data.userInfo), {
+        path: "/",
+        expiresIn: "2d",
+      });
+
+      switch (reqToVerify.data.userInfo.userRole) {
+        case "employee":
+          router("/employee/dashboard");
+          break;
+        case "admin":
+          router("/admin/dashboard");
+          break;
+        case "hr":
+          router("/");
+          break;
+        default:
+          break;
+      }
+
+      setIsLoading(false);
+      toast.success(reqToVerify?.data.message);
+    } catch (error) {
+      setIsLoading(false);
+      toast.error(error?.response?.data?.message || "OTP verification failed");
+    }
+  };
+
+  const resendOTP = async () => {
+    setIsResendingOtp(true);
+    try {
+      const baseUrl = import.meta.env.VITE__BASEURL;
+      if (!baseUrl) {
+        setIsResendingOtp(false);
+        return toast.error("Internal Error, please try again later!");
+      }
+
+      const reqToResend = await axios.post(
+        `${baseUrl}/auth/resend-login-otp`,
+        {
+          email: loginInfo.email,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      toast.success(reqToResend?.data.message);
+    } catch (error) {
+      toast.error(error?.response?.data?.message || "Failed to resend OTP");
+    } finally {
+      setIsResendingOtp(false);
     }
   };
 
@@ -198,7 +307,11 @@ export const Login = () => {
           <form
             onSubmit={(e) => {
               e.preventDefault();
-              LoginUser();
+              if (showOtpInput) {
+                verifyOTP();
+              } else {
+                LoginUser();
+              }
             }}
             className="space-y-6"
           >
@@ -285,6 +398,49 @@ export const Login = () => {
               </div>
             </div>
 
+            {/* OTP Field - Conditionally Rendered */}
+            {showOtpInput && (
+              <div>
+                <label
+                  htmlFor="otp"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
+                  OTP Verification
+                </label>
+                <p className="text-sm text-gray-600 mb-3">
+                  Please enter the 6-digit OTP sent to your email:{" "}
+                  <strong>{loginInfo.email}</strong>
+                </p>
+                <input
+                  type="text"
+                  id="otp"
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 bg-white"
+                  placeholder="Enter 6-digit OTP"
+                  maxLength="6"
+                  required
+                />
+                <div className="mt-3 flex justify-end">
+                  <button
+                    type="button"
+                    onClick={resendOTP}
+                    disabled={isResendingOtp}
+                    className="text-sm text-blue-600 hover:text-blue-500 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isResendingOtp ? (
+                      <div className="flex items-center">
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-1"></div>
+                        Resending...
+                      </div>
+                    ) : (
+                      "Resend OTP"
+                    )}
+                  </button>
+                </div>
+              </div>
+            )}
+
             {/* Remember & Forgot */}
             <div className="flex items-center justify-between">
               <div className="flex items-center">
@@ -314,15 +470,20 @@ export const Login = () => {
               type="submit"
               disabled={
                 isLoading ||
-                !Object.keys(loginInfo).every((key) => Boolean(loginInfo[key]))
+                !Object.keys(loginInfo).every((key) =>
+                  Boolean(loginInfo[key])
+                ) ||
+                (showOtpInput && !otp.trim())
               }
               className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-white bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition duration-200 font-medium"
             >
               {isLoading ? (
                 <div className="flex items-center">
                   <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                  Signing in...
+                  {showOtpInput ? "Verifying..." : "Signing in..."}
                 </div>
+              ) : showOtpInput ? (
+                "Verify OTP"
               ) : (
                 "Login"
               )}
