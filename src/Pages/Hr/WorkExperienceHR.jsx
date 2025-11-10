@@ -288,6 +288,7 @@ const WorkExperienceHR = () => {
           existingReviewedAt={workExperience?.hrFeedback?.reviewedAt}
           onNoteSaved={fetchWorkExperience}
           formData={workExperience}
+          showSignature={false}
         />
       </div>
     </Layout>

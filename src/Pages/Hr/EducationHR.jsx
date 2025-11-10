@@ -58,9 +58,12 @@ const EducationHR = () => {
         <div className="bg-white shadow-lg rounded-lg p-6">
           <h2 className="text-2xl font-bold text-gray-800 mb-6">Education</h2>
 
-          {data && Array.isArray(data) && data.length > 0 ? (
+          {data &&
+          data.educations &&
+          Array.isArray(data.educations) &&
+          data.educations.length > 0 ? (
             <>
-              {data
+              {data.educations
                 .filter((education) => education.type !== "Other")
                 .map((education, index) => (
                   <div
@@ -76,9 +79,7 @@ const EducationHR = () => {
                           <label className="block text-sm font-medium text-gray-600">
                             Institution Type
                           </label>
-                          <p className="text-gray-900">
-                            {education.type}
-                          </p>
+                          <p className="text-gray-900">{education.type}</p>
                         </div>
                       )}
                       <div className="md:col-span-2">
@@ -144,12 +145,12 @@ const EducationHR = () => {
                   <strong>Status:</strong>{" "}
                   <span
                     className={`px-2 py-1 rounded ${
-                      data?.[0]?.status === "completed"
+                      data.status === "completed"
                         ? "bg-green-100 text-green-800"
                         : "bg-yellow-100 text-yellow-800"
                     }`}
                   >
-                    {data?.[0]?.status || "draft"}
+                    {data.status || "draft"}
                   </span>
                 </p>
               </div>
@@ -157,10 +158,11 @@ const EducationHR = () => {
               <HRNotesInput
                 formType="education"
                 employeeId={employeeId}
-                existingNote={data?.[0]?.hrFeedback?.comment}
-                existingReviewedAt={data?.[0]?.hrFeedback?.reviewedAt}
+                existingNote={data?.hrFeedback?.comment}
+                existingReviewedAt={data?.hrFeedback?.reviewedAt}
                 onNoteSaved={fetchData}
                 formData={data}
+                showSignature={false}
               />
             </>
           ) : (

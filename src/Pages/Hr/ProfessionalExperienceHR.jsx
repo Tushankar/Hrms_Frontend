@@ -76,6 +76,22 @@ const ProfessionalExperienceHR = () => {
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-600">
+                        From Date
+                      </label>
+                      <p className="text-gray-900">
+                        {data.militaryService?.from || "N/A"}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-600">
+                        To Date
+                      </label>
+                      <p className="text-gray-900">
+                        {data.militaryService?.to || "N/A"}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-600">
                         Rank at Discharge
                       </label>
                       <p className="text-gray-900">
@@ -90,6 +106,67 @@ const ProfessionalExperienceHR = () => {
                         {data.militaryService?.typeOfDischarge || "N/A"}
                       </p>
                     </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-600">
+                        May Contact Supervisor
+                      </label>
+                      <p className="text-gray-900">
+                        {data.militaryService?.mayContactSupervisor || "N/A"}
+                      </p>
+                    </div>
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-medium text-gray-600">
+                        If other than honorable, explain
+                      </label>
+                      <p className="text-gray-900">
+                        {data.militaryService?.otherThanHonorable || "N/A"}
+                      </p>
+                    </div>
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-medium text-gray-600">
+                        Reason for Leaving
+                      </label>
+                      <p className="text-gray-900">
+                        {data.militaryService?.reasonForLeaving || "N/A"}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Documents Section */}
+              {(data.resumePath ||
+                data.coverLetterPath ||
+                data.portfolioPath) && (
+                <div className="mb-6">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                    Documents Submitted
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {data.resumePath && (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-600">
+                          Resume
+                        </label>
+                        <p className="text-gray-900">{data.resumePath}</p>
+                      </div>
+                    )}
+                    {data.coverLetterPath && (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-600">
+                          Cover Letter
+                        </label>
+                        <p className="text-gray-900">{data.coverLetterPath}</p>
+                      </div>
+                    )}
+                    {data.portfolioPath && (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-600">
+                          Portfolio
+                        </label>
+                        <p className="text-gray-900">{data.portfolioPath}</p>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
@@ -116,6 +193,7 @@ const ProfessionalExperienceHR = () => {
                 existingReviewedAt={data?.hrFeedback?.reviewedAt}
                 onNoteSaved={fetchData}
                 formData={data}
+                showSignature={false}
               />
             </>
           ) : (

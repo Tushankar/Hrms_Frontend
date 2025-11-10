@@ -273,6 +273,7 @@ const PersonalInformationHR = () => {
                 existingReviewedAt={data?.hrFeedback?.reviewedAt}
                 onNoteSaved={fetchData}
                 formData={data}
+                showSignature={false}
               />
             </>
           ) : (
