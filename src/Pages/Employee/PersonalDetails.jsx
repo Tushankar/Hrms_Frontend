@@ -204,52 +204,137 @@ export const PersonalDetails = () => {
               </div>
 
               {/* Work Info Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 flex-1">
-                <div className="space-y-4">
-                  <div className="flex items-center gap-4 p-4 bg-gradient-to-r from-blue-50 to-blue-100 rounded-xl">
-                    <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-md">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 flex-1">
+                <div className="space-y-6">
+                  <div className="flex gap-4">
+                    <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
                       <Briefcase size={24} className="text-blue-600" />
                     </div>
-                    <div>
-                      <p className="text-sm text-gray-600">Role</p>
-                      <p className="font-semibold text-gray-900">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">
+                        Role
+                      </p>
+                      <p className="font-semibold text-gray-900 text-base mt-2">
                         {userData?.userRole}
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-4 p-4 bg-gradient-to-r from-purple-50 to-purple-100 rounded-xl">
-                    <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-md">
-                      <Award size={24} className="text-purple-600" />
+                  <div className="flex gap-4">
+                    <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <Mail size={24} className="text-green-600" />
                     </div>
-                    <div className="flex-1">
-                      <p className="text-sm text-gray-600">Address</p>
-                      <p className="font-semibold text-gray-900 text-sm">
-                        {userData?.address}, {userData?.country}
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">
+                        Email
+                      </p>
+                      <p className="font-semibold text-gray-900 text-base mt-2 break-all">
+                        {userData?.email}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex gap-4">
+                    <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <Phone size={24} className="text-orange-600" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">
+                        Phone
+                      </p>
+                      <p className="font-semibold text-gray-900 text-base mt-2">
+                        {userData?.phoneNumber}
                       </p>
                     </div>
                   </div>
                 </div>
 
-                <div className="space-y-4">
-                  <div className="flex items-center gap-4 p-4 bg-gradient-to-r from-green-50 to-green-100 rounded-xl">
-                    <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-md">
-                      <Mail size={24} className="text-green-600" />
+                <div className="space-y-6">
+                  <div className="flex gap-4">
+                    <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <MapPin size={24} className="text-purple-600" />
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm text-gray-600">Email</p>
-                      <p className="font-semibold text-gray-900 truncate">
-                        {userData?.email}
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">
+                        Address Line
+                      </p>
+                      <p className="font-semibold text-gray-900 text-base mt-2">
+                        {userData?.addressLine1 || userData?.address || "N/A"}
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-4 p-4 bg-gradient-to-r from-orange-50 to-orange-100 rounded-xl">
-                    <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-md">
-                      <Phone size={24} className="text-orange-600" />
+                  <div className="flex gap-4">
+                    <div className="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <MapPin size={24} className="text-indigo-600" />
                     </div>
-                    <div>
-                      <p className="text-sm text-gray-600">Phone</p>
-                      <p className="font-semibold text-gray-900">
-                        {userData?.phoneNumber}
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">
+                        Country
+                      </p>
+                      <p className="font-semibold text-gray-900 text-base mt-2">
+                        {userData?.country || "N/A"}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex gap-4">
+                    <div className="w-12 h-12 bg-teal-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <MapPin size={24} className="text-teal-600" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">
+                        State
+                      </p>
+                      <p className="font-semibold text-gray-900 text-base mt-2">
+                        {userData?.state || "N/A"}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-6">
+                  <div className="flex gap-4">
+                    <div className="w-12 h-12 bg-cyan-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <MapPin size={24} className="text-cyan-600" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">
+                        City
+                      </p>
+                      <p className="font-semibold text-gray-900 text-base mt-2">
+                        {userData?.city || "N/A"}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex gap-4">
+                    <div className="w-12 h-12 bg-pink-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <Award size={24} className="text-pink-600" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">
+                        Zip Code
+                      </p>
+                      <p className="font-semibold text-gray-900 text-base mt-2">
+                        {userData?.zip || "N/A"}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex gap-4">
+                    <div className="w-12 h-12 bg-rose-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <Calendar size={24} className="text-rose-600" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">
+                        Date of Birth
+                      </p>
+                      <p className="font-semibold text-gray-900 text-base mt-2">
+                        {userData?.dateOfBirth
+                          ? new Date(userData.dateOfBirth).toLocaleDateString(
+                              "en-US",
+                              {
+                                year: "numeric",
+                                month: "short",
+                                day: "numeric",
+                              }
+                            )
+                          : "N/A"}
                       </p>
                     </div>
                   </div>

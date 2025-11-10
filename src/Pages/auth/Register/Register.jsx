@@ -5,6 +5,7 @@ import { Link, useNavigate } from "react-router-dom";
 import * as EmailValidator from "email-validator";
 import { toast } from "react-toastify";
 import axios from "axios";
+import Cookies from "js-cookie";
 import CircularProgress from "@mui/material/CircularProgress";
 
 export const Register = () => {
@@ -12,11 +13,14 @@ export const Register = () => {
     fullName: "",
     email: "",
     phoneNumber: "",
+    addressLine1: "",
+    country: "",
+    state: "",
+    city: "",
+    zip: "",
+    dateOfBirth: "",
     password: "",
     confirmPassword: "",
-    country: "",
-    address: "",
-    dateOfBirth: "",
   });
   const [otp, setOtp] = useState("");
   const [showOtpInput, setShowOtpInput] = useState(false);
@@ -24,11 +28,42 @@ export const Register = () => {
   const [isResendingOtp, setIsResendingOtp] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [countries, setCountries] = useState([]);
+  const [states, setStates] = useState([]);
+  const [cities, setCities] = useState([]);
+  const [loadingCountries, setLoadingCountries] = useState(false);
+  const [loadingStates, setLoadingStates] = useState(false);
+  const [loadingCities, setLoadingCities] = useState(false);
   const router = useNavigate();
 
   const handleOnChange = (e) => {
     const { name, value } = e.target;
     setRegisterInfo({ ...registerInfo, [name]: value });
+
+    // Handle cascading dropdowns
+    if (name === "country") {
+      // Reset state and city when country changes
+      setRegisterInfo((prev) => ({
+        ...prev,
+        state: "",
+        city: "",
+      }));
+      setStates([]);
+      setCities([]);
+      if (value) {
+        fetchStates(value);
+      }
+    } else if (name === "state") {
+      // Reset city when state changes
+      setRegisterInfo((prev) => ({
+        ...prev,
+        city: "",
+      }));
+      setCities([]);
+      if (value && registerInfo.country) {
+        fetchCities(registerInfo.country, value);
+      }
+    }
   };
 
   const createNewAccount = async () => {
@@ -54,11 +89,14 @@ export const Register = () => {
         {
           fullName: registerInfo?.fullName,
           email: registerInfo?.email,
-          country: registerInfo?.country,
           phoneNumber: registerInfo?.phoneNumber,
-          password: registerInfo?.password,
-          address: registerInfo?.address,
+          addressLine1: registerInfo?.addressLine1,
+          country: registerInfo?.country,
+          state: registerInfo?.state,
+          city: registerInfo?.city,
+          zip: registerInfo?.zip,
           dateOfBirth: registerInfo?.dateOfBirth,
+          password: registerInfo?.password,
           userRole: "employee",
         },
         {
@@ -106,7 +144,77 @@ export const Register = () => {
 
       setIsLoading(false);
       toast.success(reqToVerify?.data.message);
-      router("/auth/log-in");
+
+      // After successful OTP verification, automatically log the user in
+      try {
+        const loginResponse = await axios.post(
+          `${baseUrl}/auth/log-in`,
+          {
+            email: registerInfo.email,
+            password: registerInfo.password,
+          },
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        console.log("Login response:", loginResponse);
+        const session = loginResponse?.headers["authorization"];
+
+        if (!session) {
+          console.error("No session token in response headers");
+          toast.error(
+            "Login failed after registration. Please try logging in manually."
+          );
+          router("/auth/log-in");
+          return;
+        }
+
+        if (loginResponse?.data.userInfo.accountStatus === "inactive") {
+          toast.error("Your Account is Restricted, Please Contact Admin");
+          return;
+        }
+
+        // Set session cookie
+        Cookies.set("session", session, {
+          path: "/",
+          expires: 2, // 2 days
+        });
+
+        // Set user data cookie
+        Cookies.set("user", JSON.stringify(loginResponse.data.userInfo), {
+          path: "/",
+          expires: 2, // 2 days
+        });
+
+        // Redirect based on user role
+        const userRole = loginResponse.data.userInfo.userRole;
+        console.log("User role:", userRole);
+
+        switch (userRole) {
+          case "employee":
+            router("/employee/dashboard");
+            break;
+          case "admin":
+            router("/admin/dashboard");
+            break;
+          case "hr":
+            router("/");
+            break;
+          default:
+            router("/employee/dashboard");
+            break;
+        }
+
+        toast.success("Account created and logged in successfully!");
+      } catch (loginError) {
+        console.error("Auto-login failed:", loginError);
+        console.error("Error response:", loginError.response?.data);
+        toast.error("Account created successfully! Please log in manually.");
+        router("/auth/log-in");
+      }
     } catch (error) {
       setIsLoading(false);
       console.error(error?.response.data);
@@ -128,11 +236,14 @@ export const Register = () => {
         {
           fullName: registerInfo?.fullName,
           email: registerInfo?.email,
-          country: registerInfo?.country,
           phoneNumber: registerInfo?.phoneNumber,
-          password: registerInfo?.password,
-          address: registerInfo?.address,
+          addressLine1: registerInfo?.addressLine1,
+          country: registerInfo?.country,
+          state: registerInfo?.state,
+          city: registerInfo?.city,
+          zip: registerInfo?.zip,
           dateOfBirth: registerInfo?.dateOfBirth,
+          password: registerInfo?.password,
           userRole: "employee",
         },
         {
@@ -149,6 +260,131 @@ export const Register = () => {
       setIsResendingOtp(false);
     }
   };
+
+  // Fetch countries from API
+  const fetchCountries = async () => {
+    setLoadingCountries(true);
+    try {
+      const response = await axios.get(
+        "https://countriesnow.space/api/v0.1/countries"
+      );
+      if (response.data && response.data.data) {
+        const countryList = response.data.data.map((country) => ({
+          value: country.country,
+          label: country.country,
+        }));
+
+        // Sort countries with United States first, then alphabetically
+        const sortedCountries = countryList.sort((a, b) => {
+          if (a.value === "United States") return -1;
+          if (b.value === "United States") return 1;
+          return a.label.localeCompare(b.label);
+        });
+
+        setCountries(sortedCountries);
+
+        // Set United States as default if no country is selected
+        if (!registerInfo.country) {
+          setRegisterInfo((prev) => ({
+            ...prev,
+            country: "United States",
+          }));
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching countries:", error);
+      // Fallback to some common countries if API fails
+      setCountries([
+        { value: "United States", label: "United States" },
+        { value: "Canada", label: "Canada" },
+        { value: "United Kingdom", label: "United Kingdom" },
+        { value: "Australia", label: "Australia" },
+        { value: "India", label: "India" },
+      ]);
+    } finally {
+      setLoadingCountries(false);
+    }
+  };
+
+  // Fetch states based on selected country
+  const fetchStates = async (countryName) => {
+    if (!countryName) {
+      setStates([]);
+      return;
+    }
+
+    setLoadingStates(true);
+    try {
+      const response = await axios.post(
+        "https://countriesnow.space/api/v0.1/countries/states",
+        {
+          country: countryName,
+        }
+      );
+
+      if (response.data && response.data.data && response.data.data.states) {
+        const stateList = response.data.data.states.map((state) => ({
+          value: state.name,
+          label: state.name,
+        }));
+        setStates(stateList);
+      } else {
+        setStates([]);
+      }
+    } catch (error) {
+      console.error("Error fetching states:", error);
+      setStates([]);
+    } finally {
+      setLoadingStates(false);
+    }
+  };
+
+  // Fetch cities based on selected country and state
+  const fetchCities = async (countryName, stateName) => {
+    if (!countryName || !stateName) {
+      setCities([]);
+      return;
+    }
+
+    setLoadingCities(true);
+    try {
+      const response = await axios.post(
+        "https://countriesnow.space/api/v0.1/countries/state/cities",
+        {
+          country: countryName,
+          state: stateName,
+        }
+      );
+
+      if (response.data && response.data.data) {
+        const cityList = response.data.data.map((city) => ({
+          value: city,
+          label: city,
+        }));
+        setCities(cityList);
+      } else {
+        setCities([]);
+      }
+    } catch (error) {
+      console.error("Error fetching cities:", error);
+      setCities([]);
+    } finally {
+      setLoadingCities(false);
+    }
+  };
+
+  // Load countries on component mount
+  React.useEffect(() => {
+    fetchCountries();
+  }, []);
+
+  // Load states when country changes
+  React.useEffect(() => {
+    if (registerInfo.country) {
+      fetchStates(registerInfo.country);
+    }
+  }, [registerInfo.country]);
+
   return (
     <>
       <div className="p-3 sm:p-5 min-h-[100dvh] flex justify-center items-center">
@@ -203,7 +439,7 @@ export const Register = () => {
                 </div>
 
                 <div className="flex flex-col sm:flex-row justify-center items-stretch gap-3 mt-3">
-                  <div className="flex flex-col w-full sm:flex-1 gap-2">
+                  <div className="flex flex-col w-full gap-2">
                     <label className="text-[#505050] font-[600] font-[Poppins] text-sm md:text-base">
                       Phone Number
                     </label>
@@ -217,32 +453,115 @@ export const Register = () => {
                       placeholder="Phone Number"
                     />
                   </div>
+                </div>
+
+                <div className="flex flex-col sm:flex-row justify-center items-stretch gap-3 mt-3">
                   <div className="flex flex-col w-full sm:flex-1 gap-2">
+                    <label className="text-[#505050] font-[600] font-[Poppins] text-sm md:text-base">
+                      Address Line 1
+                    </label>
+                    <input
+                      type="text"
+                      id="addressLine1"
+                      className="border border-[#95A5A6] placeholder:text-[#95A5A6] font-[Poppins] text-sm md:text-base font-[400] rounded-lg outline-none py-2 px-2"
+                      placeholder="Address Line 1"
+                      name="addressLine1"
+                      value={registerInfo.addressLine1}
+                      onChange={handleOnChange}
+                    />
+                  </div>
+                  <div className="flex flex-col w-full sm:w-1/3 gap-2">
                     <label className="text-[#505050] font-[600] font-[Poppins] text-sm md:text-base">
                       Country
                     </label>
-                    {/* <select
-                      onChange={handleOnChange}
-                      value={registerInfo.country}
-                      name="country"
-                      className="border border-[#95A5A6] placeholder:text-[#95A5A6] font-[Poppins] text-[1vw] font-[400] rounded-lg outline-none py-2 px-2"
-                    >
-                      <option className="text-[#95A5A6]">
-                        -Select Country-
-                      </option>
-                      <option>-Select Country-</option>
-                      <option>-Select Country-</option>
-                      <option>-Select Country-</option>
-                      <option>-Select Country-</option>
-                    </select> */}
-                    <input
-                      type="text"
+                    <select
                       id="country"
                       name="country"
                       value={registerInfo.country}
                       onChange={handleOnChange}
+                      disabled={loadingCountries}
+                      className="border border-[#95A5A6] placeholder:text-[#95A5A6] font-[Poppins] text-sm md:text-base font-[400] rounded-lg outline-none py-2 px-2 bg-white disabled:bg-gray-100 disabled:cursor-not-allowed"
+                    >
+                      <option value="">Select Country</option>
+                      {countries.map((country) => (
+                        <option key={country.value} value={country.value}>
+                          {country.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div className="flex flex-col sm:flex-row justify-center items-stretch gap-3 mt-3">
+                  <div className="flex flex-col w-full sm:flex-1 gap-2">
+                    <label className="text-[#505050] font-[600] font-[Poppins] text-sm md:text-base">
+                      State
+                    </label>
+                    <select
+                      id="state"
+                      name="state"
+                      value={registerInfo.state}
+                      onChange={handleOnChange}
+                      disabled={loadingStates || states.length === 0}
+                      className="border border-[#95A5A6] placeholder:text-[#95A5A6] font-[Poppins] text-sm md:text-base font-[400] rounded-lg outline-none py-2 px-2 bg-white disabled:bg-gray-100 disabled:cursor-not-allowed"
+                    >
+                      <option value="">Select State</option>
+                      {states.map((state) => (
+                        <option key={state.value} value={state.value}>
+                          {state.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="flex flex-col w-full sm:flex-1 gap-2">
+                    <label className="text-[#505050] font-[600] font-[Poppins] text-sm md:text-base">
+                      City
+                    </label>
+                    <select
+                      id="city"
+                      name="city"
+                      value={registerInfo.city}
+                      onChange={handleOnChange}
+                      disabled={loadingCities || cities.length === 0}
+                      className="border border-[#95A5A6] placeholder:text-[#95A5A6] font-[Poppins] text-sm md:text-base font-[400] rounded-lg outline-none py-2 px-2 bg-white disabled:bg-gray-100 disabled:cursor-not-allowed"
+                    >
+                      <option value="">Select City</option>
+                      {cities.map((city) => (
+                        <option key={city.value} value={city.value}>
+                          {city.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div className="flex flex-col sm:flex-row justify-center items-stretch gap-3 mt-3">
+                  <div className="flex flex-col w-full sm:flex-1 gap-2">
+                    <label className="text-[#505050] font-[600] font-[Poppins] text-sm md:text-base">
+                      Zip Code
+                    </label>
+                    <input
+                      type="text"
+                      id="zip"
                       className="border border-[#95A5A6] placeholder:text-[#95A5A6] font-[Poppins] text-sm md:text-base font-[400] rounded-lg outline-none py-2 px-2"
-                      placeholder="Enter Country"
+                      placeholder="Zip Code"
+                      name="zip"
+                      value={registerInfo.zip}
+                      onChange={handleOnChange}
+                    />
+                  </div>
+                  <div className="flex flex-col w-full sm:flex-1 gap-2">
+                    <label className="text-[#505050] font-[600] font-[Poppins] text-sm md:text-base">
+                      Date of Birth
+                    </label>
+                    <input
+                      type="date"
+                      id="dateOfBirth"
+                      className="border border-[#95A5A6] placeholder:text-[#95A5A6] font-[Poppins] text-sm md:text-base font-[400] rounded-lg outline-none py-2 px-2"
+                      placeholder="Date of Birth"
+                      name="dateOfBirth"
+                      onChange={handleOnChange}
+                      value={registerInfo.dateOfBirth}
                     />
                   </div>
                 </div>
@@ -364,37 +683,6 @@ export const Register = () => {
                         )}
                       </button>
                     </div>
-                  </div>
-                </div>
-
-                <div className="flex flex-col sm:flex-row justify-center items-stretch gap-3 mt-3">
-                  <div className="flex flex-col w-full sm:flex-1 gap-2">
-                    <label className="text-[#505050] font-[600] font-[Poppins] text-sm md:text-base">
-                      Address
-                    </label>
-                    <input
-                      type="text"
-                      id="phoneNumber"
-                      className="border border-[#95A5A6] placeholder:text-[#95A5A6] font-[Poppins] text-sm md:text-base font-[400] rounded-lg outline-none py-2 px-2"
-                      placeholder="Address"
-                      name="address"
-                      value={registerInfo.address}
-                      onChange={handleOnChange}
-                    />
-                  </div>
-                  <div className="flex flex-col w-full sm:flex-1 gap-2">
-                    <label className="text-[#505050] font-[600] font-[Poppins] text-sm md:text-base">
-                      Date of Birth
-                    </label>
-                    <input
-                      type="date"
-                      id="country"
-                      className="border border-[#95A5A6] placeholder:text-[#95A5A6] font-[Poppins] text-sm md:text-base font-[400] rounded-lg outline-none py-2 px-2"
-                      placeholder="Date of Birth"
-                      name="dateOfBirth"
-                      onChange={handleOnChange}
-                      value={registerInfo.dateOfBirth}
-                    />
                   </div>
                 </div>
 

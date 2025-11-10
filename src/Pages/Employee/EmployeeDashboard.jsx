@@ -78,8 +78,11 @@ export const EmployeeDashboard = () => {
     userName: user?.userName || "",
     email: user?.email || "",
     phone: user?.phoneNumber || "",
+    addressLine1: user?.addressLine1 || "",
+    state: user?.state || "",
+    city: user?.city || "",
+    zip: user?.zip || "",
     country: user?.country || "",
-    address: user?.address || "",
   });
   const [selectedProfileImage, setSelectedProfileImage] = useState(null);
   const [profileImagePreview, setProfileImagePreview] = useState(null);
@@ -1187,7 +1190,10 @@ export const EmployeeDashboard = () => {
       formData.append("email", profileData.email);
       formData.append("phone", profileData.phone);
       formData.append("country", profileData.country);
-      formData.append("address", profileData.address);
+      formData.append("addressLine1", profileData.addressLine1);
+      formData.append("state", profileData.state);
+      formData.append("city", profileData.city);
+      formData.append("zip", profileData.zip);
 
       // Add profile image if selected
       if (selectedProfileImage) {
@@ -1252,8 +1258,11 @@ export const EmployeeDashboard = () => {
       userName: user?.userName || "",
       email: user?.email || "",
       phone: user?.phoneNumber || "",
+      addressLine1: user?.addressLine1 || "",
+      state: user?.state || "",
+      city: user?.city || "",
+      zip: user?.zip || "",
       country: user?.country || "",
-      address: user?.address || "",
     });
     setSelectedProfileImage(null);
     setProfileImagePreview(null);
@@ -1457,52 +1466,137 @@ export const EmployeeDashboard = () => {
               </div>
 
               {/* Work Info Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 flex-1">
-                <div className="space-y-3">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                      <Briefcase size={20} className="text-blue-600" />
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 flex-1">
+                <div className="space-y-6">
+                  <div className="flex gap-4">
+                    <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <Briefcase size={24} className="text-blue-600" />
                     </div>
-                    <div>
-                      <p className="text-xs text-gray-500">Role</p>
-                      <p className="font-medium text-gray-900">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">
+                        Role
+                      </p>
+                      <p className="font-semibold text-gray-900 text-base mt-2">
                         {user?.userRole}
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                      <Award size={20} className="text-purple-600" />
+                  <div className="flex gap-4">
+                    <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <Mail size={24} className="text-green-600" />
                     </div>
-                    <div>
-                      <p className="text-xs text-gray-500">Address</p>
-                      <p className="font-medium text-gray-900">
-                        {user?.address},{user?.country}{" "}
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">
+                        Email
+                      </p>
+                      <p className="font-semibold text-gray-900 text-base mt-2 break-all">
+                        {user?.email}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex gap-4">
+                    <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <Phone size={24} className="text-orange-600" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">
+                        Phone
+                      </p>
+                      <p className="font-semibold text-gray-900 text-base mt-2">
+                        {user?.phoneNumber}
                       </p>
                     </div>
                   </div>
                 </div>
 
-                <div className="space-y-3">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                      <Mail size={20} className="text-green-600" />
+                <div className="space-y-6">
+                  <div className="flex gap-4">
+                    <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <MapPin size={24} className="text-purple-600" />
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs text-gray-500">Email</p>
-                      <p className="font-medium text-gray-900 truncate">
-                        {user?.email}
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">
+                        Address Line
+                      </p>
+                      <p className="font-semibold text-gray-900 text-base mt-2">
+                        {user?.addressLine1 || "N/A"}
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
-                      <Phone size={20} className="text-orange-600" />
+                  <div className="flex gap-4">
+                    <div className="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <MapPin size={24} className="text-indigo-600" />
                     </div>
-                    <div>
-                      <p className="text-xs text-gray-500">Phone</p>
-                      <p className="font-medium text-gray-900">
-                        {user?.phoneNumber}
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">
+                        Country
+                      </p>
+                      <p className="font-semibold text-gray-900 text-base mt-2">
+                        {user?.country || "N/A"}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex gap-4">
+                    <div className="w-12 h-12 bg-teal-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <MapPin size={24} className="text-teal-600" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">
+                        State
+                      </p>
+                      <p className="font-semibold text-gray-900 text-base mt-2">
+                        {user?.state || "N/A"}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-6">
+                  <div className="flex gap-4">
+                    <div className="w-12 h-12 bg-cyan-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <MapPin size={24} className="text-cyan-600" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">
+                        City
+                      </p>
+                      <p className="font-semibold text-gray-900 text-base mt-2">
+                        {user?.city || "N/A"}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex gap-4">
+                    <div className="w-12 h-12 bg-pink-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <Award size={24} className="text-pink-600" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">
+                        Zip Code
+                      </p>
+                      <p className="font-semibold text-gray-900 text-base mt-2">
+                        {user?.zip || "N/A"}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex gap-4">
+                    <div className="w-12 h-12 bg-rose-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <Calendar size={24} className="text-rose-600" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">
+                        Date of Birth
+                      </p>
+                      <p className="font-semibold text-gray-900 text-base mt-2">
+                        {user?.dateOfBirth
+                          ? new Date(user.dateOfBirth).toLocaleDateString(
+                              "en-US",
+                              {
+                                year: "numeric",
+                                month: "short",
+                                day: "numeric",
+                              }
+                            )
+                          : "N/A"}
                       </p>
                     </div>
                   </div>
@@ -1972,18 +2066,63 @@ export const EmployeeDashboard = () => {
                     />
                   </div>
 
-                  <div className="md:col-span-2">
+                  <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Address
+                      Address Line 1
                     </label>
-                    <textarea
-                      value={profileData.address}
+                    <input
+                      type="text"
+                      value={profileData.addressLine1}
                       onChange={(e) =>
-                        handleProfileInputChange("address", e.target.value)
+                        handleProfileInputChange("addressLine1", e.target.value)
                       }
-                      rows={3}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1F3A93] focus:border-transparent"
-                      placeholder="Enter your address"
+                      placeholder="Enter your address line 1"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      State
+                    </label>
+                    <input
+                      type="text"
+                      value={profileData.state}
+                      onChange={(e) =>
+                        handleProfileInputChange("state", e.target.value)
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1F3A93] focus:border-transparent"
+                      placeholder="Enter your state"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      City
+                    </label>
+                    <input
+                      type="text"
+                      value={profileData.city}
+                      onChange={(e) =>
+                        handleProfileInputChange("city", e.target.value)
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1F3A93] focus:border-transparent"
+                      placeholder="Enter your city"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      ZIP Code
+                    </label>
+                    <input
+                      type="text"
+                      value={profileData.zip}
+                      onChange={(e) =>
+                        handleProfileInputChange("zip", e.target.value)
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1F3A93] focus:border-transparent"
+                      placeholder="Enter your ZIP code"
                     />
                   </div>
                 </div>
