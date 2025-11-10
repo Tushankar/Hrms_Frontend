@@ -1,10 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import {
-  AppleIcon,
-  GoogleIcon,
-  FaceBooIcon,
-} from "../../../assets/Svgs/AllSvgs";
+import { OtpVerifyModal } from "../../../Components/Common/UI/OtpVerifyModal/OtpVerifyModal";
+import { ForgotPasswordModal } from "../../../Components/Common/UI/ForgotPasswordModal/ForgotPasswordModal";
 import * as EmailValidator from "email-validator";
 import { toast } from "react-toastify";
 import axios from "axios";
@@ -401,9 +398,7 @@ export const Login = () => {
           <form
             onSubmit={(e) => {
               e.preventDefault();
-              if (showOtpInput) {
-                verifyOTP();
-              } else {
+              if (!showOtpInput) {
                 LoginUser();
               }
             }}
@@ -492,49 +487,6 @@ export const Login = () => {
               </div>
             </div>
 
-            {/* OTP Field - Conditionally Rendered */}
-            {showOtpInput && (
-              <div>
-                <label
-                  htmlFor="otp"
-                  className="block text-sm font-medium text-gray-700 mb-2"
-                >
-                  OTP Verification
-                </label>
-                <p className="text-sm text-gray-600 mb-3">
-                  Please enter the 6-digit OTP sent to your email:{" "}
-                  <strong>{loginInfo.email}</strong>
-                </p>
-                <input
-                  type="text"
-                  id="otp"
-                  value={otp}
-                  onChange={(e) => setOtp(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 bg-white"
-                  placeholder="Enter 6-digit OTP"
-                  maxLength="6"
-                  required
-                />
-                <div className="mt-3 flex justify-end">
-                  <button
-                    type="button"
-                    onClick={resendOTP}
-                    disabled={isResendingOtp}
-                    className="text-sm text-blue-600 hover:text-blue-500 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {isResendingOtp ? (
-                      <div className="flex items-center">
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-1"></div>
-                        Resending...
-                      </div>
-                    ) : (
-                      "Resend OTP"
-                    )}
-                  </button>
-                </div>
-              </div>
-            )}
-
             {/* Remember & Forgot */}
             <div className="flex items-center justify-between">
               <div className="flex items-center">
@@ -560,169 +512,25 @@ export const Login = () => {
               </button>
             </div>
 
-            {/* Inline Forgot Password Flow */}
-            {forgotMode && (
-              <div className="mt-4 p-4 border border-gray-200 rounded-lg bg-white">
-                <h3 className="text-lg font-medium text-gray-800 mb-2">
-                  Reset Password
-                </h3>
-                <p className="text-sm text-gray-600 mb-3">
-                  Enter the email you registered with and we will send an OTP to
-                  reset your password.
-                </p>
-
-                <div className="mb-3">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Email address
-                  </label>
-                  <input
-                    type="email"
-                    name="email"
-                    required
-                    value={loginInfo.email}
-                    onChange={handleOnChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 bg-white"
-                    placeholder="Enter your email"
-                  />
-                </div>
-
-                <div className="flex items-center justify-end mb-3">
-                  <button
-                    type="button"
-                    onClick={sendForgotOtp}
-                    disabled={isSendingForgotOtp}
-                    className="text-sm text-blue-600 hover:text-blue-500 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {isSendingForgotOtp ? (
-                      <div className="flex items-center">
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-1"></div>
-                        Sending...
-                      </div>
-                    ) : (
-                      "Send OTP"
-                    )}
-                  </button>
-                </div>
-
-                <div className="mb-3">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    OTP
-                  </label>
-                  <input
-                    type="text"
-                    value={forgotOtp}
-                    onChange={(e) => setForgotOtp(e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 bg-white"
-                    placeholder="Enter 6-digit OTP"
-                    maxLength="6"
-                  />
-                  <div className="mt-2 text-right">
-                    <button
-                      type="button"
-                      onClick={resendForgotOtp}
-                      disabled={isResendingForgotOtp}
-                      className="text-sm text-blue-600 hover:text-blue-500 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {isResendingForgotOtp ? (
-                        <div className="flex items-center">
-                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-1"></div>
-                          Resending...
-                        </div>
-                      ) : (
-                        "Resend OTP"
-                      )}
-                    </button>
-                  </div>
-                </div>
-
-                <div className="mb-3">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    New Password
-                  </label>
-                  <input
-                    type="password"
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 bg-white"
-                    placeholder="Enter new password"
-                  />
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setForgotMode(false);
-                      setForgotOtp("");
-                      setNewPassword("");
-                    }}
-                    className="text-sm text-gray-600 hover:text-gray-700"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="button"
-                    onClick={verifyForgotOtp}
-                    disabled={isVerifyingForgotOtp}
-                    className="py-2 px-4 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {isVerifyingForgotOtp ? "Resetting..." : "Reset Password"}
-                  </button>
-                </div>
-              </div>
-            )}
-
             {/* Sign In Button */}
             <button
               type="submit"
               disabled={
                 isLoading ||
-                !Object.keys(loginInfo).every((key) =>
-                  Boolean(loginInfo[key])
-                ) ||
-                (showOtpInput && !otp.trim())
+                !Object.keys(loginInfo).every((key) => Boolean(loginInfo[key]))
               }
               className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-white bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition duration-200 font-medium"
             >
               {isLoading ? (
                 <div className="flex items-center">
                   <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                  {showOtpInput ? "Verifying..." : "Signing in..."}
+                  Signing in...
                 </div>
-              ) : showOtpInput ? (
-                "Verify OTP"
               ) : (
                 "Login"
               )}
             </button>
           </form>
-
-          {/* Divider */}
-          <div className="mt-8 mb-6">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300" />
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-gray-50 text-gray-500">
-                  Or continue with
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Social Login */}
-          <div className="grid grid-cols-3 gap-3">
-            <button className="w-full inline-flex justify-center py-3 px-4 border border-gray-300 rounded-lg shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 transition duration-200">
-              <GoogleIcon className="w-5 h-5" />
-            </button>
-            <button className="w-full inline-flex justify-center py-3 px-4 border border-gray-300 rounded-lg shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 transition duration-200">
-              <AppleIcon className="w-5 h-5" />
-            </button>
-            <button className="w-full inline-flex justify-center py-3 px-4 border border-gray-300 rounded-lg shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 transition duration-200">
-              <FaceBooIcon className="w-5 h-5" />
-            </button>
-          </div>
 
           {/* Sign Up Link */}
           <p className="mt-8 text-center text-sm text-gray-600">
@@ -736,6 +544,42 @@ export const Login = () => {
           </p>
         </div>
       </div>
+      {/* OTP Verification Modal */}
+      <OtpVerifyModal
+        isOpen={showOtpInput}
+        onClose={() => {
+          setShowOtpInput(false);
+          setOtp("");
+        }}
+        email={loginInfo.email}
+        otp={otp}
+        setOtp={setOtp}
+        onVerify={verifyOTP}
+        isLoading={isLoading}
+        onResend={resendOTP}
+        isResending={isResendingOtp}
+      />
+      {/* Forgot Password Modal */}
+      <ForgotPasswordModal
+        isOpen={forgotMode}
+        onClose={() => {
+          setForgotMode(false);
+          setForgotOtp("");
+          setNewPassword("");
+        }}
+        email={loginInfo.email}
+        setEmail={(email) => setLoginInfo({ ...loginInfo, email: email })}
+        forgotOtp={forgotOtp}
+        setForgotOtp={setForgotOtp}
+        newPassword={newPassword}
+        setNewPassword={setNewPassword}
+        onSendOtp={sendForgotOtp}
+        onResendOtp={resendForgotOtp}
+        onVerifyOtp={verifyForgotOtp}
+        isSending={isSendingForgotOtp}
+        isResending={isResendingForgotOtp}
+        isVerifying={isVerifyingForgotOtp}
+      />
     </div>
   );
 };
