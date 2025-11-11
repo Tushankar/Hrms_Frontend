@@ -32,12 +32,20 @@ const NonCompeteAgreementHR = () => {
         { withCredentials: true }
       );
 
+      console.log(
+        "Non-Compete Agreement Response:",
+        response.data?.data?.forms
+      );
+
       if (response.data?.data?.forms?.nonCompeteAgreement) {
         const data = response.data.data.forms.nonCompeteAgreement;
         console.log("📄 Non-Compete Form Data:", data);
         setFormId(data._id);
         setEmployeeName(data.employeeName || "Employee");
         setFormData(data);
+      } else {
+        console.warn("No non-compete agreement data found");
+        setFormData(null);
       }
       setLoading(false);
     } catch (error) {
@@ -365,6 +373,23 @@ const NonCompeteAgreementHR = () => {
                 </div>
               )}
 
+              {!formData && !loading && (
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
+                  <div className="flex items-center gap-3">
+                    <AlertCircle className="w-6 h-6 text-yellow-600" />
+                    <div>
+                      <h3 className="font-semibold text-yellow-800">
+                        No Data Found
+                      </h3>
+                      <p className="text-sm text-yellow-700">
+                        No non-compete agreement data available for this
+                        employee.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* Digital Signature Section */}
               {formData?.employeeSignature && (
                 <div className="space-y-6 mb-8">
@@ -463,11 +488,21 @@ const NonCompeteAgreementHR = () => {
             </h3>
             <div className="bg-gray-50 border border-gray-300 rounded-lg p-4 mb-4">
               {selectedSignature && (
-                <img
-                  src={getSignatureSrc(selectedSignature)}
-                  alt="Employee Signature"
-                  className="w-full h-auto"
-                />
+                <p
+                  className="text-3xl text-center"
+                  style={{
+                    fontFamily: "'Great Vibes', cursive",
+                    fontSize: "48px",
+                    fontWeight: "400",
+                    letterSpacing: "0.5px",
+                    minHeight: "60px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  {selectedSignature}
+                </p>
               )}
             </div>
             <button

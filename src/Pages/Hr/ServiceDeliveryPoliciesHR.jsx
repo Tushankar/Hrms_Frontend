@@ -37,8 +37,15 @@ export default function ServiceDeliveryPoliciesHR() {
         { withCredentials: true }
       );
 
-      if (response.data?.data?.forms?.serviceDeliveryPolicies) {
-        const policyData = response.data.data.forms.serviceDeliveryPolicies;
+      console.log(
+        "Service Delivery Policy Response:",
+        response.data?.data?.forms
+      );
+
+      if (response.data?.data?.forms?.serviceDeliveryPolicy) {
+        const policyData = response.data.data.forms.serviceDeliveryPolicy;
+
+        console.log("Policy Data:", policyData);
 
         // Set signature data
         if (policyData.employeeSignature) {
@@ -54,6 +61,8 @@ export default function ServiceDeliveryPoliciesHR() {
         if (policyData.policyInitials) {
           setPolicyInitials(policyData.policyInitials);
         }
+      } else {
+        console.warn("No service delivery policy data found");
       }
     } catch (error) {
       console.error("Error fetching employee data:", error);

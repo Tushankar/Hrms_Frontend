@@ -41,6 +41,8 @@ const EmployeeDetailsUploadHR = () => {
         }
       );
 
+      console.log("Full Application Response:", appResponse.data?.data);
+
       const forms = appResponse.data?.data?.forms;
       const jobDescData =
         forms?.jobDescriptionPCA ||
@@ -67,7 +69,22 @@ const EmployeeDetailsUploadHR = () => {
         setPositionType(posType);
 
         // Fetch multiple documents using the new endpoint
-        await fetchUploadedDocuments(appResponse.data?.data?._id, posType);
+        const applicationId = appResponse.data?.data?.application?._id;
+        console.log(
+          "Application ID:",
+          applicationId,
+          "Position Type:",
+          posType
+        );
+
+        if (applicationId && posType) {
+          await fetchUploadedDocuments(applicationId, posType);
+        } else {
+          console.warn("Missing applicationId or posType for document fetch");
+        }
+      } else {
+        console.warn("No job description data found");
+        setFormData(null);
       }
     } catch (error) {
       console.error("Error fetching submission:", error);
@@ -81,8 +98,13 @@ const EmployeeDetailsUploadHR = () => {
     try {
       if (!applicationId || !posType) {
         console.warn("Missing applicationId or positionType");
+        setUploadedDocuments([]);
         return;
       }
+
+      console.log(
+        `Fetching documents for applicationId: ${applicationId}, posType: ${posType}`
+      );
 
       const response = await axios.get(
         `${baseURL}/onboarding/get-uploaded-documents/${applicationId}/${posType}`,
@@ -92,13 +114,22 @@ const EmployeeDetailsUploadHR = () => {
         }
       );
 
+      console.log("Documents Response:", response.data);
+
       if (response.data?.success && response.data?.data?.documents) {
         console.log("📄 Documents fetched:", response.data.data.documents);
         setUploadedDocuments(response.data.data.documents || []);
+      } else {
+        console.warn(
+          "No documents found in response or response not successful"
+        );
+        setUploadedDocuments([]);
       }
     } catch (error) {
       console.error("Error fetching documents:", error);
-      // Don't show error toast, just log it
+      console.error("Error details:", error.response?.data);
+      // Set empty array on error instead of silent failure
+      setUploadedDocuments([]);
     }
   };
 
@@ -127,6 +158,24 @@ const EmployeeDetailsUploadHR = () => {
           {loading ? (
             <div className="text-center py-8">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#1F3A93] mx-auto"></div>
+            </div>
+          ) : !formData ? (
+            <div className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl p-6 border border-amber-200">
+              <div className="flex items-start gap-4">
+                <div className="bg-amber-100 p-3 rounded-lg">
+                  <AlertCircle className="w-8 h-8 text-amber-600" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-amber-800 mb-1">
+                    No Job Description Found
+                  </h3>
+                  <p className="text-sm text-amber-600">
+                    No job description data available for this employee. Please
+                    ensure the employee has submitted their job description
+                    form.
+                  </p>
+                </div>
+              </div>
             </div>
           ) : (
             <>
