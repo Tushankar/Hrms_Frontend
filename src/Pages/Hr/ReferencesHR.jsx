@@ -7,7 +7,8 @@ import HRNotesInput from "../../Components/Common/HRNotesInput/HRNotesInput";
 const ReferencesHR = () => {
   const { employeeId } = useParams();
   const navigate = useNavigate();
-  const [data, setData] = useState(null);
+  const [data, setData] = useState([]);
+  const [referencesForm, setReferencesForm] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -26,10 +27,23 @@ const ReferencesHR = () => {
       );
       if (response.ok) {
         const result = await response.json();
-        setData(result.data?.forms?.references);
+        // Extract the references form data and handle the references array
+        const referencesFormData = result.data?.forms?.references;
+        if (referencesFormData && referencesFormData.references) {
+          setData(referencesFormData.references);
+          setReferencesForm(referencesFormData);
+        } else {
+          setData([]);
+          setReferencesForm(null);
+        }
+      } else {
+        setData([]);
+        setReferencesForm(null);
       }
     } catch (error) {
       console.error("Error:", error);
+      setData([]);
+      setReferencesForm(null);
     } finally {
       setLoading(false);
     }
@@ -109,12 +123,12 @@ const ReferencesHR = () => {
               <strong>Status:</strong>{" "}
               <span
                 className={`px-2 py-1 rounded ${
-                  Array.isArray(data) && data[0]?.status === "completed"
+                  referencesForm?.status === "completed"
                     ? "bg-green-100 text-green-800"
                     : "bg-yellow-100 text-yellow-800"
                 }`}
               >
-                {Array.isArray(data) ? data[0]?.status || "draft" : "draft"}
+                {referencesForm?.status || "draft"}
               </span>
             </p>
           </div>
@@ -122,18 +136,11 @@ const ReferencesHR = () => {
           <HRNotesInput
             formType="references"
             employeeId={employeeId}
-            existingNote={
-              Array.isArray(data)
-                ? data[0]?.hrFeedback?.comment
-                : data?.hrFeedback?.comment
-            }
-            existingReviewedAt={
-              Array.isArray(data)
-                ? data[0]?.hrFeedback?.reviewedAt
-                : data?.hrFeedback?.reviewedAt
-            }
+            existingNote={referencesForm?.hrFeedback?.comment}
+            existingReviewedAt={referencesForm?.hrFeedback?.reviewedAt}
             onNoteSaved={fetchData}
             formData={data}
+            showSignature={false}
           />
         </div>
       </div>

@@ -8,6 +8,7 @@ const ProfessionalExperienceHR = () => {
   const { employeeId } = useParams();
   const navigate = useNavigate();
   const [data, setData] = useState(null);
+  const [professionalForm, setProfessionalForm] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -26,10 +27,32 @@ const ProfessionalExperienceHR = () => {
       );
       if (response.ok) {
         const result = await response.json();
-        setData(result.data?.forms?.professionalExperience);
+        console.log(
+          "Professional Experience Response:",
+          result.data?.forms?.professionalExperience
+        );
+
+        // Extract the professional experience form data
+        const professionalExperienceForm =
+          result.data?.forms?.professionalExperience;
+        if (professionalExperienceForm) {
+          // The entire form object contains all the data we need
+          setData(professionalExperienceForm);
+          setProfessionalForm(professionalExperienceForm);
+        } else {
+          console.warn("No professional experience form found");
+          setData(null);
+          setProfessionalForm(null);
+        }
+      } else {
+        console.error("Failed to fetch data:", response.status);
+        setData(null);
+        setProfessionalForm(null);
       }
     } catch (error) {
-      console.error("Error:", error);
+      console.error("Error fetching professional experience:", error);
+      setData(null);
+      setProfessionalForm(null);
     } finally {
       setLoading(false);
     }
@@ -60,7 +83,8 @@ const ProfessionalExperienceHR = () => {
           {data ? (
             <>
               {/* Military Service */}
-              {data.hasMilitaryService === "YES" && (
+              {(data.hasMilitaryService === true ||
+                data.hasMilitaryService === "YES") && (
                 <div className="mb-6">
                   <h3 className="text-lg font-semibold text-gray-800 mb-4">
                     Military Service
@@ -134,6 +158,16 @@ const ProfessionalExperienceHR = () => {
                 </div>
               )}
 
+              {(data.hasMilitaryService === false ||
+                data.hasMilitaryService === "NO") && (
+                <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                  <p className="text-gray-700">
+                    <strong>Military Service:</strong> Employee indicated no
+                    military service experience.
+                  </p>
+                </div>
+              )}
+
               {/* Documents Section */}
               {(data.resumePath ||
                 data.coverLetterPath ||
@@ -176,12 +210,13 @@ const ProfessionalExperienceHR = () => {
                   <strong>Status:</strong>{" "}
                   <span
                     className={`px-2 py-1 rounded ${
-                      data.status === "completed" || data.status === "submitted"
+                      professionalForm?.status === "completed" ||
+                      professionalForm?.status === "submitted"
                         ? "bg-green-100 text-green-800"
                         : "bg-yellow-100 text-yellow-800"
                     }`}
                   >
-                    {data.status || "draft"}
+                    {professionalForm?.status || "draft"}
                   </span>
                 </p>
               </div>
@@ -189,8 +224,8 @@ const ProfessionalExperienceHR = () => {
               <HRNotesInput
                 formType="professional-experience"
                 employeeId={employeeId}
-                existingNote={data?.hrFeedback?.comment}
-                existingReviewedAt={data?.hrFeedback?.reviewedAt}
+                existingNote={professionalForm?.hrFeedback?.comment}
+                existingReviewedAt={professionalForm?.hrFeedback?.reviewedAt}
                 onNoteSaved={fetchData}
                 formData={data}
                 showSignature={false}
