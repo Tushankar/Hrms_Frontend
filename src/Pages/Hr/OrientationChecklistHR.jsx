@@ -56,44 +56,93 @@ const OrientationChecklistHR = () => {
 
           // Check if we have data (the API returns data directly without a success flag)
           if (response.data && response.data.data) {
-            const applicationData =
-              response.data.data.forms.orientationChecklist;
+            const orientationChecklistData =
+              response.data.data.forms?.orientationChecklist;
+            console.log("Full API Response:", response.data.data);
             console.log(
-              "Setting orientation checklist form data:",
-              applicationData
+              "Orientation Checklist Data:",
+              orientationChecklistData
             );
 
-            // Set application data for display
-            setApplicationData({
-              employeeName:
-                `${applicationData.firstName || ""} ${
-                  applicationData.lastName || ""
-                }`.trim() || "N/A",
-              employeeEmail: applicationData.email || "N/A",
-              applicationId: employeeId,
-            });
+            if (orientationChecklistData) {
+              // Set application data for display
+              setApplicationData({
+                employeeName:
+                  `${orientationChecklistData.firstName || ""} ${
+                    orientationChecklistData.lastName || ""
+                  }`.trim() || "N/A",
+                employeeEmail: orientationChecklistData.email || "N/A",
+                applicationId: employeeId,
+              });
 
-            // Map backend data to form structure
-            setFormData({
-              policies: applicationData.policies || false,
-              duties: applicationData.duties || false,
-              emergencies: applicationData.emergencies || false,
-              tbExposure: applicationData.tbExposure || false,
-              clientRights: applicationData.clientRights || false,
-              complaints: applicationData.complaints || false,
-              documentation: applicationData.documentation || false,
-              handbook: applicationData.handbook || false,
-              applicantSignature: applicationData.applicantSignature || "",
-              signatureDate: applicationData.signatureDate
-                ? new Date(applicationData.signatureDate)
-                    .toISOString()
-                    .slice(0, 10)
-                : "",
-            });
+              // Map backend data to form structure - properly extract all checkbox values
+              setFormData({
+                policies:
+                  orientationChecklistData.policies === true ||
+                  orientationChecklistData.policies === "true" ||
+                  false,
+                duties:
+                  orientationChecklistData.duties === true ||
+                  orientationChecklistData.duties === "true" ||
+                  false,
+                emergencies:
+                  orientationChecklistData.emergencies === true ||
+                  orientationChecklistData.emergencies === "true" ||
+                  false,
+                tbExposure:
+                  orientationChecklistData.tbExposure === true ||
+                  orientationChecklistData.tbExposure === "true" ||
+                  false,
+                clientRights:
+                  orientationChecklistData.clientRights === true ||
+                  orientationChecklistData.clientRights === "true" ||
+                  false,
+                complaints:
+                  orientationChecklistData.complaints === true ||
+                  orientationChecklistData.complaints === "true" ||
+                  false,
+                documentation:
+                  orientationChecklistData.documentation === true ||
+                  orientationChecklistData.documentation === "true" ||
+                  false,
+                handbook:
+                  orientationChecklistData.handbook === true ||
+                  orientationChecklistData.handbook === "true" ||
+                  false,
+                applicantSignature:
+                  orientationChecklistData.applicantSignature || "",
+                signatureDate: orientationChecklistData.signatureDate
+                  ? new Date(orientationChecklistData.signatureDate)
+                      .toISOString()
+                      .slice(0, 10)
+                  : "",
+              });
 
-            // Load existing HR feedback
-            if (applicationData.hrFeedback) {
-              setExistingFeedback(applicationData.hrFeedback);
+              console.log("Form Data Set:", {
+                policies: orientationChecklistData.policies,
+                duties: orientationChecklistData.duties,
+                emergencies: orientationChecklistData.emergencies,
+                tbExposure: orientationChecklistData.tbExposure,
+                clientRights: orientationChecklistData.clientRights,
+                complaints: orientationChecklistData.complaints,
+                documentation: orientationChecklistData.documentation,
+                handbook: orientationChecklistData.handbook,
+                applicantSignature: orientationChecklistData.applicantSignature,
+                signatureDate: orientationChecklistData.signatureDate,
+              });
+
+              // Load existing HR feedback
+              if (orientationChecklistData.hrFeedback) {
+                setExistingFeedback(orientationChecklistData.hrFeedback);
+              }
+            } else {
+              console.warn("No orientationChecklist object in forms");
+              toast.error("No orientation checklist data found for this user");
+              setApplicationData({
+                employeeName: "No data found",
+                employeeEmail: "No data found",
+                applicationId: employeeId,
+              });
             }
           } else {
             console.error(
@@ -403,60 +452,140 @@ const OrientationChecklistHR = () => {
                     </div>
                   </div>
 
+                  {/* Completion Summary */}
+                  <div className="mb-8 bg-gradient-to-r from-green-50 to-emerald-50 p-6 rounded-lg border border-green-200">
+                    <h3 className="text-lg font-bold text-green-800 mb-4">
+                      Checklist Completion Summary
+                    </h3>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      {statements.map((statement) => (
+                        <div
+                          key={statement.key}
+                          className={`p-3 rounded-lg text-center text-sm font-medium ${
+                            formData[statement.key]
+                              ? "bg-green-100 text-green-800 border border-green-300"
+                              : "bg-gray-100 text-gray-600 border border-gray-300"
+                          }`}
+                        >
+                          <div className="text-lg mb-1">
+                            {formData[statement.key] ? "✓" : "✗"}
+                          </div>
+                          <div>
+                            {statement.key === "policies"
+                              ? "Policies"
+                              : statement.key === "duties"
+                              ? "Duties"
+                              : statement.key === "emergencies"
+                              ? "Emergencies"
+                              : statement.key === "tbExposure"
+                              ? "TB Exposure"
+                              : statement.key === "clientRights"
+                              ? "Client Rights"
+                              : statement.key === "complaints"
+                              ? "Complaints"
+                              : statement.key === "documentation"
+                              ? "Documentation"
+                              : "Handbook"}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="mt-4 pt-4 border-t border-green-200">
+                      <p className="text-sm text-gray-700">
+                        <span className="font-semibold">Completion Rate:</span>{" "}
+                        <span className="text-lg font-bold text-green-700">
+                          {Math.round(
+                            (Object.values(formData).slice(0, 8).filter(Boolean)
+                              .length /
+                              8) *
+                              100
+                          )}
+                          %
+                        </span>{" "}
+                        (
+                        {
+                          Object.values(formData).slice(0, 8).filter(Boolean)
+                            .length
+                        }
+                        /8 items completed)
+                      </p>
+                    </div>
+                  </div>
+
                   {/* Signature Section */}
                   <div className="bg-gray-50 p-6 rounded-lg mb-6">
                     <h3 className="text-lg font-semibold text-gray-800 mb-4">
-                      Signatures
+                      Employee Signatures & Date
                     </h3>
                     <div className="grid grid-cols-1 gap-8">
                       <div>
-                        <div className="mb-4">
-                          <label
-                            className="block text-sm font-medium text-gray-700 mb-1"
-                            htmlFor="applicantSignature"
-                          >
-                            Employee Signature
-                          </label>
-                          <input
-                            id="applicantSignature"
-                            type="text"
-                            value={formData.applicantSignature}
-                            onChange={(e) =>
-                              handleInputChange(
-                                "applicantSignature",
-                                e.target.value
-                              )
-                            }
-                            placeholder="Employee signature (display only)"
-                            className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
-                            style={{
-                              fontFamily: "'Great Vibes', cursive",
-                              fontSize: "48px",
-                              letterSpacing: "0.5px",
-                            }}
-                            readOnly
-                          />
-                          <p className="text-xs text-gray-500 mt-1">
-                            Displayed in Great Vibes font
-                          </p>
-                        </div>
+                        {formData.applicantSignature ? (
+                          <div className="mb-6 bg-white p-4 rounded-lg border-2 border-blue-300">
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                              Employee Signature
+                            </label>
+                            <div
+                              className="w-full px-4 py-6 text-center border-2 border-dashed border-green-400 bg-green-50 rounded-lg"
+                              style={{
+                                fontFamily: "'Great Vibes', cursive",
+                                fontSize: "48px",
+                                letterSpacing: "0.5px",
+                                color: "#1F3A93",
+                              }}
+                            >
+                              {formData.applicantSignature}
+                            </div>
+                            <p className="text-xs text-gray-500 mt-2">
+                              ✓ Signature provided (displayed in Great Vibes
+                              font)
+                            </p>
+                          </div>
+                        ) : (
+                          <div className="mb-6 bg-white p-4 rounded-lg border-2 border-red-300">
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                              Employee Signature
+                            </label>
+                            <div className="w-full px-4 py-6 text-center border-2 border-dashed border-red-300 bg-red-50 rounded-lg text-gray-500">
+                              No signature provided
+                            </div>
+                            <p className="text-xs text-red-600 mt-2">
+                              ✗ Employee has not provided a signature
+                            </p>
+                          </div>
+                        )}
+
                         <div>
-                          <label
-                            className="block text-sm font-medium text-gray-700 mb-1"
-                            htmlFor="signatureDate"
-                          >
-                            Employee Date
-                          </label>
-                          <input
-                            id="signatureDate"
-                            type="date"
-                            value={formData.signatureDate}
-                            onChange={(e) =>
-                              handleInputChange("signatureDate", e.target.value)
-                            }
-                            className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
-                            readOnly
-                          />
+                          {formData.signatureDate ? (
+                            <div className="bg-white p-4 rounded-lg border-2 border-blue-300">
+                              <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Signature Date
+                              </label>
+                              <div className="w-full px-4 py-3 border rounded-md bg-green-50 border-green-400 font-semibold text-gray-800">
+                                {new Date(
+                                  formData.signatureDate
+                                ).toLocaleDateString("en-US", {
+                                  year: "numeric",
+                                  month: "long",
+                                  day: "numeric",
+                                })}
+                              </div>
+                              <p className="text-xs text-gray-500 mt-2">
+                                ✓ Date signed: {formData.signatureDate}
+                              </p>
+                            </div>
+                          ) : (
+                            <div className="bg-white p-4 rounded-lg border-2 border-red-300">
+                              <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Signature Date
+                              </label>
+                              <div className="w-full px-4 py-3 border rounded-md bg-red-50 border-red-400 text-gray-500">
+                                No date provided
+                              </div>
+                              <p className="text-xs text-red-600 mt-2">
+                                ✗ No signature date available
+                              </p>
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>
