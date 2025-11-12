@@ -442,7 +442,7 @@ const DirectDepositForm = () => {
 
         {/* Main Form Section */}
         <div className="border-[2px] border-black">
-          <div className="bg-black text-white px-4 py-2.5 text-[14px] font-bold whitespace-nowrap">
+          <div className="bg-black text-white px-2 py-1.5 text-[10px] font-bold text-center">
             COMPLETE TO ENROLL / ADD / CHANGE BANK ACCOUNTS –{" "}
             <span className="italic">
               PLEASE PRINT CLEARLY IN BLACK/BLUE INK ONLY
@@ -1229,7 +1229,7 @@ const DirectDepositForm = () => {
 
         {/* Confirmation Statement */}
         <div className="mt-4 border-[2px] border-black">
-          <div className="bg-black text-white px-2 py-1.5 text-[10px] font-bold">
+          <div className="bg-black text-white px-2 py-1.5 text-[10px] font-bold text-center">
             CONFIRMATION STATEMENT –{" "}
             <span className="italic">
               PLEASE PRINT CLEARLY IN BLACK/BLUE INK ONLY
