@@ -44,7 +44,8 @@ const W4FormHR = () => {
       setSubmission(w4Data);
       if (w4Data) {
         console.log("Setting form data with:", w4Data);
-        setFormData(flattenData(w4Data));
+        // Data from get-application is already flattened, so use it directly
+        setFormData(w4Data);
       }
     } catch (error) {
       console.error("Error fetching submission:", error);

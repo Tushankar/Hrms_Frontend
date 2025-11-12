@@ -68,7 +68,11 @@ const W4Form = () => {
       );
 
       if (appResponse.data?.data?.application) {
-        setApplicationId(appResponse.data.data.application._id);
+        const appId = appResponse.data.data.application._id;
+        setApplicationId(appId);
+
+        // Load W4 data immediately
+        await loadW4DataAsync(appId);
 
         // Calculate progress
         const backendData = appResponse.data.data;
@@ -101,24 +105,34 @@ const W4Form = () => {
     }
   };
 
-  const loadW4Data = async () => {
+  const loadW4DataAsync = async (appId) => {
     try {
-      if (!applicationId) return;
+      if (!appId) return;
+
+      console.log("Loading W4 data for application:", appId);
 
       const response = await axios.get(
-        `${baseURL}/onboarding/get-w4-form/${applicationId}`,
+        `${baseURL}/onboarding/get-w4-form/${appId}`,
         { withCredentials: true }
       );
 
+      console.log("Full response from backend:", response.data);
+
       if (response.data?.w4Form) {
+        console.log(
+          "W4 data loaded from response.data.w4Form:",
+          response.data.w4Form
+        );
         // Backend already returns data in flat format, so use it directly
         setFormData(response.data.w4Form);
         // Check if form has meaningful data (not just empty strings)
         const hasData = Object.values(response.data.w4Form).some(
           (value) => value && value.toString().trim() !== ""
         );
+        console.log("Has form data?", hasData);
         setIsFormCompleted(hasData);
       } else {
+        console.log("No w4Form data found in response:", response.data);
         setIsFormCompleted(false);
       }
     } catch (error) {
@@ -129,7 +143,7 @@ const W4Form = () => {
 
   useEffect(() => {
     if (applicationId) {
-      loadW4Data();
+      loadW4DataAsync(applicationId);
     }
   }, [applicationId]);
 
@@ -187,16 +201,22 @@ const W4Form = () => {
         },
       };
 
+      console.log("=== SAVING W4 FORM ===");
+      console.log("Frontend formData being sent:", formData);
+      console.log("Mapped backend data:", backendData);
+
       const response = await axios.post(
         `${baseURL}/onboarding/save-w4-form`,
         {
           applicationId,
           employeeId,
-          formData: backendData,
+          formData: formData, // Send the flat formData directly, not mapped
           status: "completed", // Always save as completed for now
         },
         { withCredentials: true }
       );
+
+      console.log("Save response:", response.data);
 
       if (response.data) {
         toast.success("W-4 Form saved successfully!");
