@@ -439,66 +439,88 @@ const NonCompleteAgreement = () => {
                     NON-COMPETE AGREEMENT
                   </h1>
 
-                  <p className="mb-4 sm:mb-6">
-                    This Non-Compete (the "Agreement") is made as of this{" "}
-                    <input
-                      type="text"
-                      value={formData.day}
-                      onChange={(e) => handleChange("day", e.target.value)}
-                      className="border-b border-black w-8 text-center mx-1 focus:outline-none"
-                    />{" "}
-                    day of{" "}
-                    <input
-                      type="text"
-                      value={formData.month}
-                      onChange={(e) => handleChange("month", e.target.value)}
-                      className="border-b border-black w-12 text-center mx-1 focus:outline-none"
-                    />
-                    ,{" "}
-                    <input
-                      type="text"
-                      value={formData.year}
-                      onChange={(e) => handleChange("year", e.target.value)}
-                      className="border-b border-black w-16 text-center mx-1 focus:outline-none"
-                    />{" "}
-                    (the "Effective Date") by and between Pacific Health Systems
-                    LLC ("Company"), located at 303 Corporate Center Dr., Suite
-                    325, Stockbridge, GA 30281, and{" "}
-                    <input
-                      type="text"
-                      value={formData.employeeName}
-                      onChange={(e) =>
-                        handleChange("employeeName", e.target.value)
-                      }
-                      className="border-b border-black w-full sm:w-48 mx-1 focus:outline-none"
-                    />{" "}
-                    ("Employee"), residing at{" "}
+                  <div className="space-y-3 sm:space-y-4 mb-4 sm:mb-6 text-[10px] sm:text-xs">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-baseline gap-1 sm:gap-0">
+                      <span className="mr-0 sm:mr-2">
+                        This Non-Compete (the "Agreement") is made as of this
+                      </span>
+                      <input
+                        type="text"
+                        value={formData.day}
+                        onChange={(e) => handleChange("day", e.target.value)}
+                        className="border-0 border-b border-black w-8 text-center focus:outline-none focus:border-b-2 bg-transparent"
+                      />
+                      <span className="mx-1">day of</span>
+                      <input
+                        type="text"
+                        value={formData.month}
+                        onChange={(e) => handleChange("month", e.target.value)}
+                        className="border-0 border-b border-black w-20 text-center focus:outline-none focus:border-b-2 bg-transparent"
+                      />
+                      <span>,</span>
+                      <input
+                        type="text"
+                        value={formData.year}
+                        onChange={(e) => handleChange("year", e.target.value)}
+                        className="border-0 border-b border-black w-16 text-center mx-1 focus:outline-none focus:border-b-2 bg-transparent"
+                      />
+                      <span>(the "Effective Date")</span>
+                    </div>
+
+                    <p>
+                      by and between Pacific Health Systems LLC ("Company"),
+                      located at 303 Corporate Center Dr., Suite 325,
+                      Stockbridge, GA 30281, and
+                    </p>
+
+                    <div className="flex flex-col sm:flex-row items-start sm:items-baseline gap-1 sm:gap-0">
+                      <input
+                        type="text"
+                        value={formData.employeeName}
+                        onChange={(e) =>
+                          handleChange("employeeName", e.target.value)
+                        }
+                        className="border-0 border-b border-black w-full sm:w-48 focus:outline-none focus:border-b-2 bg-transparent"
+                      />
+                      <span className="mx-0 sm:mx-2">
+                        ("Employee"), residing at
+                      </span>
+                    </div>
+
                     <input
                       type="text"
                       value={formData.employeeAddress}
                       onChange={(e) =>
                         handleChange("employeeAddress", e.target.value)
                       }
-                      className="border-b border-black w-full sm:w-64 mx-1 focus:outline-none"
+                      className="border-0 border-b border-black w-full focus:outline-none focus:border-b-2 bg-transparent"
                     />
-                    <span className="block border-b border-black w-full my-1"></span>
-                    Employee will be serving as{" "}
-                    <input
-                      type="text"
-                      value={formData.employeePosition}
-                      onChange={(e) =>
-                        handleChange("employeePosition", e.target.value)
-                      }
-                      className="border-b border-black w-full sm:w-40 mx-1 focus:outline-none"
-                    />
-                    . Employee may have access to or may generate or otherwise
-                    come into contact with proprietary and/or confidential
-                    information of the Company or the Company's clients. The
-                    Company wishes to enter into a non-compete agreement in the
-                    event Employee terminates his or her employment. In
-                    consideration of the promises and mutual covenants herein,
-                    the parties agree as follows:
-                  </p>
+
+                    <div className="flex flex-col sm:flex-row items-start sm:items-baseline gap-1 sm:gap-0">
+                      <span className="mr-0 sm:mr-2">
+                        Employee will be serving as
+                      </span>
+                      <input
+                        type="text"
+                        value={formData.employeePosition}
+                        onChange={(e) =>
+                          handleChange("employeePosition", e.target.value)
+                        }
+                        className="border-0 border-b border-black w-full sm:w-40 focus:outline-none focus:border-b-2 bg-transparent"
+                      />
+                      <span>.</span>
+                    </div>
+
+                    <p>
+                      Employee may have access to or may generate or otherwise
+                      come into contact with proprietary and/or confidential
+                      information of the Company or the Company's clients. The
+                      Company wishes to enter into a non-compete agreement in
+                      the event Employee terminates his or her employment. In
+                      consideration of the promises and mutual covenants herein,
+                      the parties agree as follows:
+                    </p>
+                  </div>
 
                   <h3 className="font-bold text-blue-700 mb-2">
                     1. Employee Covenants.

@@ -2227,6 +2227,15 @@ const I9Form = () => {
             >
               Previous
             </button>
+            <div className="flex-1 flex justify-center">
+              <button
+                type="button"
+                onClick={() => navigate("/employee/task-management")}
+                className="px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-[#1F3A93] to-[#2748B4] text-white font-semibold rounded-xl hover:from-[#16306e] hover:to-[#1F3A93] transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 text-sm sm:text-base"
+              >
+                Exit Application
+              </button>
+            </div>
             <button
               type="button"
               onClick={async () => {

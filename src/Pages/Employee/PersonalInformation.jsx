@@ -107,41 +107,6 @@ const formatDateForInput = (isoDate) => {
   return isoDate.split("T")[0];
 };
 
-// Get currency symbol based on currency code
-const getCurrencySymbol = (currencyCode) => {
-  const symbols = {
-    USD: "$",
-    EUR: "€",
-    GBP: "£",
-    CAD: "$",
-    AUD: "$",
-    INR: "₹",
-    JPY: "¥",
-    CNY: "¥",
-    CHF: "Fr",
-    NZD: "$",
-    SGD: "$",
-    HKD: "$",
-    SEK: "kr",
-    NOK: "kr",
-    DKK: "kr",
-    MXN: "$",
-    BRL: "R$",
-    ZAR: "R",
-    KRW: "₩",
-    AED: "د.إ",
-    SAR: "﷼",
-    THB: "฿",
-    MYR: "RM",
-    PHP: "₱",
-    IDR: "Rp",
-    PLN: "zł",
-    TRY: "₺",
-    RUB: "₽",
-  };
-  return symbols[currencyCode] || "$";
-};
-
 // Format SSN as 000-00-0000
 const formatSSN = (value) => {
   // Remove all non-digit characters
@@ -278,7 +243,6 @@ const PersonalInformation = () => {
     dateAvailable: "",
     socialSecurityNo: "",
     desiredSalary: "",
-    salaryCurrency: "USD",
     desiredSalaryType: "",
     positionAppliedFor: "",
 
@@ -1110,127 +1074,14 @@ const PersonalInformation = () => {
                           required
                         />
                         <div className="md:col-span-2">
-                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
-                            <FormSelect
-                              label="Currency"
-                              value={formData.salaryCurrency}
-                              onChange={(value) =>
-                                handleInputChange("salaryCurrency", value)
-                              }
-                              showPlaceholder={false}
-                              options={[
-                                { value: "USD", label: "USD ($) - US Dollar" },
-                                { value: "EUR", label: "EUR (€) - Euro" },
-                                {
-                                  value: "GBP",
-                                  label: "GBP (£) - British Pound",
-                                },
-                                {
-                                  value: "CAD",
-                                  label: "CAD ($) - Canadian Dollar",
-                                },
-                                {
-                                  value: "AUD",
-                                  label: "AUD ($) - Australian Dollar",
-                                },
-                                {
-                                  value: "INR",
-                                  label: "INR (₹) - Indian Rupee",
-                                },
-                                {
-                                  value: "JPY",
-                                  label: "JPY (¥) - Japanese Yen",
-                                },
-                                {
-                                  value: "CNY",
-                                  label: "CNY (¥) - Chinese Yuan",
-                                },
-                                {
-                                  value: "CHF",
-                                  label: "CHF (Fr) - Swiss Franc",
-                                },
-                                {
-                                  value: "NZD",
-                                  label: "NZD ($) - New Zealand Dollar",
-                                },
-                                {
-                                  value: "SGD",
-                                  label: "SGD ($) - Singapore Dollar",
-                                },
-                                {
-                                  value: "HKD",
-                                  label: "HKD ($) - Hong Kong Dollar",
-                                },
-                                {
-                                  value: "SEK",
-                                  label: "SEK (kr) - Swedish Krona",
-                                },
-                                {
-                                  value: "NOK",
-                                  label: "NOK (kr) - Norwegian Krone",
-                                },
-                                {
-                                  value: "DKK",
-                                  label: "DKK (kr) - Danish Krone",
-                                },
-                                {
-                                  value: "MXN",
-                                  label: "MXN ($) - Mexican Peso",
-                                },
-                                {
-                                  value: "BRL",
-                                  label: "BRL (R$) - Brazilian Real",
-                                },
-                                {
-                                  value: "ZAR",
-                                  label: "ZAR (R) - South African Rand",
-                                },
-                                {
-                                  value: "KRW",
-                                  label: "KRW (₩) - South Korean Won",
-                                },
-                                {
-                                  value: "AED",
-                                  label: "AED (د.إ) - UAE Dirham",
-                                },
-                                {
-                                  value: "SAR",
-                                  label: "SAR (﷼) - Saudi Riyal",
-                                },
-                                { value: "THB", label: "THB (฿) - Thai Baht" },
-                                {
-                                  value: "MYR",
-                                  label: "MYR (RM) - Malaysian Ringgit",
-                                },
-                                {
-                                  value: "PHP",
-                                  label: "PHP (₱) - Philippine Peso",
-                                },
-                                {
-                                  value: "IDR",
-                                  label: "IDR (Rp) - Indonesian Rupiah",
-                                },
-                                {
-                                  value: "PLN",
-                                  label: "PLN (zł) - Polish Zloty",
-                                },
-                                {
-                                  value: "TRY",
-                                  label: "TRY (₺) - Turkish Lira",
-                                },
-                                {
-                                  value: "RUB",
-                                  label: "RUB (₽) - Russian Ruble",
-                                },
-                              ]}
-                            />
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                             <div className="mb-4">
                               <label className="block text-sm font-semibold text-gray-700 mb-2">
                                 Desired Salary Amount
                               </label>
                               <div className="relative">
                                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-semibold">
-                                  {getCurrencySymbol(formData.salaryCurrency)}
+                                  $
                                 </span>
                                 <input
                                   type="text"
@@ -1254,7 +1105,10 @@ const PersonalInformation = () => {
                               }
                               options={[
                                 { value: "hourly", label: "Hourly" },
-                                { value: "annual", label: "Annual" },
+                                { value: "weekly", label: "Weekly" },
+                                { value: "biweekly", label: "Bi-Weekly" },
+                                { value: "monthly", label: "Monthly" },
+                                { value: "yearly", label: "Yearly" },
                               ]}
                             />
                           </div>
@@ -1390,7 +1244,7 @@ const PersonalInformation = () => {
                         {formData.isUSCitizen === "NO" && (
                           <div>
                             <label className="block text-sm font-semibold text-gray-700 mb-3">
-                              If no, are you authorized to work in the U.S.?{" "}
+                              Are you authorized to work in the U.S.?{" "}
                               <span className="text-red-500">*</span>
                             </label>
                             <div className="flex gap-6">
@@ -1608,7 +1462,7 @@ const PersonalInformation = () => {
                     <div className="flex flex-col lg:flex-row items-center lg:justify-between gap-3 md:gap-4">
                       {/* Left: Save Draft */}
                       <div className="w-full lg:w-auto order-3 lg:order-1">
-                        <button
+                        {/* <button
                           type="button"
                           onClick={() => saveForm("draft")}
                           disabled={saving}
@@ -1617,8 +1471,8 @@ const PersonalInformation = () => {
                           <Save className="w-3 h-3 md:w-4 md:h-4 mr-1 md:mr-2" />
                           <span className="text-sm md:text-base">
                             Save Draft
-                          </span>
-                        </button>
+                          </span> */}
+                        {/* </button> */}
                       </div>
 
                       {/* Center: Exit Application */}

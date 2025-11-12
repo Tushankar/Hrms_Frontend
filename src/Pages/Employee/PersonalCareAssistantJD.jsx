@@ -1222,6 +1222,13 @@ const PersonalCareAssistantJD = () => {
 
               <div className="mt-6 pt-6 border-t border-gray-200">
                 <div className="flex flex-col sm:flex-row gap-4 sm:justify-between sm:items-center">
+                  <button
+                    type="button"
+                    onClick={() => navigate("/employee/legal-disclosures")}
+                    className="px-6 sm:px-8 py-3 bg-gradient-to-r from-[#1F3A93] to-[#2748B4] text-white font-semibold rounded-xl hover:from-[#16306e] hover:to-[#1F3A93] transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 text-sm sm:text-base"
+                  >
+                    Previous Form
+                  </button>
                   <div className="w-full sm:w-auto flex justify-center">
                     <button
                       type="button"

@@ -290,15 +290,8 @@ const DrivingLicenseUpload = () => {
                 : "Government ID Upload"}
             </h1>
             <p className="text-gray-600">
-              {governmentIdType
-                ? `You have selected ${
-                    governmentIdType.charAt(0).toUpperCase() +
-                    governmentIdType.slice(1)
-                  } in your personal information. Upload your ${
-                    governmentIdType.charAt(0).toUpperCase() +
-                    governmentIdType.slice(1)
-                  } as a means of identification.`
-                : "Upload your government-issued Picture ID as a means of identification."}
+              Upload your Driver's License or any other means of photo
+              identification
             </p>
           </div>
 
@@ -507,6 +500,17 @@ const DrivingLicenseUpload = () => {
 
               <div className="mt-6 pt-6 border-t border-gray-200">
                 <div className="flex flex-col sm:flex-row gap-4 sm:justify-between sm:items-center">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      navigate("/employee/cpr-first-aid-certificate")
+                    }
+                    className="w-full sm:w-auto px-6 sm:px-8 py-3 bg-gradient-to-r from-gray-500 to-gray-600 text-white font-semibold rounded-xl hover:from-gray-600 hover:to-gray-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 text-sm sm:text-base"
+                  >
+                    <ArrowLeft className="w-4 h-4 inline mr-2" />
+                    Previous Form
+                  </button>
+
                   <div className="w-full sm:w-auto flex justify-center">
                     <button
                       type="button"

@@ -2,10 +2,10 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   ArrowLeft,
-  Target,
+  Send,
   CheckCircle,
   FileText,
-  Send,
+  Target,
   Loader2,
 } from "lucide-react";
 import toast, { Toaster } from "react-hot-toast";
@@ -40,49 +40,69 @@ const FORM_KEYS = [
   "directDeposit",
 ];
 
-export default function DirectDepositFormHR() {
+const DirectDepositFormHR = () => {
   const navigate = useNavigate();
   const { employeeId } = useParams();
-  const baseURL = import.meta.env.VITE__BASEURL;
   const [loading, setLoading] = useState(true);
   const [applicationId, setApplicationId] = useState(null);
+  const [isFormCompleted, setIsFormCompleted] = useState(false);
   const [overallProgress, setOverallProgress] = useState(0);
   const [completedFormsCount, setCompletedFormsCount] = useState(0);
-  const [isFormCompleted, setIsFormCompleted] = useState(false);
   const [notes, setNotes] = useState("");
   const [existingFeedback, setExistingFeedback] = useState(null);
   const [downloading, setDownloading] = useState(false);
+  const baseURL = import.meta.env.VITE__BASEURL;
+
   const [formData, setFormData] = useState({
-    name: "",
-    address: "",
-    city: "",
-    state: "",
-    zipCode: "",
-    telephone: "",
-    areaCode: "",
-    personEntitled: "",
-    claimId: "",
-    accountType: "",
-    paymentType: [],
-    accountNumber: "",
-    allotmentType: "",
-    allotmentAmount: "",
-    govAgencyName: "",
-    govAgencyAddress: "",
-    financialInstitution: "",
-    routingNumber: "",
-    checkDigit: "",
-    accountTitle: "",
-    repName: "",
-    repTelephone: "",
-    payeeSignature1: "",
-    payeeDate1: "",
-    payeeSignature2: "",
-    payeeDate2: "",
-    jointSignature1: "",
-    jointDate1: "",
-    jointSignature2: "",
-    jointDate2: "",
+    companyName: "Care Smart LLC / 39 18167860",
+    employeeName: "",
+    employeeNumber: "",
+    accounts: [
+      {
+        action: "",
+        accountType: "",
+        accountHolderName: "",
+        routingNumber: "",
+        accountNumber: "",
+        bankName: "",
+        depositType: "",
+        depositPercent: "",
+        depositAmount: "",
+        depositRemainder: false,
+        lastFourDigits: "",
+      },
+      {
+        action: "",
+        accountType: "",
+        accountHolderName: "",
+        routingNumber: "",
+        accountNumber: "",
+        bankName: "",
+        depositType: "",
+        depositPercent: "",
+        depositAmount: "",
+        depositRemainder: false,
+        lastFourDigits: "",
+      },
+      {
+        action: "",
+        accountType: "",
+        accountHolderName: "",
+        routingNumber: "",
+        accountNumber: "",
+        bankName: "",
+        depositType: "",
+        depositPercent: "",
+        depositAmount: "",
+        depositRemainder: false,
+        lastFourDigits: "",
+      },
+    ],
+    employeeSignature: "",
+    employeeDate: "",
+    employerName: "",
+    employerSignature: "",
+    employerDate: "",
   });
 
   useEffect(() => {
@@ -97,58 +117,99 @@ export default function DirectDepositFormHR() {
 
   const loadDirectDepositData = async () => {
     try {
+      if (!applicationId) return;
+
       const response = await axios.get(
         `${baseURL}/onboarding/get-direct-deposit/${applicationId}`,
         { withCredentials: true }
       );
 
       if (response.data?.directDeposit) {
-        const data = response.data.directDeposit;
-        setFormData({
-          name: data.name || "",
-          address: data.address || "",
-          city: data.city || "",
-          state: data.state || "",
-          zipCode: data.zipCode || "",
-          telephone: data.telephone || "",
-          areaCode: data.areaCode || "",
-          personEntitled: data.personEntitled || "",
-          claimId: data.claimId || "",
-          accountType: data.accountType || "",
-          paymentType: data.paymentType || [],
-          accountNumber: data.accountNumber || "",
-          allotmentType: data.allotmentType || "",
-          allotmentAmount: data.allotmentAmount || "",
-          govAgencyName: data.govAgencyName || "",
-          govAgencyAddress: data.govAgencyAddress || "",
-          financialInstitution: data.financialInstitution || "",
-          routingNumber: data.routingNumber || "",
-          checkDigit: data.checkDigit || "",
-          accountTitle: data.accountTitle || "",
-          repName: data.repName || "",
-          repTelephone: data.repTelephone || "",
-          payeeSignature1: data.payeeSignature1 || "",
-          payeeDate1: data.payeeDate1 || "",
-          payeeSignature2: data.payeeSignature2 || "",
-          payeeDate2: data.payeeDate2 || "",
-          jointSignature1: data.jointSignature1 || "",
-          jointDate1: data.jointDate1 || "",
-          jointSignature2: data.jointSignature2 || "",
-          jointDate2: data.jointDate2 || "",
-        });
-        const hasData = Object.values(data).some(
-          (value) =>
-            value &&
-            (Array.isArray(value)
-              ? value.length > 0
-              : value.toString().trim() !== "")
-        );
+        const depositData = response.data.directDeposit;
+
+        // Map the flat structure to the accounts array structure
+        const mappedFormData = {
+          companyName:
+            depositData.companyName || "Care Smart LLC / 39 18167860",
+          employeeName: depositData.employeeName || "",
+          employeeNumber: depositData.employeeNumber || "",
+          accounts: [
+            {
+              action: depositData.accounts_1_action || "",
+              accountType: depositData.accounts_1_accountType || "",
+              accountHolderName: depositData.accounts_1_accountHolderName || "",
+              routingNumber: depositData.accounts_1_routingNumber || "",
+              accountNumber: depositData.accounts_1_accountNumber || "",
+              bankName: depositData.accounts_1_bankName || "",
+              depositType: depositData.accounts_1_depositType || "",
+              depositPercent: depositData.accounts_1_depositPercent || "",
+              depositAmount: depositData.accounts_1_depositAmount || "",
+              depositRemainder:
+                depositData.accounts_1_depositRemainder || false,
+              lastFourDigits: depositData.accounts_1_lastFourDigits || "",
+            },
+            {
+              action: depositData.accounts_2_action || "",
+              accountType: depositData.accounts_2_accountType || "",
+              accountHolderName: depositData.accounts_2_accountHolderName || "",
+              routingNumber: depositData.accounts_2_routingNumber || "",
+              accountNumber: depositData.accounts_2_accountNumber || "",
+              bankName: depositData.accounts_2_bankName || "",
+              depositType: depositData.accounts_2_depositType || "",
+              depositPercent: depositData.accounts_2_depositPercent || "",
+              depositAmount: depositData.accounts_2_depositAmount || "",
+              depositRemainder:
+                depositData.accounts_2_depositRemainder || false,
+              lastFourDigits: depositData.accounts_2_lastFourDigits || "",
+            },
+            {
+              action: depositData.accounts_3_action || "",
+              accountType: depositData.accounts_3_accountType || "",
+              accountHolderName: depositData.accounts_3_accountHolderName || "",
+              routingNumber: depositData.accounts_3_routingNumber || "",
+              accountNumber: depositData.accounts_3_accountNumber || "",
+              bankName: depositData.accounts_3_bankName || "",
+              depositType: depositData.accounts_3_depositType || "",
+              depositPercent: depositData.accounts_3_depositPercent || "",
+              depositAmount: depositData.accounts_3_depositAmount || "",
+              depositRemainder:
+                depositData.accounts_3_depositRemainder || false,
+              lastFourDigits: depositData.accounts_3_lastFourDigits || "",
+            },
+          ],
+          employeeSignature: depositData.employeeSignature || "",
+          employeeDate: depositData.employeeDate || "",
+          employerName: depositData.employerName || "",
+          employerSignature: depositData.employerSignature || "",
+          employerDate: depositData.employerDate || "",
+        };
+
+        setFormData(mappedFormData);
+
+        // Check if form has meaningful data
+        const hasData =
+          mappedFormData.employeeName?.trim() ||
+          mappedFormData.employeeNumber?.trim() ||
+          mappedFormData.accounts.some(
+            (acc) =>
+              acc.action?.trim() ||
+              acc.routingNumber?.trim() ||
+              acc.accountNumber?.trim() ||
+              acc.accountHolderName?.trim()
+          );
         setIsFormCompleted(hasData);
+
+        if (depositData.hrFeedback) {
+          setExistingFeedback(depositData.hrFeedback);
+        }
+      } else {
+        setIsFormCompleted(false);
       }
     } catch (error) {
       if (error.response?.status !== 404) {
-        console.error("Error loading direct deposit data:", error);
+        console.error("Error loading Direct Deposit data:", error);
       }
+      setIsFormCompleted(false);
     }
   };
 
@@ -162,6 +223,7 @@ export default function DirectDepositFormHR() {
       if (appResponse.data?.data?.application) {
         setApplicationId(appResponse.data.data.application._id);
 
+        // Calculate progress
         const backendData = appResponse.data.data;
         const forms = backendData.forms || {};
         const completedFormsArray =
@@ -185,15 +247,6 @@ export default function DirectDepositFormHR() {
         setOverallProgress(percentage);
         setCompletedFormsCount(completedForms);
       }
-
-      // Load existing HR feedback
-      const feedbackResponse = await axios.get(
-        `${baseURL}/onboarding/get-direct-deposit/${appResponse.data.data.application._id}`,
-        { withCredentials: true }
-      );
-      if (feedbackResponse.data?.directDeposit?.hrFeedback) {
-        setExistingFeedback(feedbackResponse.data.directDeposit.hrFeedback);
-      }
     } catch (error) {
       console.error("Error initializing form:", error);
     } finally {
@@ -211,7 +264,7 @@ export default function DirectDepositFormHR() {
       const payload = {
         userId: employeeId,
         notes: notes.trim(),
-        formType: "DirectDepositForm",
+        formType: "directDeposit",
         timestamp: new Date().toISOString(),
       };
 
@@ -310,7 +363,7 @@ export default function DirectDepositFormHR() {
       <Toaster position="top-right" />
       <div className="max-w-5xl mx-auto px-4 sm:px-6 md:px-8 pt-6 pb-8">
         <button
-          onClick={() => navigate(-1)}
+          onClick={handlePrevious}
           className="inline-flex items-center gap-2 px-4 py-2 text-white bg-gradient-to-r from-[#1F3A93] to-[#2748B4] rounded-lg hover:from-[#16306e] hover:to-[#1F3A93] transition-all duration-200 shadow-md mb-6"
         >
           <ArrowLeft className="w-4 h-4" />
@@ -349,920 +402,730 @@ export default function DirectDepositFormHR() {
             </div>
           )}
 
-          <div className="text-center mb-6 sm:mb-8">
+          <div className="text-center mb-4">
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">
-              Direct Deposit Form
+              Direct Deposit Enrollment/Change Form - HR Review
             </h1>
             <p className="text-sm sm:text-base text-gray-600">
-              Standard Form 1199A - Direct Deposit Sign-Up (HR Review)
+              Paychex Form (HR Review)
             </p>
           </div>
 
-          <div className="p-4 bg-white font-sans direct-deposit-page">
+          {/* Form Content */}
+          <div className="direct-deposit-page max-w-4xl mx-auto bg-white p-6">
             {/* Header */}
-            <div className="flex justify-between items-start mb-4">
-              <div className="text-[9px] leading-tight">
-                <div className="font-bold">Standard Form 1199A</div>
-                <div>(Rev. April 2021)</div>
-                <div>Prescribed by Treasury Department</div>
-                <div>31 CFR 210, 240, 208, 210</div>
-              </div>
-              <div className="text-[9px]">OMB No. 1530-0006</div>
+            <div className="text-center mb-4 border-t-[3px] border-black pt-2">
+              <h1
+                className="text-3xl font-black tracking-wide mb-1"
+                style={{
+                  fontFamily: "Arial Black, sans-serif",
+                  letterSpacing: "0.1em",
+                }}
+              >
+                PAYCHEX
+              </h1>
+              <h2 className="text-base font-bold">
+                Direct Deposit Enrollment/Change Form*
+              </h2>
             </div>
 
-            <h1 className="text-xl font-bold text-center mb-3">
-              DIRECT DEPOSIT SIGN-UP FORM
-            </h1>
-
-            {/* Directions */}
-            <div className="text-[9px] leading-tight mb-4">
-              <div className="font-bold mb-1">DIRECTIONS</div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <ul className="list-disc pl-3 space-y-0.5">
-                    <li>
-                      To sign up for Direct Deposit, the payee is to read the
-                      back of this form and fill in the information requested in
-                      Sections 1 and 2. Then take or mail this form to the
-                      financial institution. The financial institution will
-                      complete Section 3.
-                    </li>
-                    <li>
-                      The completed form will be returned to the Government
-                      agency identified below.
-                    </li>
-                    <li>
-                      A separate form must be completed for each type of payment
-                      to be sent by Direct Deposit.
-                    </li>
-                  </ul>
-                </div>
-                <div>
-                  <ul className="list-disc pl-3 space-y-0.5">
-                    <li>
-                      The claim number and type of payment are printed on
-                      Government checks. (See the sample check on the back of
-                      this form.) This information is also stated on
-                      beneficiary/annuitant award letters and other documents
-                      from the Government agency.
-                    </li>
-                    <li>
-                      Payees must keep the Government agency informed of any
-                      address changes in order to receive important information
-                      about benefits and to remain qualified for payments.
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-
-            {/* Section 1 */}
-            <div className="border border-black">
-              <div className="bg-[#d4d9f7] p-1.5 font-bold text-[10px] border-b border-black">
-                SECTION 1{" "}
-                <span className="font-normal italic">
-                  (TO BE COMPLETED BY PAYEE)
-                </span>
-              </div>
-
-              <div className="grid grid-cols-12">
-                {/* Row A & D */}
-                <div className="col-span-6 border-r border-black p-1.5">
-                  <div className="text-[9px] font-bold mb-0.5">
-                    A&nbsp;&nbsp;NAME OF PAYEE{" "}
-                    <span className="font-normal italic">
-                      (last, first, middle initial)
-                    </span>
-                  </div>
-                  <input
-                    type="text"
-                    className="w-full p-0.5 border-none text-[10px] bg-[#d4d9f7]"
-                    value={formData.name}
-                    readOnly
-                  />
-                </div>
-                <div className="col-span-6 p-1.5">
-                  <div className="text-[9px] font-bold mb-0.5 flex items-center gap-2">
-                    D&nbsp;&nbsp;TYPE OF DEPOSITOR ACCOUNT
-                    <label className="flex items-center gap-0.5 font-normal ml-4">
-                      <input
-                        type="checkbox"
-                        className="w-3 h-3"
-                        checked={formData.accountType === "checking"}
-                        readOnly
-                      />
-                      CHECKING
-                    </label>
-                    <label className="flex items-center gap-0.5 font-normal ml-2">
-                      <input
-                        type="checkbox"
-                        className="w-3 h-3"
-                        checked={formData.accountType === "savings"}
-                        readOnly
-                      />
-                      SAVINGS
-                    </label>
-                  </div>
-                  <div className="text-[9px] font-bold mb-0.5 mt-1">
-                    E&nbsp;&nbsp;DEPOSITOR ACCOUNT NUMBER
-                  </div>
-                  <input
-                    type="text"
-                    className="w-full p-0.5 border-none text-[10px] bg-[#d4d9f7]"
-                    value={formData.accountNumber}
-                    readOnly
-                  />
-                </div>
-              </div>
-
-              {/* Address Row */}
-              <div className="border-t border-black p-1.5">
-                <div className="text-[9px] font-bold mb-0.5">
-                  ADDRESS{" "}
-                  <span className="font-normal italic">
-                    (street, route, P.O. Box, APO/FPO)
-                  </span>
-                </div>
+            {/* Company and Employee Info */}
+            <div className="mb-3 text-[11px]">
+              <div className="flex mb-1.5">
+                <label className="font-bold whitespace-nowrap mr-2">
+                  Company Name and/or Client Number
+                </label>
                 <input
                   type="text"
-                  className="w-full p-0.5 border-none text-[10px] bg-[#d4d9f7]"
-                  value={formData.address}
+                  value={formData.companyName}
                   readOnly
+                  className="flex-1 border-b border-black px-1 outline-none bg-transparent"
                 />
               </div>
-
-              {/* City, State, Zip & Payment Type */}
-              <div className="grid grid-cols-12 border-t border-black">
-                <div className="col-span-6 border-r border-black">
-                  <div className="grid grid-cols-12">
-                    <div className="col-span-5 border-r border-black p-1.5">
-                      <div className="text-[9px] font-bold mb-0.5">CITY</div>
-                      <input
-                        type="text"
-                        className="w-full p-0.5 border-none text-[10px] bg-[#d4d9f7]"
-                        value={formData.city}
-                        readOnly
-                      />
-                    </div>
-                    <div className="col-span-3 border-r border-black p-1.5">
-                      <div className="text-[9px] font-bold mb-0.5">STATE</div>
-                      <input
-                        type="text"
-                        className="w-full p-0.5 border-none text-[10px] bg-[#d4d9f7]"
-                        value={formData.state}
-                        readOnly
-                      />
-                    </div>
-                    <div className="col-span-4 p-1.5">
-                      <div className="text-[9px] font-bold mb-0.5">
-                        ZIP CODE
-                      </div>
-                      <input
-                        type="text"
-                        className="w-full p-0.5 border-none text-[10px] bg-[#d4d9f7]"
-                        value={formData.zipCode}
-                        readOnly
-                      />
-                    </div>
-                  </div>
-                </div>
-                <div className="col-span-6 p-1.5">
-                  <div className="text-[9px] font-bold mb-1">
-                    F&nbsp;&nbsp;TYPE OF PAYMENT{" "}
-                    <span className="font-normal italic">(Check only one)</span>
-                  </div>
-                  <div className="grid grid-cols-2 gap-x-2 text-[8px] leading-tight">
-                    <div className="space-y-0.5">
-                      <label className="flex items-center gap-0.5">
-                        <input
-                          type="checkbox"
-                          className="w-2.5 h-2.5 flex-shrink-0"
-                          checked={formData.paymentType?.includes(
-                            "Social Security"
-                          )}
-                          readOnly
-                        />
-                        <span>Social Security</span>
-                      </label>
-                      <label className="flex items-center gap-0.5">
-                        <input
-                          type="checkbox"
-                          className="w-2.5 h-2.5 flex-shrink-0"
-                          checked={formData.paymentType?.includes(
-                            "Supplemental Security Income"
-                          )}
-                          readOnly
-                        />
-                        <span>Supplemental Security Income</span>
-                      </label>
-                      <label className="flex items-center gap-0.5">
-                        <input
-                          type="checkbox"
-                          className="w-2.5 h-2.5 flex-shrink-0"
-                          checked={formData.paymentType?.includes(
-                            "Railroad Retirement"
-                          )}
-                          readOnly
-                        />
-                        <span>Railroad Retirement</span>
-                      </label>
-                      <label className="flex items-center gap-0.5">
-                        <input
-                          type="checkbox"
-                          className="w-2.5 h-2.5 flex-shrink-0"
-                          checked={formData.paymentType?.includes(
-                            "Civil Service Retirement (OPM)"
-                          )}
-                          readOnly
-                        />
-                        <span>Civil Service Retirement (OPM)</span>
-                      </label>
-                      <label className="flex items-center gap-0.5">
-                        <input
-                          type="checkbox"
-                          className="w-2.5 h-2.5 flex-shrink-0"
-                          checked={formData.paymentType?.includes(
-                            "VA Compensation or Pension"
-                          )}
-                          readOnly
-                        />
-                        <span>VA Compensation or Pension</span>
-                      </label>
-                    </div>
-                    <div className="space-y-0.5">
-                      <label className="flex items-center gap-0.5">
-                        <input
-                          type="checkbox"
-                          className="w-2.5 h-2.5 flex-shrink-0"
-                          checked={formData.paymentType?.includes(
-                            "Fed. Salary/Mil. Civilian Pay"
-                          )}
-                          readOnly
-                        />
-                        <span>Fed. Salary/Mil. Civilian Pay</span>
-                      </label>
-                      <label className="flex items-center gap-0.5">
-                        <input
-                          type="checkbox"
-                          className="w-2.5 h-2.5 flex-shrink-0"
-                          checked={formData.paymentType?.includes(
-                            "Mil. Active"
-                          )}
-                          readOnly
-                        />
-                        <span>Mil. Active</span>
-                      </label>
-                      <label className="flex items-center gap-0.5">
-                        <input
-                          type="checkbox"
-                          className="w-2.5 h-2.5 flex-shrink-0"
-                          checked={formData.paymentType?.includes(
-                            "Mil. Retired"
-                          )}
-                          readOnly
-                        />
-                        <span>Mil. Retired</span>
-                      </label>
-                      <label className="flex items-center gap-0.5">
-                        <input
-                          type="checkbox"
-                          className="w-2.5 h-2.5 flex-shrink-0"
-                          checked={formData.paymentType?.includes(
-                            "Mil. Survivor"
-                          )}
-                          readOnly
-                        />
-                        <span>Mil. Survivor</span>
-                      </label>
-                      <label className="flex items-center gap-0.5">
-                        <input
-                          type="checkbox"
-                          className="w-2.5 h-2.5 flex-shrink-0"
-                          checked={formData.paymentType?.includes("Other")}
-                          readOnly
-                        />
-                        <span>Other</span>
-                      </label>
-                    </div>
-                  </div>
-                </div>
+              <div className="flex mb-1.5 items-end">
+                <label className="font-bold whitespace-nowrap mr-2">
+                  Employee/Worker Name
+                </label>
+                <input
+                  type="text"
+                  value={formData.employeeName}
+                  readOnly
+                  className="flex-1 border-b border-black px-1 outline-none bg-transparent mr-6"
+                />
+                <label className="font-bold whitespace-nowrap mr-2">
+                  Employee/Worker Number
+                </label>
+                <input
+                  type="text"
+                  value={formData.employeeNumber}
+                  readOnly
+                  className="w-32 border-b border-black px-1 outline-none bg-transparent"
+                />
               </div>
-
-              {/* Telephone & Allotment */}
-              <div className="grid grid-cols-12 border-t border-black">
-                <div className="col-span-6 border-r border-black">
-                  <div className="grid grid-cols-2">
-                    <div className="border-r border-black p-1.5">
-                      <div className="text-[9px] font-bold mb-0.5">
-                        TELEPHONE NUMBER
-                      </div>
-                      <input
-                        type="text"
-                        className="w-full p-0.5 border-none text-[10px] bg-[#d4d9f7]"
-                        value={formData.telephone}
-                        readOnly
-                      />
-                    </div>
-                    <div className="p-1.5">
-                      <div className="text-[9px] font-bold mb-0.5">
-                        AREA CODE
-                      </div>
-                      <input
-                        type="text"
-                        className="w-full p-0.5 border-none text-[10px] bg-[#d4d9f7]"
-                        value={formData.areaCode}
-                        readOnly
-                      />
-                    </div>
-                  </div>
-                </div>
-                <div className="col-span-6 p-1.5">
-                  <div className="text-[9px] font-bold mb-0.5">
-                    G&nbsp;&nbsp;THIS BOX FOR ALLOTMENT OF PAYMENT ONLY{" "}
-                    <span className="font-normal italic">(if applicable)</span>
-                  </div>
-                  <div className="grid grid-cols-2 gap-1">
-                    <div>
-                      <div className="text-[9px] font-bold mb-0.5">TYPE</div>
-                      <input
-                        type="text"
-                        className="w-full p-0.5 border-none text-[10px] bg-[#d4d9f7]"
-                        value={formData.allotmentType}
-                        readOnly
-                      />
-                    </div>
-                    <div>
-                      <div className="text-[9px] font-bold mb-0.5">AMOUNT</div>
-                      <input
-                        type="text"
-                        className="w-full p-0.5 border-none text-[10px] bg-[#d4d9f7]"
-                        value={formData.allotmentAmount}
-                        readOnly
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Person Entitled & Claim ID */}
-              <div className="grid grid-cols-2 border-t border-black">
-                <div className="border-r border-black p-1.5">
-                  <div className="text-[9px] font-bold mb-0.5">
-                    B&nbsp;&nbsp;NAME OF PERSON(S) ENTITLED TO PAYMENT
-                  </div>
-                  <input
-                    type="text"
-                    className="w-full p-0.5 border-none text-[10px] bg-[#d4d9f7]"
-                    value={formData.personEntitled}
-                    readOnly
-                  />
-                </div>
-                <div className="p-1.5">
-                  <div className="text-[9px] font-bold mb-0.5">
-                    C&nbsp;&nbsp;CLAIM OR PAYROLL ID NUMBER
-                  </div>
-                  <input
-                    type="text"
-                    className="w-full p-0.5 border-none text-[10px] bg-[#d4d9f7]"
-                    value={formData.claimId}
-                    readOnly
-                  />
-                </div>
-              </div>
-
-              {/* Certifications */}
-              <div className="grid grid-cols-2 border-t border-black">
-                <div className="border-r border-black p-1.5">
-                  <div className="flex items-center justify-center gap-1 mb-1">
-                    <div className="text-[8px]">Prefix</div>
-                    <input
-                      type="text"
-                      className="w-12 p-0.5 border-none text-[9px] bg-[#d4d9f7]"
-                      readOnly
-                    />
-                    <div className="text-[8px]">Suffix</div>
-                    <input
-                      type="text"
-                      className="w-12 p-0.5 border-none text-[9px] bg-[#d4d9f7]"
-                      readOnly
-                    />
-                  </div>
-                  <div className="text-[9px] font-bold text-center mb-1">
-                    PAYEE/JOINT PAYEE CERTIFICATION
-                  </div>
-                  <div className="text-[7px] leading-tight mb-1">
-                    I certify that I have read, understand, and agree to the
-                    conditions stated in the Special Notice To Joint Account
-                    Holders printed on the back side. I authorize the financial
-                    institution named below to receive ACH credit entries, and
-                    if necessary, ACH debit entries and adjustments for any ACH
-                    credit entries made in error to the account indicated above.
-                    I have read and understood the back of this form. In signing
-                    this form, I authorize my payment to be sent to the
-                    financial institution named below to be deposited to the
-                    designated account.
-                  </div>
-                  <div className="grid grid-cols-2 gap-1 mb-1">
-                    <div>
-                      <div className="text-[8px] font-bold mb-0.5">
-                        SIGNATURE
-                      </div>
-                      <input
-                        type="text"
-                        value={formData.payeeSignature1}
-                        className="w-full p-0.5 border-none text-[9px] bg-[#d4d9f7] h-5"
-                        readOnly
-                      />
-                    </div>
-                    <div>
-                      <div className="text-[8px] font-bold mb-0.5">DATE</div>
-                      <input
-                        type="text"
-                        value={formData.payeeDate1}
-                        className="w-full p-0.5 border-none text-[9px] bg-[#d4d9f7] h-5"
-                        readOnly
-                      />
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-1">
-                    <div>
-                      <div className="text-[8px] font-bold mb-0.5">
-                        SIGNATURE
-                      </div>
-                      <input
-                        type="text"
-                        value={formData.payeeSignature2}
-                        className="w-full p-0.5 border-none text-[9px] bg-[#d4d9f7] h-5"
-                        readOnly
-                      />
-                    </div>
-                    <div>
-                      <div className="text-[8px] font-bold mb-0.5">DATE</div>
-                      <input
-                        type="text"
-                        value={formData.payeeDate2}
-                        className="w-full p-0.5 border-none text-[9px] bg-[#d4d9f7] h-5"
-                        readOnly
-                      />
-                    </div>
-                  </div>
-                </div>
-                <div className="p-1.5">
-                  <div className="text-[9px] font-bold text-center mb-1">
-                    JOINT ACCOUNT HOLDERS' CERTIFICATION
-                  </div>
-                  <div className="text-[7px] leading-tight mb-1">
-                    I certify that I have read and understood the back of this
-                    form, including the SPECIAL NOTICE TO JOINT ACCOUNT HOLDERS.
-                  </div>
-                  <div className="grid grid-cols-2 gap-1 mb-1">
-                    <div>
-                      <div className="text-[8px] font-bold mb-0.5">
-                        SIGNATURE
-                      </div>
-                      <input
-                        type="text"
-                        value={formData.jointSignature1}
-                        className="w-full p-0.5 border-none text-[9px] bg-[#d4d9f7] h-5"
-                        readOnly
-                      />
-                    </div>
-                    <div>
-                      <div className="text-[8px] font-bold mb-0.5">DATE</div>
-                      <input
-                        type="text"
-                        value={formData.jointDate1}
-                        className="w-full p-0.5 border-none text-[9px] bg-[#d4d9f7] h-5"
-                        readOnly
-                      />
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-1">
-                    <div>
-                      <div className="text-[8px] font-bold mb-0.5">
-                        SIGNATURE
-                      </div>
-                      <input
-                        type="text"
-                        value={formData.jointSignature2}
-                        className="w-full p-0.5 border-none text-[9px] bg-[#d4d9f7] h-5"
-                        readOnly
-                      />
-                    </div>
-                    <div>
-                      <div className="text-[8px] font-bold mb-0.5">DATE</div>
-                      <input
-                        type="text"
-                        value={formData.jointDate2}
-                        className="w-full p-0.5 border-none text-[9px] bg-[#d4d9f7] h-5"
-                        readOnly
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <p className="text-[10px] mb-0.5">
+                <span className="font-bold">Employee/Worker:</span> Retain a
+                copy of this form for your records. Return the original to your
+                employer/company.
+              </p>
+              <p className="text-[10px]">
+                <span className="font-bold">Employer/Company:</span> Please
+                retain a copy of this document for your records.
+              </p>
             </div>
 
-            {/* Section 2 */}
-            <div className="border border-black border-t-0">
-              <div className="bg-[#d4d9f7] p-1.5 font-bold text-[10px] border-t border-black">
-                SECTION 2{" "}
-                <span className="font-normal italic">
-                  (TO BE COMPLETED BY PAYEE OR FINANCIAL INSTITUTION)
+            {/* Main Form Section */}
+            <div className="border-[2px] border-black">
+              <div className="bg-black text-white px-2 py-1.5 text-[10px] font-bold">
+                COMPLETE TO ENROLL / ADD / CHANGE BANK ACCOUNTS –{" "}
+                <span className="italic">
+                  PLEASE PRINT CLEARLY IN BLACK/BLUE INK ONLY
                 </span>
               </div>
-              <div className="grid grid-cols-2">
-                <div className="border-r border-black p-1.5">
-                  <div className="text-[9px] font-bold mb-0.5">
-                    GOVERNMENT AGENCY NAME
+
+              {/* Account 1 */}
+              <div className="border-b-[2px] border-black">
+                {/* Action Row */}
+                <div className="flex border-b border-black text-[10px]">
+                  <div className="flex items-center px-2 py-1.5 border-r border-black">
+                    <input
+                      type="checkbox"
+                      checked={formData.accounts[0].action === "add"}
+                      readOnly
+                      className="mr-1 w-3 h-3"
+                    />
+                    <label className="font-bold whitespace-nowrap">
+                      Add new
+                    </label>
                   </div>
-                  <textarea
-                    className="w-full p-0.5 border-none text-[10px] bg-[#d4d9f7] h-16 resize-none"
-                    value={formData.govAgencyName}
-                    readOnly
-                  />
+                  <div className="flex items-center px-2 py-1.5 border-r border-black">
+                    <input
+                      type="checkbox"
+                      checked={formData.accounts[0].action === "update"}
+                      readOnly
+                      className="mr-1 w-3 h-3"
+                    />
+                    <label className="font-bold whitespace-nowrap">
+                      Update existing account
+                    </label>
+                  </div>
+                  <div className="flex items-center px-2 py-1.5 border-r border-black">
+                    <input
+                      type="checkbox"
+                      checked={formData.accounts[0].action === "replace"}
+                      readOnly
+                      className="mr-1 w-3 h-3"
+                    />
+                    <label className="font-bold whitespace-nowrap">
+                      Replace existing account
+                    </label>
+                  </div>
+                  <div className="flex items-center px-2 py-1.5 flex-1">
+                    <label className="font-bold whitespace-nowrap mr-1">
+                      Last 4 digits of the existing account number
+                    </label>
+                    <input
+                      type="text"
+                      maxLength="4"
+                      value={formData.accounts[0].lastFourDigits}
+                      readOnly
+                      className="w-12 border-b border-black px-1 outline-none bg-transparent"
+                    />
+                  </div>
                 </div>
-                <div className="p-1.5">
-                  <div className="text-[9px] font-bold mb-0.5">
-                    GOVERNMENT AGENCY ADDRESS
+
+                {/* Account Type Row */}
+                <div className="flex border-b border-black text-[10px]">
+                  <div className="px-2 py-1.5 border-r border-black font-bold whitespace-nowrap">
+                    Type of Account
                   </div>
-                  <textarea
-                    className="w-full p-0.5 border-none text-[10px] bg-[#d4d9f7] h-16 resize-none"
-                    value={formData.govAgencyAddress}
-                    readOnly
-                  />
+                  <div className="flex items-center px-2 py-1.5 border-r border-black">
+                    <input
+                      type="checkbox"
+                      checked={formData.accounts[0].accountType === "checking"}
+                      readOnly
+                      className="mr-1 w-3 h-3"
+                    />
+                    <label className="whitespace-nowrap">Checking</label>
+                  </div>
+                  <div className="flex items-center px-2 py-1.5 border-r border-black">
+                    <input
+                      type="checkbox"
+                      checked={formData.accounts[0].accountType === "savings"}
+                      readOnly
+                      className="mr-1 w-3 h-3"
+                    />
+                    <label className="whitespace-nowrap">Savings</label>
+                  </div>
+                  <div className="flex items-center px-2 py-1.5 flex-1">
+                    <label className="font-bold whitespace-nowrap mr-1">
+                      Account holder's Name:
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.accounts[0].accountHolderName}
+                      readOnly
+                      className="flex-1 border-b border-black px-1 outline-none bg-transparent border-0"
+                    />
+                  </div>
+                </div>
+
+                {/* Routing Number Row */}
+                <div className="flex border-b border-black text-[10px]">
+                  <div className="px-2 py-1.5 border-r border-black font-bold whitespace-nowrap w-44">
+                    Routing/Transit Number
+                  </div>
+                  <div className="flex-1 px-2 py-1.5">
+                    <input
+                      type="text"
+                      maxLength="9"
+                      value={formData.accounts[0].routingNumber}
+                      readOnly
+                      className="w-full border-b border-black px-1 outline-none bg-transparent border-0"
+                    />
+                  </div>
+                </div>
+
+                {/* Account Number Row */}
+                <div className="flex border-b border-black text-[10px]">
+                  <div className="px-2 py-1.5 border-r border-black font-bold whitespace-nowrap w-44">
+                    Checking/Savings Account Number**
+                  </div>
+                  <div className="flex-1 px-2 py-1.5">
+                    <input
+                      type="text"
+                      maxLength="17"
+                      value={formData.accounts[0].accountNumber}
+                      readOnly
+                      className="w-full border-b border-black px-1 outline-none bg-transparent border-0"
+                    />
+                  </div>
+                </div>
+
+                {/* Bank Name Row */}
+                <div className="flex border-b border-black text-[10px]">
+                  <div className="px-2 py-1.5 border-r border-black font-bold whitespace-nowrap w-44">
+                    Financial Institution ("Bank") Name
+                  </div>
+                  <div className="flex-1 px-2 py-1.5 border-0">
+                    <input
+                      type="text"
+                      value={formData.accounts[0].bankName}
+                      readOnly
+                      className="w-full px-1 outline-none bg-transparent border-0"
+                    />
+                  </div>
+                </div>
+
+                {/* Deposit Amount Row */}
+                <div className="flex text-[10px]">
+                  <div className="px-2 py-1.5 border-r border-black font-bold whitespace-nowrap">
+                    I wish to deposit (check one):
+                  </div>
+                  <div className="flex items-center px-2 py-1.5 border-r border-black border-0">
+                    <input
+                      type="text"
+                      value={formData.accounts[0].depositPercent}
+                      readOnly
+                      className="w-10 border-b border-black px-1 outline-none bg-transparent mr-1 border-0"
+                    />
+                    <label className="whitespace-nowrap">% of Net</label>
+                  </div>
+                  <div className="flex items-center px-2 py-1.5 border-r border-black border-0">
+                    <label className="whitespace-nowrap mr-1">
+                      Specific Dollar Amount $
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.accounts[0].depositAmount}
+                      readOnly
+                      className="w-20 border-b border-black px-1 outline-none bg-transparent border-0"
+                    />
+                    <span className="ml-1">.00</span>
+                  </div>
+                  <div className="flex items-center px-2 py-1.5 flex-1">
+                    <input
+                      type="checkbox"
+                      checked={formData.accounts[0].depositRemainder}
+                      readOnly
+                      className="mr-1 w-3 h-3"
+                    />
+                    <label className="whitespace-nowrap">
+                      Remainder of Net Pay
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              {/* Account 2 */}
+              <div className="border-b-[2px] border-black">
+                {/* Action Row */}
+                <div className="flex border-b border-black text-[10px]">
+                  <div className="flex items-center px-2 py-1.5 border-r border-black">
+                    <input
+                      type="checkbox"
+                      checked={formData.accounts[1].action === "add"}
+                      readOnly
+                      className="mr-1 w-3 h-3"
+                    />
+                    <label className="font-bold whitespace-nowrap">
+                      Add new
+                    </label>
+                  </div>
+                  <div className="flex items-center px-2 py-1.5 border-r border-black">
+                    <input
+                      type="checkbox"
+                      checked={formData.accounts[1].action === "update"}
+                      readOnly
+                      className="mr-1 w-3 h-3"
+                    />
+                    <label className="font-bold whitespace-nowrap">
+                      Update existing account
+                    </label>
+                  </div>
+                  <div className="flex items-center px-2 py-1.5 border-r border-black">
+                    <input
+                      type="checkbox"
+                      checked={formData.accounts[1].action === "replace"}
+                      readOnly
+                      className="mr-1 w-3 h-3"
+                    />
+                    <label className="font-bold whitespace-nowrap">
+                      Replace existing account
+                    </label>
+                  </div>
+                  <div className="flex items-center px-2 py-1.5 flex-1">
+                    <label className="font-bold whitespace-nowrap mr-1">
+                      Last 4 digits of the existing account number
+                    </label>
+                    <input
+                      type="text"
+                      maxLength="4"
+                      value={formData.accounts[1].lastFourDigits}
+                      readOnly
+                      className="w-12 border-b border-black px-1 outline-none bg-transparent"
+                    />
+                  </div>
+                </div>
+
+                {/* Account Type Row */}
+                <div className="flex border-b border-black text-[10px]">
+                  <div className="px-2 py-1.5 border-r border-black font-bold whitespace-nowrap">
+                    Type of Account
+                  </div>
+                  <div className="flex items-center px-2 py-1.5 border-r border-black">
+                    <input
+                      type="checkbox"
+                      checked={formData.accounts[1].accountType === "checking"}
+                      readOnly
+                      className="mr-1 w-3 h-3"
+                    />
+                    <label className="whitespace-nowrap">Checking</label>
+                  </div>
+                  <div className="flex items-center px-2 py-1.5 border-r border-black">
+                    <input
+                      type="checkbox"
+                      checked={formData.accounts[1].accountType === "savings"}
+                      readOnly
+                      className="mr-1 w-3 h-3"
+                    />
+                    <label className="whitespace-nowrap">Savings</label>
+                  </div>
+                  <div className="flex items-center px-2 py-1.5 flex-1">
+                    <label className="font-bold whitespace-nowrap mr-1">
+                      Account holder's Name:
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.accounts[1].accountHolderName}
+                      readOnly
+                      className="flex-1 border-b border-black px-1 outline-none bg-transparent border-0"
+                    />
+                  </div>
+                </div>
+
+                {/* Routing Number Row */}
+                <div className="flex border-b border-black text-[10px]">
+                  <div className="px-2 py-1.5 border-r border-black font-bold whitespace-nowrap w-44">
+                    Routing/Transit Number
+                  </div>
+                  <div className="flex-1 px-2 py-1.5">
+                    <input
+                      type="text"
+                      maxLength="9"
+                      value={formData.accounts[1].routingNumber}
+                      readOnly
+                      className="w-full border-b border-black px-1 outline-none bg-transparent border-0"
+                    />
+                  </div>
+                </div>
+
+                {/* Account Number Row */}
+                <div className="flex border-b border-black text-[10px]">
+                  <div className="px-2 py-1.5 border-r border-black font-bold whitespace-nowrap w-44">
+                    Checking/Savings Account Number**
+                  </div>
+                  <div className="flex-1 px-2 py-1.5">
+                    <input
+                      type="text"
+                      maxLength="17"
+                      value={formData.accounts[1].accountNumber}
+                      readOnly
+                      className="w-full border-b border-black px-1 outline-none bg-transparent border-0"
+                    />
+                  </div>
+                </div>
+
+                {/* Bank Name Row */}
+                <div className="flex border-b border-black text-[10px]">
+                  <div className="px-2 py-1.5 border-r border-black font-bold whitespace-nowrap w-44">
+                    Financial Institution ("Bank") Name
+                  </div>
+                  <div className="flex-1 px-2 py-1.5 border-0">
+                    <input
+                      type="text"
+                      value={formData.accounts[1].bankName}
+                      readOnly
+                      className="w-full px-1 outline-none bg-transparent border-0"
+                    />
+                  </div>
+                </div>
+
+                {/* Deposit Amount Row */}
+                <div className="flex text-[10px]">
+                  <div className="px-2 py-1.5 border-r border-black font-bold whitespace-nowrap">
+                    I wish to deposit (check one):
+                  </div>
+                  <div className="flex items-center px-2 py-1.5 border-r border-black border-0">
+                    <input
+                      type="text"
+                      value={formData.accounts[1].depositPercent}
+                      readOnly
+                      className="w-10 border-b border-black px-1 outline-none bg-transparent mr-1 border-0"
+                    />
+                    <label className="whitespace-nowrap">% of Net</label>
+                  </div>
+                  <div className="flex items-center px-2 py-1.5 border-r border-black border-0">
+                    <label className="whitespace-nowrap mr-1">
+                      Specific Dollar Amount $
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.accounts[1].depositAmount}
+                      readOnly
+                      className="w-20 border-b border-black px-1 outline-none bg-transparent border-0"
+                    />
+                    <span className="ml-1">.00</span>
+                  </div>
+                  <div className="flex items-center px-2 py-1.5 flex-1">
+                    <input
+                      type="checkbox"
+                      checked={formData.accounts[1].depositRemainder}
+                      readOnly
+                      className="mr-1 w-3 h-3"
+                    />
+                    <label className="whitespace-nowrap">
+                      Remainder of Net Pay
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              {/* Account 3 */}
+              <div>
+                {/* Action Row */}
+                <div className="flex border-b border-black text-[10px]">
+                  <div className="flex items-center px-2 py-1.5 border-r border-black">
+                    <input
+                      type="checkbox"
+                      checked={formData.accounts[2].action === "add"}
+                      readOnly
+                      className="mr-1 w-3 h-3"
+                    />
+                    <label className="font-bold whitespace-nowrap">
+                      Add new
+                    </label>
+                  </div>
+                  <div className="flex items-center px-2 py-1.5 border-r border-black">
+                    <input
+                      type="checkbox"
+                      checked={formData.accounts[2].action === "update"}
+                      readOnly
+                      className="mr-1 w-3 h-3"
+                    />
+                    <label className="font-bold whitespace-nowrap">
+                      Update existing account
+                    </label>
+                  </div>
+                  <div className="flex items-center px-2 py-1.5 border-r border-black">
+                    <input
+                      type="checkbox"
+                      checked={formData.accounts[2].action === "replace"}
+                      readOnly
+                      className="mr-1 w-3 h-3"
+                    />
+                    <label className="font-bold whitespace-nowrap">
+                      Replace existing account
+                    </label>
+                  </div>
+                  <div className="flex items-center px-2 py-1.5 flex-1">
+                    <label className="font-bold whitespace-nowrap mr-1">
+                      Last 4 digits of the existing account number
+                    </label>
+                    <input
+                      type="text"
+                      maxLength="4"
+                      value={formData.accounts[2].lastFourDigits}
+                      readOnly
+                      className="w-12 border-b border-black px-1 outline-none bg-transparent"
+                    />
+                  </div>
+                </div>
+
+                {/* Account Type Row */}
+                <div className="flex border-b border-black text-[10px]">
+                  <div className="px-2 py-1.5 border-r border-black font-bold whitespace-nowrap">
+                    Type of Account
+                  </div>
+                  <div className="flex items-center px-2 py-1.5 border-r border-black">
+                    <input
+                      type="checkbox"
+                      checked={formData.accounts[2].accountType === "checking"}
+                      readOnly
+                      className="mr-1 w-3 h-3"
+                    />
+                    <label className="whitespace-nowrap">Checking</label>
+                  </div>
+                  <div className="flex items-center px-2 py-1.5 border-r border-black">
+                    <input
+                      type="checkbox"
+                      checked={formData.accounts[2].accountType === "savings"}
+                      readOnly
+                      className="mr-1 w-3 h-3"
+                    />
+                    <label className="whitespace-nowrap">Savings</label>
+                  </div>
+                  <div className="flex items-center px-2 py-1.5 flex-1">
+                    <label className="font-bold whitespace-nowrap mr-1">
+                      Account holder's Name:
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.accounts[2].accountHolderName}
+                      readOnly
+                      className="flex-1 border-b border-black px-1 outline-none bg-transparent border-0"
+                    />
+                  </div>
+                </div>
+
+                {/* Routing Number Row */}
+                <div className="flex border-b border-black text-[10px]">
+                  <div className="px-2 py-1.5 border-r border-black font-bold whitespace-nowrap w-44">
+                    Routing/Transit Number
+                  </div>
+                  <div className="flex-1 px-2 py-1.5">
+                    <input
+                      type="text"
+                      maxLength="9"
+                      value={formData.accounts[2].routingNumber}
+                      readOnly
+                      className="w-full border-b border-black px-1 outline-none bg-transparent border-0"
+                    />
+                  </div>
+                </div>
+
+                {/* Account Number Row */}
+                <div className="flex border-b border-black text-[10px]">
+                  <div className="px-2 py-1.5 border-r border-black font-bold whitespace-nowrap w-44">
+                    Checking/Savings Account Number**
+                  </div>
+                  <div className="flex-1 px-2 py-1.5">
+                    <input
+                      type="text"
+                      maxLength="17"
+                      value={formData.accounts[2].accountNumber}
+                      readOnly
+                      className="w-full border-b border-black px-1 outline-none bg-transparent border-0"
+                    />
+                  </div>
+                </div>
+
+                {/* Bank Name Row */}
+                <div className="flex border-b border-black text-[10px]">
+                  <div className="px-2 py-1.5 border-r border-black font-bold whitespace-nowrap w-44">
+                    Financial Institution ("Bank") Name
+                  </div>
+                  <div className="flex-1 px-2 py-1.5 border-0">
+                    <input
+                      type="text"
+                      value={formData.accounts[2].bankName}
+                      readOnly
+                      className="w-full px-1 outline-none bg-transparent border-0"
+                    />
+                  </div>
+                </div>
+
+                {/* Deposit Amount Row */}
+                <div className="flex text-[10px]">
+                  <div className="px-2 py-1.5 border-r border-black font-bold whitespace-nowrap">
+                    I wish to deposit (check one):
+                  </div>
+                  <div className="flex items-center px-2 py-1.5 border-r border-black border-0">
+                    <input
+                      type="text"
+                      value={formData.accounts[2].depositPercent}
+                      readOnly
+                      className="w-10 border-b border-black px-1 outline-none bg-transparent mr-1 border-0"
+                    />
+                    <label className="whitespace-nowrap">% of Net</label>
+                  </div>
+                  <div className="flex items-center px-2 py-1.5 border-r border-black border-0">
+                    <label className="whitespace-nowrap mr-1">
+                      Specific Dollar Amount $
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.accounts[2].depositAmount}
+                      readOnly
+                      className="w-20 border-b border-black px-1 outline-none bg-transparent border-0"
+                    />
+                    <span className="ml-1">.00</span>
+                  </div>
+                  <div className="flex items-center px-2 py-1.5 flex-1">
+                    <input
+                      type="checkbox"
+                      checked={formData.accounts[2].depositRemainder}
+                      readOnly
+                      className="mr-1 w-3 h-3"
+                    />
+                    <label className="whitespace-nowrap">
+                      Remainder of Net Pay
+                    </label>
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Section 3 */}
-            <div className="border border-black border-t-0">
-              <div className="bg-[#d4d9f7] p-1.5 font-bold text-[10px] border-t border-black">
-                SECTION 3{" "}
-                <span className="font-normal italic">
-                  (TO BE COMPLETED BY FINANCIAL INSTITUTION)
+            {/* Confirmation Statement */}
+            <div className="mt-4 border-[2px] border-black">
+              <div className="bg-black text-white px-2 py-1.5 text-[10px] font-bold">
+                CONFIRMATION STATEMENT –{" "}
+                <span className="italic">
+                  PLEASE PRINT CLEARLY IN BLACK/BLUE INK ONLY
                 </span>
               </div>
-              <div className="grid grid-cols-12">
-                <div className="col-span-6 border-r border-black p-1.5">
-                  <div className="text-[9px] font-bold mb-0.5">
-                    NAME AND ADDRESS OF FINANCIAL INSTITUTION
-                  </div>
-                  <textarea
-                    className="w-full p-0.5 border-none text-[10px] bg-[#d4d9f7] h-20 resize-none"
-                    value={formData.financialInstitution}
+              <div className="p-3 text-[10px] leading-tight">
+                <p className="mb-3">
+                  I authorize my employer/company to deposit and I authorize my
+                  earnings into the bank account(s) specified above and, if
+                  necessary, to electronically debit the account to correct
+                  erroneous credits. I understand that this authorization will
+                  remain in effect until I notify Company in writing that I wish
+                  to revoke it. I certify the account number accurately reflects
+                  my intended receiving account. I agree that direct deposit
+                  transactions I authorize comply with all applicable laws. My
+                  signature below indicates that I am agreeing to all terms that
+                  are set forth in this document. I further agree that the
+                  authority of the accountholder to authorize my
+                  employer/company make direct deposits into the named account.
+                  I understand that this authorization will remain in full force
+                  and effect until I notify Company in writing that I wish to
+                  revoke my authorization and understand that the Company
+                  requires at least 5 business days prior notice to cancel this
+                  authorization.
+                </p>
+
+                <div className="flex items-center mb-3">
+                  <div className="w-3.5 h-3.5 border-[2px] border-black mr-2 flex-shrink-0"></div>
+                  <label className="font-bold whitespace-nowrap mr-2">
+                    Employee/Worker Signature:
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.employeeSignature}
                     readOnly
+                    className="flex-1 border-b border-black px-1 outline-none bg-transparent mr-4"
+                    style={{ fontFamily: "Brush Script MT, cursive" }}
+                  />
+                  <label className="font-bold whitespace-nowrap mr-2">
+                    Date:
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.employeeDate}
+                    readOnly
+                    className="w-28 border-b border-black px-1 outline-none bg-transparent"
                   />
                 </div>
-                <div className="col-span-6 p-1.5">
-                  <div className="text-[9px] font-bold mb-0.5">
-                    ROUTING NUMBER
-                  </div>
-                  <div className="flex gap-0.5 mb-2">
-                    {[...Array(9)].map((_, i) => (
-                      <input
-                        key={i}
-                        type="text"
-                        maxLength="1"
-                        value={(formData.routingNumber || "")[i] || ""}
-                        className="w-7 h-8 p-0.5 border-none text-[10px] text-center bg-[#d4d9f7]"
-                        readOnly
-                      />
-                    ))}
-                  </div>
-                  <div className="grid grid-cols-2 gap-1 mb-2">
-                    <div>
-                      <div className="text-[9px] font-bold mb-0.5">
-                        CHECK DIGIT
-                      </div>
-                      <input
-                        type="text"
-                        className="w-full p-0.5 border-none text-[10px] bg-[#d4d9f7]"
-                        value={formData.checkDigit}
-                        readOnly
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <div className="text-[9px] font-bold mb-0.5">
-                      DEPOSITOR ACCOUNT TITLE
-                    </div>
-                    <input
-                      type="text"
-                      className="w-full p-0.5 border-none text-[10px] bg-[#d4d9f7]"
-                      value={formData.accountTitle}
-                      readOnly
-                    />
-                  </div>
+
+                <p className="mb-3">
+                  I confirm that the above named employee/worker has passed or
+                  changed a bank account for direct deposit transactions
+                  processed by Paychex, Inc. I have reviewed the information
+                  provided and it is accurate to the best of my knowledge. My
+                  signature below indicates that I have the authority to execute
+                  this document on behalf of the Client.
+                </p>
+
+                <div className="flex items-center mb-3">
+                  <label className="font-bold whitespace-nowrap mr-2">
+                    Employer/Company Representative Printed Name:
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.employerName}
+                    readOnly
+                    className="flex-1 border-b border-black px-1 outline-none bg-transparent"
+                  />
                 </div>
-              </div>
 
-              <div className="border-t border-black p-1.5">
-                <div className="text-[9px] font-bold text-center mb-1">
-                  FINANCIAL INSTITUTION CERTIFICATION
+                <div className="flex items-center mb-3">
+                  <div className="w-3.5 h-3.5 border-[2px] border-black mr-2 flex-shrink-0"></div>
+                  <label className="font-bold whitespace-nowrap mr-2">
+                    Employer/Company Representative Signature:
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.employerSignature}
+                    readOnly
+                    className="flex-1 border-b border-black px-1 outline-none bg-transparent mr-4"
+                    style={{ fontFamily: "Brush Script MT, cursive" }}
+                  />
+                  <label className="font-bold whitespace-nowrap mr-2">
+                    Date:
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.employerDate}
+                    readOnly
+                    className="w-28 border-b border-black px-1 outline-none bg-transparent"
+                  />
                 </div>
-                <div className="text-[7px] leading-tight mb-1">
-                  I confirm the identity of the above-named payee(s) and as an
-                  account owner or authorized representative of the above-named
-                  financial institution, I certify that the financial
-                  institution agrees to receive and deposit the payment
-                  identified above in accordance with 31 CFR Parts 240, 208, and
-                  210.
+
+                <div className="bg-gray-100 p-2 text-[10px] leading-tight">
+                  <p className="mb-1">
+                    <span className="font-bold">
+                      * All fields are required unless noted.
+                    </span>{" "}
+                    <span className="ml-8">M/DD/YY</span>
+                  </p>
+                  <p className="mb-1">
+                    <span className="font-bold">
+                      ** Certain accounts may have restrictions on deposits and
+                      withdrawals.
+                    </span>{" "}
+                    Check with your bank for more information specific to your
+                    account.
+                  </p>
+                  <p className="italic">
+                    <span className="font-bold">Note:</span> Digital or
+                    Electronic Signatures are not acceptable.
+                  </p>
                 </div>
-                <div className="grid grid-cols-12 gap-1">
-                  <div className="col-span-4">
-                    <div className="text-[8px] font-bold mb-0.5">
-                      PRINT OR TYPE REPRESENTATIVE'S NAME
-                    </div>
-                    <input
-                      type="text"
-                      className="w-full p-0.5 border-none text-[9px] bg-[#d4d9f7] h-5"
-                      value={formData.repName}
-                      readOnly
-                    />
-                  </div>
-                  <div className="col-span-4">
-                    <div className="text-[8px] font-bold mb-0.5">
-                      SIGNATURE OF REPRESENTATIVE
-                    </div>
-                    <input
-                      type="text"
-                      className="w-full p-0.5 border-none text-[9px] bg-[#d4d9f7] h-5"
-                      readOnly
-                    />
-                  </div>
-                  <div className="col-span-2">
-                    <div className="text-[8px] font-bold mb-0.5">
-                      TELEPHONE NUMBER
-                    </div>
-                    <input
-                      type="text"
-                      className="w-full p-0.5 border-none text-[9px] bg-[#d4d9f7] h-5"
-                      value={formData.repTelephone}
-                      readOnly
-                    />
-                  </div>
-                  <div className="col-span-2">
-                    <div className="text-[8px] font-bold mb-0.5">DATE</div>
-                    <input
-                      type="text"
-                      className="w-full p-0.5 border-none text-[9px] bg-[#d4d9f7] h-5"
-                      readOnly
-                    />
-                  </div>
+
+                <div className="text-right mt-2 text-[10px]">
+                  <p>DP0002 10/20</p>
+                  <p>Form Expires 10/31/23</p>
                 </div>
-              </div>
-
-              <div className="border-t border-black p-1.5 flex justify-between items-center bg-white">
-                <div className="text-[7px] leading-tight italic">
-                  Financial institutions should refer to the GREEN BOOK for
-                  further instructions.
-                  <br />
-                  THE FINANCIAL INSTITUTION SHOULD MAIL THE COMPLETED FORM TO
-                  THE GOVERNMENT AGENCY IDENTIFIED ABOVE.
-                </div>
-                <button
-                  className="px-3 py-1 border border-black text-[9px] font-bold hover:bg-gray-100"
-                  disabled
-                >
-                  Reset
-                </button>
-              </div>
-
-              <div className="border-t border-black p-1.5 flex justify-between text-[8px] bg-white">
-                <div className="font-bold">GOVERNMENT AGENCY COPY</div>
-                <div>1199-207</div>
-              </div>
-            </div>
-
-            {/* Page 2 - Back of Form */}
-            <div className="mt-8 max-w-5xl border-t-2 border-black pt-4">
-              <div className="text-[8px] mb-3">SF 1199A (Back)</div>
-
-              {/* Burden Estimate Statement */}
-              <div className="border border-black mb-3">
-                <div className="text-center font-bold text-[9px] py-1.5 border-b border-black">
-                  BURDEN ESTIMATE STATEMENT
-                </div>
-                <div className="text-[7.5px] leading-snug p-2">
-                  The estimated average burden associated with this collection
-                  of information is 10 minutes per respondent or recordkeeper,
-                  depending on individual circumstances. Comments concerning the
-                  accuracy of this burden estimates and suggestions for reducing
-                  this burden should be directed to the Bureau of the Fiscal
-                  Service, Forms Management Officer, Parkersburg, WV 26106-1328.
-                </div>
-              </div>
-
-              {/* Please Read This Carefully */}
-              <div className="text-center font-bold text-[9px] mb-1.5">
-                PLEASE READ THIS CAREFULLY
-              </div>
-              <div className="text-[7.5px] leading-snug mb-3 text-justify">
-                All information on this form, including the individual claim
-                number, SF 3222, 31 CFR 208 and/or 210. The information is
-                confidential and is needed to prove entitlement to payments. The
-                information will be used to process payment data from the
-                Federal agency to the financial institution and/or its agent.
-                Failure to provide the requested information may affect the
-                processing of this form and may delay or prevent the receipt of
-                payments through the Direct Deposit/Electronic Funds Transfer
-                Program.
-              </div>
-
-              {/* Information Found on Checks */}
-              <div className="text-[8px] font-bold mb-1.5">
-                INFORMATION FOUND ON CHECKS
-              </div>
-              <div className="grid grid-cols-2 gap-3 mb-3">
-                <div>
-                  <div className="text-[7.5px] leading-snug mb-1.5">
-                    Most of the information needed to complete boxes A, C, and F
-                    in Section 1 is printed on your government check:
-                  </div>
-                  <div className="text-[7.5px] leading-snug space-y-1.5">
-                    <div className="flex items-start gap-1.5">
-                      <div className="flex-shrink-0 w-4 h-4 rounded-full border border-black flex items-center justify-center text-[7px] font-bold mt-0.5">
-                        A
-                      </div>
-                      <div>
-                        Be sure that payee's name is written exactly as it
-                        appears on the check. Be sure current address is shown.
-                      </div>
-                    </div>
-                    <div className="flex items-start gap-1.5">
-                      <div className="flex-shrink-0 w-4 h-4 rounded-full border border-black flex items-center justify-center text-[7px] font-bold mt-0.5">
-                        C
-                      </div>
-                      <div>
-                        Claim numbers and suffixes are printed here on checks
-                        and at the top left side for the type of death case.
-                        Check the Green Book for the location of prefixes and
-                        suffixes for all other types of payments.
-                      </div>
-                    </div>
-                    <div className="flex items-start gap-1.5">
-                      <div className="flex-shrink-0 w-4 h-4 rounded-full border border-black flex items-center justify-center text-[7px] font-bold mt-0.5">
-                        F
-                      </div>
-                      <div>
-                        Type of payment is printed to the left of the amount.
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div className="border-2 border-black p-2 relative">
-                  <div className="flex justify-between items-start mb-1 text-[6.5px]">
-                    <div className="leading-tight">
-                      <div className="font-mono">1541</div>
-                      <div className="font-mono">000</div>
-                      <div>PHILADELPHIA, PA</div>
-                    </div>
-                    <div className="text-right leading-tight">
-                      <div>Check No.</div>
-                      <div className="font-mono">000 0041299</div>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="w-7 h-7 rounded-full border-2 border-black flex items-center justify-center">
-                      <svg width="20" height="20" viewBox="0 0 20 20">
-                        <circle
-                          cx="10"
-                          cy="10"
-                          r="8"
-                          fill="none"
-                          stroke="black"
-                          strokeWidth="1.5"
-                        />
-                        <text
-                          x="10"
-                          y="13"
-                          textAnchor="middle"
-                          fontSize="10"
-                          fill="black"
-                        >
-                          ✱
-                        </text>
-                      </svg>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <div className="text-[6px] border border-black rounded px-1">
-                        HIGH LOW
-                      </div>
-                      <div className="text-[6px] border border-black rounded px-1">
-                        PAY
-                      </div>
-                      <div className="text-[6px] border border-black rounded px-1">
-                        31
-                      </div>
-                    </div>
-                    <div className="flex-shrink-0 w-4 h-4 rounded-full border-2 border-black flex items-center justify-center text-[7px] font-bold bg-white">
-                      C
-                    </div>
-                  </div>
-
-                  <div className="text-[7px] mb-1">
-                    Pay to
-                    <br />
-                    the order of
-                  </div>
-
-                  <div className="mb-2">
-                    <div className="border-b border-black h-4"></div>
-                  </div>
-
-                  <div className="flex justify-end items-start gap-1 mb-2">
-                    <div className="text-[6px] font-mono">28 28</div>
-                    <div className="border border-black px-1.5 py-0.5 text-[6px]">
-                      DOLLARS
-                    </div>
-                    <div className="border border-black px-1 py-0.5 text-[6px] font-mono">
-                      .25
-                    </div>
-                  </div>
-
-                  <div className="relative mb-2">
-                    <div className="border-b border-black h-3"></div>
-                    <div className="absolute left-1/3 top-0 flex-shrink-0 w-5 h-5 rounded-full border-2 border-black flex items-center justify-center text-[7px] font-bold bg-white">
-                      F
-                    </div>
-                  </div>
-
-                  <div className="relative mb-2">
-                    <div className="border-b border-black h-3"></div>
-                    <div className="absolute left-0 top-0 flex-shrink-0 w-5 h-5 rounded-full border-2 border-black flex items-center justify-center text-[7px] font-bold bg-white">
-                      A
-                    </div>
-                  </div>
-
-                  <div className="border-t-2 border-black pt-1 text-right">
-                    <div className="text-[8px] font-bold">NOT NEGOTIABLE</div>
-                  </div>
-
-                  <div className="text-center text-[6px] font-mono mt-1">
-                    00000218: 0415771626*
-                  </div>
-                </div>
-              </div>
-
-              {/* Special Notice to Joint Account Holders */}
-              <div className="text-[8px] font-bold mb-1">
-                SPECIAL NOTICE TO JOINT ACCOUNT HOLDERS
-              </div>
-              <div className="text-[7.5px] leading-snug mb-3 text-justify ml-4">
-                Joint account holders should immediately advise both the
-                Government agency and the financial institution of the death of
-                a beneficiary. Funds deposited after the date of death or
-                ineligibility for salary payments, are to be returned to the
-                Government agency. The Government agency will then make a
-                determination regarding survivor rights, calculate survivor
-                benefit payments, if any, and begin payments.
-              </div>
-
-              {/* Cancellation */}
-              <div className="text-[8px] font-bold mb-1">CANCELLATION</div>
-              <div className="text-[7px] leading-snug mb-1 text-justify ml-4">
-                The agreement represented by this authorization remains in
-                effect until cancelled by the recipient by notice to the Federal
-                agency or by the death or legal incapacity of the recipient.
-                Upon cancellation by the recipient, the recipient should notify
-                the receiving financial institution that he/she is doing so.
-              </div>
-              <div className="text-[7px] leading-snug mb-3 text-justify ml-8">
-                The agreement represented by this authorization may be cancelled
-                by the financial institution by providing the recipient a
-                written notice 30 days in advance of the cancellation date. The
-                recipient must immediately advise the Federal agency if the
-                authorization is cancelled by the financial institution. The
-                financial institution cannot cancel the authorization by advice
-                to the Government agency.
-              </div>
-
-              {/* Changing Receiving Financial Institutions */}
-              <div className="text-[8px] font-bold mb-1">
-                CHANGING RECEIVING FINANCIAL INSTITUTIONS
-              </div>
-              <div className="text-[7px] leading-snug mb-3 text-justify ml-4">
-                The payee's Direct Deposit will continue to be received by the
-                selected financial institution until the Government agency is
-                notified by the payee that the payee wishes to change the
-                financial institution receiving the payee's Direct Deposit. To
-                effect this change, the payee will contact the serving agency
-                and provide updated account information. It is recommended that
-                the payee maintain accounts at both financial institutions until
-                the transaction is complete, i.e. after the new financial
-                institution receives the payee's Direct Deposit payment.
-              </div>
-
-              {/* False Statements or Fraudulent Claims */}
-              <div className="text-[8px] font-bold mb-1">
-                FALSE STATEMENTS OR FRAUDULENT CLAIMS
-              </div>
-              <div className="text-[7.5px] leading-snug mb-4 text-justify ml-4">
-                Federal law provides a fine of not more than $10,000 or
-                imprisonment for not more than five (5) years or both for
-                presenting a false statement or making a fraudulent claim.
               </div>
             </div>
           </div>
@@ -1288,33 +1151,40 @@ export default function DirectDepositFormHR() {
           </div>
 
           {/* Progress Section */}
-          <div className="mt-8 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-100">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <Target className="w-5 h-5 text-blue-600" />
-                <span className="text-sm font-semibold text-gray-700">
-                  Application Progress
-                </span>
-              </div>
-              <div className="text-right">
-                <div className="text-lg font-bold text-blue-600">
-                  {completedFormsCount}/20
+          <div className="mt-8 mx-8 sm:mx-16 lg:mx-32 xl:mx-40">
+            <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-100 max-w-2xl mx-auto">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <Target className="w-5 h-5 text-blue-600" />
+                  <span className="text-sm font-semibold text-gray-700">
+                    Application Progress
+                  </span>
                 </div>
-                <div className="text-xs text-gray-600">Forms Completed</div>
+                <div className="text-right">
+                  <div className="text-lg font-bold text-blue-600">
+                    {completedFormsCount}/20
+                  </div>
+                  <div className="text-xs text-gray-600">Forms Completed</div>
+                </div>
               </div>
-            </div>
-            <div className="mb-2">
-              <div className="flex justify-between items-center mb-1">
-                <span className="text-xs text-gray-600">Overall Progress</span>
-                <span className="text-xs font-semibold text-blue-600">
-                  {overallProgress}%
-                </span>
+              <div className="mb-2">
+                <div className="flex justify-between items-center mb-1">
+                  <span className="text-xs text-gray-600">
+                    Overall Progress
+                  </span>
+                  <span className="text-xs font-bold text-blue-600">
+                    {overallProgress}%
+                  </span>
+                </div>
+                <div className="w-full bg-blue-200 rounded-full h-2">
+                  <div
+                    className="bg-gradient-to-r from-blue-500 to-blue-600 h-2 rounded-full transition-all duration-1000 ease-out"
+                    style={{ width: `${overallProgress}%` }}
+                  ></div>
+                </div>
               </div>
-              <div className="w-full bg-gray-200 rounded-full h-2.5">
-                <div
-                  className="bg-gradient-to-r from-blue-500 to-indigo-600 h-2.5 rounded-full transition-all duration-500"
-                  style={{ width: `${overallProgress}%` }}
-                ></div>
+              <div className="text-xs text-gray-600 text-center">
+                📝 Current: Direct Deposit Form
               </div>
             </div>
           </div>
@@ -1391,4 +1261,6 @@ export default function DirectDepositFormHR() {
       </div>
     </Layout>
   );
-}
+};
+
+export default DirectDepositFormHR;

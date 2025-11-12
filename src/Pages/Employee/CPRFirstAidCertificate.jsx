@@ -271,11 +271,13 @@ const CPRFirstAidCertificate = () => {
             <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-8">
               {/* Status Banner */}
               {!loading && (
-                <div className={`mb-6 p-4 rounded-lg border ${
-                  uploadedCprCert
-                    ? 'bg-green-50 border-green-200'
-                    : 'bg-red-50 border-red-200'
-                }`}>
+                <div
+                  className={`mb-6 p-4 rounded-lg border ${
+                    uploadedCprCert
+                      ? "bg-green-50 border-green-200"
+                      : "bg-red-50 border-red-200"
+                  }`}
+                >
                   <div className="flex items-center justify-center gap-3">
                     {uploadedCprCert ? (
                       <CheckCircle className="w-6 h-6 text-green-600 flex-shrink-0" />
@@ -285,11 +287,15 @@ const CPRFirstAidCertificate = () => {
                     <div>
                       {uploadedCprCert ? (
                         <p className="text-base font-semibold text-green-800">
-                          ✅ Progress Updated - Uploaded Successfully on {new Date(uploadedCprCert.uploadedAt).toLocaleDateString()}
+                          ✅ Progress Updated - Uploaded Successfully on{" "}
+                          {new Date(
+                            uploadedCprCert.uploadedAt
+                          ).toLocaleDateString()}
                         </p>
                       ) : (
                         <p className="text-base font-semibold text-red-800">
-                          ⚠️ Not filled yet - Upload your certificate to complete your progress
+                          ⚠️ Not filled yet - Upload your certificate to
+                          complete your progress
                         </p>
                       )}
                     </div>
@@ -478,6 +484,16 @@ const CPRFirstAidCertificate = () => {
                       Previous Form
                     </button>
 
+                    <div className="w-full sm:w-auto flex justify-center">
+                      <button
+                        type="button"
+                        onClick={() => navigate("/employee/task-management")}
+                        className="px-6 sm:px-8 py-3 bg-gradient-to-r from-[#1F3A93] to-[#2748B4] text-white font-semibold rounded-xl hover:from-[#16306e] hover:to-[#1F3A93] transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 text-sm sm:text-base"
+                      >
+                        Exit Application
+                      </button>
+                    </div>
+
                     <button
                       type="button"
                       onClick={async () => {
@@ -503,7 +519,7 @@ const CPRFirstAidCertificate = () => {
                           console.error("Error saving status:", error);
                         }
                         window.dispatchEvent(new Event("formStatusUpdated"));
-                         navigate("/employee/driving-license-upload");
+                        navigate("/employee/driving-license-upload");
                       }}
                       className="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-6 py-3 bg-gradient-to-r from-[#1F3A93] to-[#2748B4] text-white font-bold tracking-wide rounded-lg hover:from-[#16306e] hover:to-[#1F3A93] focus:ring-2 focus:ring-[#1F3A93]/30 transition-all duration-200 shadow-md hover:shadow-lg hover:-translate-y-0.5"
                     >

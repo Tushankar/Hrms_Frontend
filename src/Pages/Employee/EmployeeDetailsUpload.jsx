@@ -52,6 +52,26 @@ const EmployeeDetailsUpload = () => {
   const fileInputRef = useRef(null);
   const baseURL = import.meta.env.VITE__BASEURL;
 
+  const getPositionDisplayName = (position) => {
+    const positionMap = {
+      PCA: "Personal Care Assistant",
+      CNA: "Certified Nursing Assistant",
+      LPN: "Licensed Practical Nurse",
+      RN: "Registered Nurse",
+    };
+    return positionMap[position] || "Professional";
+  };
+
+  const getCertificateType = (position) => {
+    const certMap = {
+      PCA: "PCA Certificate",
+      CNA: "CNA Certificate",
+      LPN: "LPN License",
+      RN: "RN License",
+    };
+    return certMap[position] || "Professional Certificate";
+  };
+
   useEffect(() => {
     checkSubmission();
   }, []);
@@ -387,11 +407,22 @@ const EmployeeDetailsUpload = () => {
           )}
 
           <div className="text-center mb-8">
+            <div className="mb-4">
+              <h2 className="text-2xl font-bold text-blue-600 mb-2">
+                Professional Certificate
+              </h2>
+              <p className="text-gray-700 text-lg">
+                You have selected:{" "}
+                <span className="font-semibold text-blue-800">
+                  {getCertificateType(positionType)}
+                </span>
+              </p>
+            </div>
             <h1 className="text-3xl font-bold text-gray-800 mb-2">
-              Professional Certificate Document Upload
+              {getCertificateType(positionType)} Document Upload
             </h1>
             <p className="text-gray-600">
-              Upload your professional LPN Certificate
+              Upload your {getCertificateType(positionType).toLowerCase()}
             </p>
           </div>
 

@@ -493,7 +493,7 @@ const OrientationPresentation = () => {
                   <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
                     <button
                       type="button"
-                      onClick={() => navigate("/employee/staff-of-misconduct")}
+                      onClick={() => navigate("/employee/direct-deposit")}
                       className="inline-flex items-center justify-center gap-2 w-full sm:w-auto py-2.5 sm:py-3 px-4 sm:px-6 bg-gradient-to-r from-[#1F3A93] to-[#2748B4] text-white font-semibold rounded-lg hover:from-[#16306e] hover:to-[#1F3A93] transition-all duration-200 shadow-md hover:shadow-lg text-sm sm:text-base"
                     >
                       <ArrowLeft className="w-4 h-4" />

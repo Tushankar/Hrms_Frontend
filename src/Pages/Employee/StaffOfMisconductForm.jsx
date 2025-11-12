@@ -206,105 +206,83 @@ const StaffOfMisconductForm = () => {
 
     try {
       console.log("Loading form data for misconduct statement");
-      const response = await axios.get(
-        `${baseURL}/onboarding/misconduct-statement/get-misconduct-statement/${applicationId}`,
-        { withCredentials: true }
-      );
 
-      console.log("Misconduct statement response:", response.data);
+      // First try to load from the specific misconduct statement endpoint
+      let loadedFormData = null;
+      try {
+        const response = await axios.get(
+          `${baseURL}/onboarding/misconduct-statement/get-misconduct-statement/${applicationId}`,
+          { withCredentials: true }
+        );
 
-      if (response.data && response.data.formData) {
-        const { formData: loadedFormData } = response.data;
+        console.log("Misconduct statement response:", response.data);
 
-        // Load form data
-        if (loadedFormData.staffTitle)
-          setFormData((prev) => ({
-            ...prev,
-            staffTitle: loadedFormData.staffTitle,
-          }));
-        if (loadedFormData.companyName)
-          setFormData((prev) => ({
-            ...prev,
-            companyName: loadedFormData.companyName,
-          }));
-        if (loadedFormData.employeeNameParagraph)
-          setFormData((prev) => ({
-            ...prev,
-            employeeNameParagraph: loadedFormData.employeeNameParagraph,
-          }));
-        if (loadedFormData.employeeName)
-          setFormData((prev) => ({
-            ...prev,
-            employeeName: loadedFormData.employeeName,
-          }));
-        if (loadedFormData.employmentPosition)
-          setFormData((prev) => ({
-            ...prev,
-            employmentPosition: loadedFormData.employmentPosition,
-          }));
-        if (loadedFormData.signatureLine)
-          setFormData((prev) => ({
-            ...prev,
-            signatureLine: loadedFormData.signatureLine,
-          }));
-        if (loadedFormData.dateField1)
-          setFormData((prev) => ({
-            ...prev,
-            dateField1: loadedFormData.dateField1,
-          }));
-        else {
-          // Set default date to today if not provided
-          const today = new Date();
-          const todayDate = today.toISOString().slice(0, 10);
-          setFormData((prev) => ({
-            ...prev,
-            dateField1: todayDate,
-          }));
+        if (response.data && response.data.formData) {
+          loadedFormData = response.data.formData;
         }
-        if (loadedFormData.exhibitName)
-          setFormData((prev) => ({
-            ...prev,
-            exhibitName: loadedFormData.exhibitName,
-          }));
-        if (loadedFormData.printName)
-          setFormData((prev) => ({
-            ...prev,
-            printName: loadedFormData.printName,
-          }));
-        if (loadedFormData.signatureField)
-          setFormData((prev) => ({
-            ...prev,
-            signatureField: loadedFormData.signatureField,
-          }));
-        if (loadedFormData.dateField2)
-          setFormData((prev) => ({
-            ...prev,
-            dateField2: loadedFormData.dateField2,
-          }));
-        else {
-          // Set default date to today if not provided
-          const today = new Date();
-          const todayDate = today.toISOString().slice(0, 10);
-          setFormData((prev) => ({
-            ...prev,
-            dateField2: todayDate,
-          }));
+      } catch (specificError) {
+        console.warn(
+          "Could not load from specific endpoint:",
+          specificError.message
+        );
+        // If specific endpoint fails, we'll try to load from get-application
+      }
+
+      // If no data from specific endpoint, try get-application endpoint
+      if (!loadedFormData) {
+        const userToken = Cookies.get("session");
+        const decodedToken = userToken && jwtDecode(userToken);
+        const user = decodedToken?.user;
+
+        if (user?._id) {
+          const appResponse = await axios.get(
+            `${baseURL}/onboarding/get-application/${user._id}`,
+            { withCredentials: true }
+          );
+
+          if (appResponse.data?.data?.forms?.misconductStatement) {
+            loadedFormData = appResponse.data.data.forms.misconductStatement;
+            console.log(
+              "Loaded form data from get-application:",
+              loadedFormData
+            );
+          }
         }
-        if (loadedFormData.notaryDay)
-          setFormData((prev) => ({
-            ...prev,
-            notaryDay: loadedFormData.notaryDay,
-          }));
-        if (loadedFormData.notaryMonth)
-          setFormData((prev) => ({
-            ...prev,
-            notaryMonth: loadedFormData.notaryMonth,
-          }));
-        if (loadedFormData.notaryYear)
-          setFormData((prev) => ({
-            ...prev,
-            notaryYear: loadedFormData.notaryYear,
-          }));
+      }
+
+      // If we have form data, update state with all fields at once
+      if (loadedFormData) {
+        // Prepare the new form state
+        const newFormData = {
+          staffTitle: loadedFormData.staffTitle || "",
+          companyName: loadedFormData.companyName || "",
+          employeeNameParagraph: loadedFormData.employeeNameParagraph || "",
+          employeeName: loadedFormData.employeeName || "",
+          employmentPosition: loadedFormData.employmentPosition || "",
+          signatureLine: loadedFormData.signatureLine || "",
+          dateField1: loadedFormData.dateField1 || "",
+          exhibitName: loadedFormData.exhibitName || "",
+          printName: loadedFormData.printName || "",
+          signatureField: loadedFormData.signatureField || "",
+          dateField2: loadedFormData.dateField2 || "",
+          notaryDay: loadedFormData.notaryDay || "",
+          notaryMonth: loadedFormData.notaryMonth || "",
+          notaryYear: loadedFormData.notaryYear || "",
+        };
+
+        // Set default dates if not provided
+        const today = new Date();
+        const todayDate = today.toISOString().slice(0, 10);
+
+        if (!newFormData.dateField1) {
+          newFormData.dateField1 = todayDate;
+        }
+        if (!newFormData.dateField2) {
+          newFormData.dateField2 = todayDate;
+        }
+
+        setFormData(newFormData);
+        console.log("✅ Form data loaded successfully");
       } else {
         // No saved data - set default dates to today
         const today = new Date();
@@ -314,6 +292,7 @@ const StaffOfMisconductForm = () => {
           dateField1: todayDate,
           dateField2: todayDate,
         }));
+        console.log("No saved form data found, using default dates");
       }
     } catch (error) {
       console.error("Error loading form data:", error);
@@ -448,175 +427,260 @@ const StaffOfMisconductForm = () => {
               <h2 className="text-lg sm:text-xl font-semibold text-gray-800 mb-3 sm:mb-4">
                 Step 1: Staff Misconduct Statement Form
               </h2>
-              <div className="max-w-6xl mx-auto bg-white p-3 sm:p-6 md:p-12 my-4 sm:my-8">
-                <div className="border-2 sm:border-4 border-black p-3 sm:p-6 md:p-12 min-h-screen">
-                  <div className="space-y-3 sm:space-y-4">
-                    <h1 className="text-xs sm:text-sm font-bold mb-4 sm:mb-6">
-                      STAFF MISCONDUCT ABUSE STATEMENT FORM
-                    </h1>
+              <div className="max-w-4xl mx-auto bg-white p-4 sm:p-8 my-4 sm:my-8">
+                <div className="space-y-3 text-xs sm:text-sm leading-relaxed">
+                  {/* Header */}
+                  <h1 className="text-center font-bold text-xs sm:text-sm mb-4 tracking-wide">
+                    STAFF MISCONDUCT ABUSE STATEMENT FORM
+                  </h1>
 
-                    <div className="flex flex-col sm:flex-row items-start sm:items-baseline mb-4 sm:mb-8 gap-1 sm:gap-0">
-                      <span className="mr-0 sm:mr-2 text-xs whitespace-nowrap">
-                        STAFF TITLE:
-                      </span>
+                  {/* Staff Title */}
+                  <div className="mb-4 flex items-baseline gap-2">
+                    <span className="font-semibold text-xs sm:text-sm">
+                      STAFF TITLE:
+                    </span>
+                    <span
+                      className="flex-1 border-b border-black"
+                      style={{ minHeight: "1.2em" }}
+                    >
                       <input
                         type="text"
                         value={formData.staffTitle}
                         onChange={(e) =>
                           handleChange("staffTitle", e.target.value)
                         }
-                        className="border-0 border-b border-black w-full sm:flex-1 px-1 focus:outline-none focus:border-b-2 text-xs bg-transparent"
+                        className="border-0 bg-transparent w-full px-1 focus:outline-none text-xs sm:text-sm"
                       />
+                    </span>
+                  </div>
+
+                  {/* Body Text */}
+                  <div className="space-y-3 mt-6">
+                    <p>
+                      I <u>understand and acknowledge</u> that I must comply
+                      with Pacific Health Systems LLC{" "}
+                      <span
+                        className="inline-block border-b border-black"
+                        style={{ minHeight: "1.2em", minWidth: "50px" }}
+                      >
+                        <input
+                          type="text"
+                          value={formData.companyName}
+                          onChange={(e) =>
+                            handleChange("companyName", e.target.value)
+                          }
+                          className="border-0 bg-transparent w-full px-1 focus:outline-none text-xs sm:text-sm"
+                          placeholder=""
+                        />
+                      </span>
+                      , Code of Conduct and Abuse & Misconduct program.
+                    </p>
+
+                    <p>
+                      All laws, regulations, policies & procedures as well as
+                      any other applicable state or local ordinances as it
+                      pertains to the responsibilities of my position.
+                    </p>
+
+                    <p>
+                      I <u>understand</u> that my failure to report any concerns
+                      regarding possible violations of these laws, regulations,
+                      and Policies may result in disciplinary action, up to and
+                      including termination.
+                    </p>
+
+                    <p>
+                      I{" "}
+                      <span
+                        className="inline-block border-b border-black"
+                        style={{ minHeight: "1.2em", minWidth: "200px" }}
+                      >
+                        <input
+                          type="text"
+                          value={formData.employeeNameParagraph}
+                          onChange={(e) =>
+                            handleChange(
+                              "employeeNameParagraph",
+                              e.target.value
+                            )
+                          }
+                          className="border-0 bg-transparent w-full px-1 focus:outline-none text-xs sm:text-sm"
+                          placeholder="Employee Name"
+                        />
+                      </span>
+                      , as an employee of Pacific Health Systems LLC{" "}
+                      <span
+                        className="inline-block border-b border-black"
+                        style={{ minHeight: "1.2em", minWidth: "30px" }}
+                      >
+                        <input
+                          type="text"
+                          value={formData.companyName}
+                          onChange={(e) =>
+                            handleChange("companyName", e.target.value)
+                          }
+                          className="border-0 bg-transparent w-full px-1 focus:outline-none text-xs sm:text-sm"
+                          placeholder=""
+                        />
+                      </span>
+                      , I hereby state that, I have never shown any misconduct
+                      nor have a history of abuse and neglect of others.
+                    </p>
+
+                    <p>
+                      I acknowledge that I have received and read the Misconduct
+                      or abuse statement form and that I clearly understand it.
+                    </p>
+                  </div>
+
+                  {/* Employee Information Fields */}
+                  <div className="space-y-3 mt-6">
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-xs sm:text-sm">
+                        Name of Employee (print):
+                      </span>
+                      <span
+                        className="flex-1 border-b border-black"
+                        style={{ minHeight: "1.2em" }}
+                      >
+                        <input
+                          type="text"
+                          value={formData.employeeName}
+                          onChange={(e) =>
+                            handleChange("employeeName", e.target.value)
+                          }
+                          className="border-0 bg-transparent w-full px-1 focus:outline-none text-xs sm:text-sm"
+                        />
+                      </span>
                     </div>
 
-                    <div className="space-y-3 sm:space-y-4 leading-relaxed text-[10px] sm:text-xs">
-                      <p>
-                        I <u>understand and acknowledge</u> that I must comply
-                        with Pacific Health Systems LLC, Code of Conduct and
-                        Abuse & Misconduct program.
-                      </p>
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-xs sm:text-sm">
+                        Employment Position:
+                      </span>
+                      <span
+                        className="flex-1 border-b border-black"
+                        style={{ minHeight: "1.2em" }}
+                      >
+                        <input
+                          type="text"
+                          value={formData.employmentPosition}
+                          onChange={(e) =>
+                            handleChange("employmentPosition", e.target.value)
+                          }
+                          className="border-0 bg-transparent w-full px-1 focus:outline-none text-xs sm:text-sm"
+                        />
+                      </span>
+                    </div>
 
-                      <p>
-                        All laws, regulations, policies & procedures as well as
-                        any other applicable state or local ordinances as it
-                        pertains to the responsibilities of my position.
-                      </p>
-
-                      <p>
-                        I <u>understand</u> that my failure to report any
-                        concerns regarding possible violations of these laws,
-                        regulations, and Policies may result in disciplinary
-                        action, up to and including termination.
-                      </p>
-
-                      <p>
-                        I, as an employee of Pacific Health Systems LLC, I
-                        hereby state that, I have never shown any misconduct nor
-                        have a history of abuse and neglect of others.
-                      </p>
-
-                      <p className="mb-6">
-                        I acknowledge that I have received and read the
-                        Misconduct or abuse statement form and that I clearly
-                        understand it.
-                      </p>
-
-                      <div className="space-y-3">
-                        <div className="flex flex-col sm:flex-row items-start sm:items-baseline gap-1 sm:gap-0">
-                          <span className="mr-0 sm:mr-2 whitespace-nowrap">
-                            Name of Employee (print):
-                          </span>
+                    {/* Signature and Date Row 1 */}
+                    <div className="flex items-baseline gap-4">
+                      <div className="flex items-baseline gap-1 flex-1">
+                        <span className="text-xs sm:text-sm">Signature:</span>
+                        <span
+                          className="flex-1 border-b border-black"
+                          style={{ minHeight: "1.2em" }}
+                        >
                           <input
                             type="text"
-                            value={formData.employeeName}
+                            value={formData.signatureLine}
                             onChange={(e) =>
-                              handleChange("employeeName", e.target.value)
+                              handleSignatureChange(
+                                "signatureLine",
+                                e.target.value
+                              )
                             }
-                            className="border-0 border-b border-black w-full sm:flex-1 px-1 focus:outline-none focus:border-b-2 bg-transparent"
+                            className="border-0 bg-transparent w-full px-1 focus:outline-none"
+                            style={{
+                              fontFamily: "'Great Vibes', cursive",
+                              fontSize: "20px",
+                              letterSpacing: "0.5px",
+                            }}
                           />
-                        </div>
-
-                        <div className="flex flex-col sm:flex-row items-start sm:items-baseline gap-1 sm:gap-0">
-                          <span className="mr-0 sm:mr-2 whitespace-nowrap">
-                            Employment Position:
-                          </span>
-                          <input
-                            type="text"
-                            value={formData.employmentPosition}
-                            onChange={(e) =>
-                              handleChange("employmentPosition", e.target.value)
-                            }
-                            className="border-0 border-b border-black w-full sm:flex-1 px-1 focus:outline-none focus:border-b-2 bg-transparent"
-                          />
-                        </div>
-
-                        <div className="flex flex-col sm:flex-row items-start sm:items-baseline gap-2">
-                          <div className="flex items-baseline w-full sm:flex-1">
-                            <span className="mr-2">Signature:</span>
-                            <input
-                              type="text"
-                              value={formData.signatureLine}
-                              onChange={(e) =>
-                                handleSignatureChange(
-                                  "signatureLine",
-                                  e.target.value
-                                )
-                              }
-                              placeholder="Sign here"
-                              style={{
-                                fontFamily: "'Great Vibes', cursive",
-                                fontSize: "28px",
-                                letterSpacing: "0.5px",
-                              }}
-                              className="border-0 border-b border-black flex-1 px-1 focus:outline-none focus:border-b-2 bg-transparent"
-                            />
-                          </div>
-                          <div className="flex items-baseline w-full sm:w-auto">
-                            <span className="mx-0 sm:mx-2">Date:</span>
-                            <input
-                              type="date"
-                              value={formData.dateField1}
-                              onChange={(e) =>
-                                handleChange("dateField1", e.target.value)
-                              }
-                              className="border-0 border-b border-black w-full sm:w-32 px-1 focus:outline-none focus:border-b-2 bg-transparent"
-                            />
-                          </div>
-                        </div>
+                        </span>
                       </div>
-
-                      <div className="my-6">
-                        <p className="mb-2">
-                          Who having been first duly sworn depose and say
-                        </p>
-                        <div className="mb-1">
-                          <span>that </span>
+                      <div className="flex items-baseline gap-1 flex-1">
+                        <span className="text-xs sm:text-sm">Date:</span>
+                        <span
+                          className="flex-1 border-b border-black"
+                          style={{ minHeight: "1.2em" }}
+                        >
                           <input
-                            type="text"
-                            value={formData.exhibitName}
+                            type="date"
+                            value={formData.dateField1}
                             onChange={(e) =>
-                              handleChange("exhibitName", e.target.value)
+                              handleChange("dateField1", e.target.value)
                             }
-                            className="border-0 border-b border-black w-full px-1 focus:outline-none focus:border-b-2 bg-transparent"
+                            className="border-0 bg-transparent w-full px-1 focus:outline-none text-xs sm:text-sm"
                           />
-                          <span> has never been shown to have exhibited</span>
-                        </div>
-                        <p>
-                          any violent or abusive behavior or intentional or
-                          grossly negligent misconduct{" "}
-                          <input
-                            type="text"
-                            className="border-0 border-b border-black w-24 mx-1 px-1 focus:outline-none focus:border-b-2 bg-transparent"
-                          />
-                          .
-                        </p>
-                        <p className="mt-2">
-                          Also have never been accused or convicted to have been
-                          abused, neglected, sexually assaulted, exploited, or
-                          deprived any person or to have subjected any person to
-                          serious injury as a result of intentional or grossly
-                          negligent misconduct as evidenced by an out-of written
-                          statement to this affect obtained at the time of
-                          application.
-                        </p>
+                        </span>
                       </div>
+                    </div>
+                  </div>
 
-                      <div className="flex flex-col sm:flex-row items-start sm:items-baseline gap-3 sm:gap-8 my-4 sm:my-6">
-                        <div className="flex flex-col sm:flex-row items-start sm:items-baseline w-full sm:flex-1 gap-1 sm:gap-0">
-                          <span className="mr-0 sm:mr-2 whitespace-nowrap">
-                            Print Name:
-                          </span>
+                  {/* Affidavit Section */}
+                  <div className="space-y-3 mt-6">
+                    <p className="mb-2">
+                      Who having been first duly sworn depose and say
+                    </p>
+                    <p>
+                      <span
+                        className="inline-block border-b border-black"
+                        style={{ minHeight: "1.2em", minWidth: "200px" }}
+                      >
+                        <input
+                          type="text"
+                          value={formData.employeeNameParagraph}
+                          onChange={(e) =>
+                            handleChange(
+                              "employeeNameParagraph",
+                              e.target.value
+                            )
+                          }
+                          className="border-0 bg-transparent w-full px-1 focus:outline-none text-xs sm:text-sm"
+                          placeholder="Employee Name"
+                        />
+                      </span>{" "}
+                      has never been shown to have exhibited any violent or
+                      abusive behavior or intentional or grossly negligent
+                      misconduct.
+                    </p>
+                    <p>
+                      Also have never been accused or convicted to have been
+                      abused, neglected, sexually assaulted, exploited, or
+                      deprived any person or to have subjected any person to
+                      serious injury as a result of intentional or grossly
+                      negligent misconduct as evidenced by an out-of written
+                      statement to this affect obtained at the time of
+                      application.
+                    </p>
+                  </div>
+
+                  {/* Witness Section */}
+                  <div className="space-y-3 mt-6">
+                    <div className="flex items-baseline gap-4">
+                      <div className="flex items-baseline gap-1 flex-1">
+                        <span className="text-xs sm:text-sm">Print Name:</span>
+                        <span
+                          className="flex-1 border-b border-black"
+                          style={{ minHeight: "1.2em" }}
+                        >
                           <input
                             type="text"
                             value={formData.printName}
                             onChange={(e) =>
                               handleChange("printName", e.target.value)
                             }
-                            className="border-0 border-b border-black w-full sm:flex-1 px-1 focus:outline-none focus:border-b-2 bg-transparent"
+                            className="border-0 bg-transparent w-full px-1 focus:outline-none text-xs sm:text-sm"
                           />
-                        </div>
-                        <div className="flex items-baseline w-full sm:flex-1">
-                          <span className="mr-2">Signature:</span>
+                        </span>
+                      </div>
+                      <div className="flex items-baseline gap-1 flex-1">
+                        <span className="text-xs sm:text-sm">Signature:</span>
+                        <span
+                          className="flex-1 border-b border-black"
+                          style={{ minHeight: "1.2em" }}
+                        >
                           <input
                             type="text"
                             value={formData.signatureField}
@@ -626,69 +690,77 @@ const StaffOfMisconductForm = () => {
                                 e.target.value
                               )
                             }
-                            placeholder="Sign here"
+                            className="border-0 bg-transparent w-full px-1 focus:outline-none"
                             style={{
                               fontFamily: "'Great Vibes', cursive",
-                              fontSize: "28px",
+                              fontSize: "20px",
                               letterSpacing: "0.5px",
                             }}
-                            className="border-0 border-b border-black flex-1 px-1 focus:outline-none focus:border-b-2 bg-transparent"
                           />
-                        </div>
+                        </span>
                       </div>
+                    </div>
 
-                      <div className="flex flex-col sm:flex-row items-start sm:items-baseline mb-4 sm:mb-6 gap-1 sm:gap-0">
-                        <span className="mr-0 sm:mr-2">Date:</span>
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-xs sm:text-sm">Date:</span>
+                      <span
+                        className="border-b border-black w-48"
+                        style={{ minHeight: "1.2em" }}
+                      >
                         <input
                           type="date"
                           value={formData.dateField2}
                           onChange={(e) =>
                             handleChange("dateField2", e.target.value)
                           }
-                          className="border-0 border-b border-black w-full sm:w-48 px-1 focus:outline-none focus:border-b-2 bg-transparent"
+                          className="border-0 bg-transparent w-full px-1 focus:outline-none text-xs sm:text-sm"
                         />
-                      </div>
-
-                      <div className="mt-6 sm:mt-8 space-y-3 sm:space-y-4">
-                        <p className="italic font-bold">Notary Affidavit</p>
-                        <p>State of Georgia</p>
-
-                        <div className="flex flex-col sm:flex-row items-start sm:items-baseline flex-wrap gap-1 sm:gap-0">
-                          <span className="mr-0 sm:mr-2">
-                            Sworn and subscribed before me this
-                          </span>
-                          <input
-                            type="text"
-                            value={formData.notaryDay}
-                            onChange={(e) =>
-                              handleChange("notaryDay", e.target.value)
-                            }
-                            className="border-0 border-b border-black w-full sm:w-16 mx-0 sm:mx-1 px-1 focus:outline-none focus:border-b-2 bg-transparent"
-                          />
-                          <span className="mx-0 sm:mx-1">day of</span>
-                          <input
-                            type="text"
-                            value={formData.notaryMonth}
-                            onChange={(e) =>
-                              handleChange("notaryMonth", e.target.value)
-                            }
-                            className="border-0 border-b border-black w-full sm:w-24 mx-0 sm:mx-1 px-1 focus:outline-none focus:border-b-2 bg-transparent"
-                          />
-                          <span className="mx-0 sm:mx-1">Year</span>
-                          <input
-                            type="text"
-                            value={formData.notaryYear}
-                            onChange={(e) =>
-                              handleChange("notaryYear", e.target.value)
-                            }
-                            className="border-0 border-b border-black w-full sm:w-20 mx-0 sm:mx-1 px-1 focus:outline-none focus:border-b-2 bg-transparent"
-                          />
-                        </div>
-
-                        <p className="mt-6">Notary Seal</p>
-                        <p className="mt-6">Notary Signature</p>
-                      </div>
+                      </span>
                     </div>
+                  </div>
+
+                  {/* Notary Section */}
+                  <div className="space-y-3 mt-6">
+                    <p className="font-bold italic text-xs sm:text-sm">
+                      Notary Affidavit
+                    </p>
+                    <p className="text-xs sm:text-sm">State of Georgia</p>
+
+                    <p className="text-xs sm:text-sm">
+                      Sworn and subscribed before me this{" "}
+                      <span className="border-b border-black inline-block w-16 text-center">
+                        <input
+                          type="text"
+                          value={formData.notaryDay}
+                          onChange={(e) =>
+                            handleChange("notaryDay", e.target.value)
+                          }
+                          className="border-0 bg-transparent w-full text-center px-1 focus:outline-none text-xs sm:text-sm"
+                        />
+                      </span>{" "}
+                      day of{" "}
+                      <span className="border-b border-black inline-block w-28">
+                        <input
+                          type="text"
+                          value={formData.notaryMonth}
+                          onChange={(e) =>
+                            handleChange("notaryMonth", e.target.value)
+                          }
+                          className="border-0 bg-transparent w-full px-1 focus:outline-none text-xs sm:text-sm"
+                        />
+                      </span>{" "}
+                      Year{" "}
+                      <span className="border-b border-black inline-block w-20 text-center">
+                        <input
+                          type="text"
+                          value={formData.notaryYear}
+                          onChange={(e) =>
+                            handleChange("notaryYear", e.target.value)
+                          }
+                          className="border-0 bg-transparent w-full text-center px-1 focus:outline-none text-xs sm:text-sm"
+                        />
+                      </span>
+                    </p>
                   </div>
                 </div>
               </div>

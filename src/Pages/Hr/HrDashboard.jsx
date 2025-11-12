@@ -1498,34 +1498,35 @@ export const HrDashboard = () => {
 
                   {/* Forms List */}
                   <div className="space-y-6">
-                    {/* PART 1 - Basic Information & Essential Forms */}
+                    {/* PART 1 - Employment Application */}
                     <div className="mb-8 p-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border-2 border-blue-300 shadow-md">
                       <h3 className="text-xl font-bold text-blue-900 mb-4 flex items-center gap-2">
-                        📋 PART 1 - Basic Information & Essential Forms
+                        📋 PART 1 - Employment Application
                       </h3>
 
-                      {/* Basic Information Section */}
+                      {/* Employment Application Section */}
                       <div className="mb-6">
                         <h4 className="text-md font-semibold text-gray-800 mb-3 border-b-2 border-blue-300 pb-2">
-                          Basic Information (6 Forms)
+                          Employment Application Forms (6 Forms)
                         </h4>
 
-                        {/* 1. Personal Information */}
+                        {/* 1. Applicant Information */}
                         <div className="p-4 mb-3 rounded-lg border border-gray-200 bg-white">
                           <div className="flex items-center justify-between">
                             <div>
                               <h5 className="font-medium">
-                                1. Personal Information
+                                1. Applicant Information
                               </h5>
                               <p className="text-sm text-gray-600">
-                                Personal details and contact information
+                                Applicant personal details and contact
+                                information
                               </p>
                             </div>
                             <button
                               onClick={() =>
                                 handleViewFormDetail(
                                   "personalInformation",
-                                  "Personal Information"
+                                  "Applicant Information"
                                 )
                               }
                               className="text-blue-600 hover:text-blue-800 text-sm font-medium px-4 py-2 rounded-lg hover:bg-blue-50 transition-colors"
@@ -1535,61 +1536,11 @@ export const HrDashboard = () => {
                           </div>
                         </div>
 
-                        {/* 2. Professional Experience */}
+                        {/* 2. Education */}
                         <div className="p-4 mb-3 rounded-lg border border-gray-200 bg-white">
                           <div className="flex items-center justify-between">
                             <div>
-                              <h5 className="font-medium">
-                                2. Professional Experience
-                              </h5>
-                              <p className="text-sm text-gray-600">
-                                Professional background and experience
-                              </p>
-                            </div>
-                            <button
-                              onClick={() =>
-                                handleViewFormDetail(
-                                  "professionalExperience",
-                                  "Professional Experience"
-                                )
-                              }
-                              className="text-blue-600 hover:text-blue-800 text-sm font-medium px-4 py-2 rounded-lg hover:bg-blue-50 transition-colors"
-                            >
-                              View Details
-                            </button>
-                          </div>
-                        </div>
-
-                        {/* 3. Work Experience */}
-                        <div className="p-4 mb-3 rounded-lg border border-gray-200 bg-white">
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <h5 className="font-medium">
-                                3. Work Experience
-                              </h5>
-                              <p className="text-sm text-gray-600">
-                                Previous work history
-                              </p>
-                            </div>
-                            <button
-                              onClick={() =>
-                                handleViewFormDetail(
-                                  "workExperience",
-                                  "Work Experience"
-                                )
-                              }
-                              className="text-blue-600 hover:text-blue-800 text-sm font-medium px-4 py-2 rounded-lg hover:bg-blue-50 transition-colors"
-                            >
-                              View Details
-                            </button>
-                          </div>
-                        </div>
-
-                        {/* 4. Education */}
-                        <div className="p-4 mb-3 rounded-lg border border-gray-200 bg-white">
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <h5 className="font-medium">4. Education</h5>
+                              <h5 className="font-medium">2. Education</h5>
                               <p className="text-sm text-gray-600">
                                 Educational background and qualifications
                               </p>
@@ -1605,11 +1556,11 @@ export const HrDashboard = () => {
                           </div>
                         </div>
 
-                        {/* 5. References */}
+                        {/* 3. References */}
                         <div className="p-4 mb-3 rounded-lg border border-gray-200 bg-white">
                           <div className="flex items-center justify-between">
                             <div>
-                              <h5 className="font-medium">5. References</h5>
+                              <h5 className="font-medium">3. References</h5>
                               <p className="text-sm text-gray-600">
                                 Professional references
                               </p>
@@ -1625,22 +1576,73 @@ export const HrDashboard = () => {
                           </div>
                         </div>
 
-                        {/* 6. Legal Disclosures */}
+                        {/* 4. Previous Employment */}
                         <div className="p-4 mb-3 rounded-lg border border-gray-200 bg-white">
                           <div className="flex items-center justify-between">
                             <div>
                               <h5 className="font-medium">
-                                6. Legal Disclosures
+                                4. Previous Employment
                               </h5>
                               <p className="text-sm text-gray-600">
-                                Legal disclosures and acknowledgments
+                                Previous work history and employment experience
+                              </p>
+                            </div>
+                            <button
+                              onClick={() =>
+                                handleViewFormDetail(
+                                  "workExperience",
+                                  "Previous Employment"
+                                )
+                              }
+                              className="text-blue-600 hover:text-blue-800 text-sm font-medium px-4 py-2 rounded-lg hover:bg-blue-50 transition-colors"
+                            >
+                              View Details
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* 5. Military Service */}
+                        <div className="p-4 mb-3 rounded-lg border border-gray-200 bg-white">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <h5 className="font-medium">
+                                5. Military Service
+                              </h5>
+                              <p className="text-sm text-gray-600">
+                                Military service and professional background
+                              </p>
+                            </div>
+                            <button
+                              onClick={() =>
+                                handleViewFormDetail(
+                                  "professionalExperience",
+                                  "Military Service"
+                                )
+                              }
+                              className="text-blue-600 hover:text-blue-800 text-sm font-medium px-4 py-2 rounded-lg hover:bg-blue-50 transition-colors"
+                            >
+                              View Details
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* 6. Disclaimer and Signature */}
+                        <div className="p-4 mb-3 rounded-lg border border-gray-200 bg-white">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <h5 className="font-medium">
+                                6. Disclaimer and Signature
+                              </h5>
+                              <p className="text-sm text-gray-600">
+                                Legal disclosures and acknowledgments with
+                                signature
                               </p>
                             </div>
                             <button
                               onClick={() =>
                                 handleViewFormDetail(
                                   "legalDisclosures",
-                                  "Legal Disclosures"
+                                  "Disclaimer and Signature"
                                 )
                               }
                               className="text-blue-600 hover:text-blue-800 text-sm font-medium px-4 py-2 rounded-lg hover:bg-blue-50 transition-colors"
@@ -1660,15 +1662,15 @@ export const HrDashboard = () => {
                         {/* Documents to Submit Section */}
                         <div className="mb-6">
                           <h4 className="text-md font-semibold text-gray-800 mb-3 border-b-2 border-green-300 pb-2">
-                            Documents to Submit (13 Forms)
+                            Documents to Submit (15 Forms)
                           </h4>
 
-                          {/* 8. Job Description */}
+                          {/* 1. Job Description */}
                           <div className="p-4 mb-3 rounded-lg border border-gray-200 bg-white">
                             <div className="flex items-center justify-between">
                               <div>
                                 <h5 className="font-medium">
-                                  8. Job Description
+                                  1. Job Description
                                 </h5>
                                 <p className="text-sm text-gray-600">
                                   Position-specific job description
@@ -1689,12 +1691,12 @@ export const HrDashboard = () => {
                             </div>
                           </div>
 
-                          {/* 9. Code of Ethics Form */}
+                          {/* 2. Code of Ethics Form */}
                           <div className="p-4 mb-3 rounded-lg border border-gray-200 bg-white">
                             <div className="flex items-center justify-between">
                               <div>
                                 <h5 className="font-medium">
-                                  9. Code of Ethics Form
+                                  2. Code of Ethics Form
                                 </h5>
                                 <p className="text-sm text-gray-600">
                                   Company ethical standards acknowledgment
@@ -1704,7 +1706,7 @@ export const HrDashboard = () => {
                                 onClick={() =>
                                   handleViewFormDetail(
                                     "codeOfEthics",
-                                    "Code of Ethics"
+                                    "Code of Ethics Form"
                                   )
                                 }
                                 className="text-blue-600 hover:text-blue-800 text-sm font-medium px-4 py-2 rounded-lg hover:bg-blue-50 transition-colors"
@@ -1714,12 +1716,12 @@ export const HrDashboard = () => {
                             </div>
                           </div>
 
-                          {/* 10. Service Delivery Form */}
+                          {/* 3. Service Delivery Form */}
                           <div className="p-4 mb-3 rounded-lg border border-gray-200 bg-white">
                             <div className="flex items-center justify-between">
                               <div>
                                 <h5 className="font-medium">
-                                  10. Service Delivery Form
+                                  3. Service Delivery Form
                                 </h5>
                                 <p className="text-sm text-gray-600">
                                   Service delivery standards acknowledgment
@@ -1729,7 +1731,7 @@ export const HrDashboard = () => {
                                 onClick={() =>
                                   handleViewFormDetail(
                                     "serviceDeliveryPolicies",
-                                    "Service Delivery Policies"
+                                    "Service Delivery Form"
                                   )
                                 }
                                 className="text-blue-600 hover:text-blue-800 text-sm font-medium px-4 py-2 rounded-lg hover:bg-blue-50 transition-colors"
@@ -1739,12 +1741,12 @@ export const HrDashboard = () => {
                             </div>
                           </div>
 
-                          {/* 11. Non-Compete Agreement */}
+                          {/* 4. Non-Compete Agreement */}
                           <div className="p-4 mb-3 rounded-lg border border-gray-200 bg-white">
                             <div className="flex items-center justify-between">
                               <div>
                                 <h5 className="font-medium">
-                                  11. Non-Compete Agreement
+                                  4. Non-Compete Agreement
                                 </h5>
                                 <p className="text-sm text-gray-600">
                                   Non-compete and confidentiality agreement
@@ -1764,12 +1766,12 @@ export const HrDashboard = () => {
                             </div>
                           </div>
 
-                          {/* 12. Emergency Contact Form */}
+                          {/* 5. Emergency Contact Form */}
                           <div className="p-4 mb-3 rounded-lg border border-gray-200 bg-white">
                             <div className="flex items-center justify-between">
                               <div>
                                 <h5 className="font-medium">
-                                  12. Emergency Contact Form
+                                  5. Emergency Contact Form
                                 </h5>
                                 <p className="text-sm text-gray-600">
                                   Emergency contact information
@@ -1779,7 +1781,7 @@ export const HrDashboard = () => {
                                 onClick={() =>
                                   handleViewFormDetail(
                                     "emergencyContact",
-                                    "Emergency Contact"
+                                    "Emergency Contact Form"
                                   )
                                 }
                                 className="text-blue-600 hover:text-blue-800 text-sm font-medium px-4 py-2 rounded-lg hover:bg-blue-50 transition-colors"
@@ -1789,12 +1791,12 @@ export const HrDashboard = () => {
                             </div>
                           </div>
 
-                          {/* 13. Professional Certificate(s) */}
+                          {/* 6. Professional Certificate(s) */}
                           <div className="p-4 mb-3 rounded-lg border border-gray-200 bg-white">
                             <div className="flex items-center justify-between">
                               <div>
                                 <h5 className="font-medium">
-                                  13. Professional Certificate(s)
+                                  6. Professional Certificate(s)
                                 </h5>
                                 <p className="text-sm text-gray-600">
                                   Professional certifications and licenses
@@ -1804,7 +1806,7 @@ export const HrDashboard = () => {
                                 onClick={() =>
                                   handleViewFormDetail(
                                     "employeeDetailsUpload",
-                                    "Professional Certificates"
+                                    "Professional Certificate(s)"
                                   )
                                 }
                                 className="text-blue-600 hover:text-blue-800 text-sm font-medium px-4 py-2 rounded-lg hover:bg-blue-50 transition-colors"
@@ -1814,65 +1816,15 @@ export const HrDashboard = () => {
                             </div>
                           </div>
 
-                          {/* 14. Driver's License */}
+                          {/* 7. CPR/First Aid Certificate */}
                           <div className="p-4 mb-3 rounded-lg border border-gray-200 bg-white">
                             <div className="flex items-center justify-between">
                               <div>
                                 <h5 className="font-medium">
-                                  14. Driver's License
+                                  7. CPR/First Aid Certificate
                                 </h5>
                                 <p className="text-sm text-gray-600">
-                                  Driver's license documentation
-                                </p>
-                              </div>
-                              <button
-                                onClick={() =>
-                                  handleViewFormDetail(
-                                    "drivingLicense",
-                                    "Driver's License"
-                                  )
-                                }
-                                className="text-blue-600 hover:text-blue-800 text-sm font-medium px-4 py-2 rounded-lg hover:bg-blue-50 transition-colors"
-                              >
-                                View Details
-                              </button>
-                            </div>
-                          </div>
-
-                          {/* 15. Background Check Form */}
-                          <div className="p-4 mb-3 rounded-lg border border-gray-200 bg-white">
-                            <div className="flex items-center justify-between">
-                              <div>
-                                <h5 className="font-medium">
-                                  15. Background Check Form
-                                </h5>
-                                <p className="text-sm text-gray-600">
-                                  Background verification authorization
-                                </p>
-                              </div>
-                              <button
-                                onClick={() =>
-                                  handleViewFormDetail(
-                                    "backgroundCheck",
-                                    "Background Check Form"
-                                  )
-                                }
-                                className="text-blue-600 hover:text-blue-800 text-sm font-medium px-4 py-2 rounded-lg hover:bg-blue-50 transition-colors"
-                              >
-                                View Details
-                              </button>
-                            </div>
-                          </div>
-
-                          {/* 15.5. CPR/First Aid Certificate */}
-                          <div className="p-4 mb-3 rounded-lg border border-gray-200 bg-white">
-                            <div className="flex items-center justify-between">
-                              <div>
-                                <h5 className="font-medium">
-                                  15.5. CPR/First Aid Certificate
-                                </h5>
-                                <p className="text-sm text-gray-600">
-                                  CPR and First Aid certification (Optional)
+                                  CPR and First Aid certification
                                 </p>
                               </div>
                               <button
@@ -1902,22 +1854,22 @@ export const HrDashboard = () => {
                             </div>
                           </div>
 
-                          {/* 16. TB or X-Ray Form */}
+                          {/* 8. Government ID */}
                           <div className="p-4 mb-3 rounded-lg border border-gray-200 bg-white">
                             <div className="flex items-center justify-between">
                               <div>
                                 <h5 className="font-medium">
-                                  16. TB or X-Ray Form
+                                  8. Government ID
                                 </h5>
                                 <p className="text-sm text-gray-600">
-                                  Tuberculosis screening questionnaire
+                                  Government-issued ID documentation
                                 </p>
                               </div>
                               <button
                                 onClick={() =>
                                   handleViewFormDetail(
-                                    "tbSymptomScreen",
-                                    "TB Symptom Screen"
+                                    "drivingLicense",
+                                    "Government ID"
                                   )
                                 }
                                 className="text-blue-600 hover:text-blue-800 text-sm font-medium px-4 py-2 rounded-lg hover:bg-blue-50 transition-colors"
@@ -1927,12 +1879,87 @@ export const HrDashboard = () => {
                             </div>
                           </div>
 
-                          {/* 17. I-94 Employment Eligibility */}
+                          {/* 9. Background Check Form */}
                           <div className="p-4 mb-3 rounded-lg border border-gray-200 bg-white">
                             <div className="flex items-center justify-between">
                               <div>
                                 <h5 className="font-medium">
-                                  17. I-94 Employment Eligibility
+                                  9. Background Check Form
+                                </h5>
+                                <p className="text-sm text-gray-600">
+                                  Background verification authorization
+                                </p>
+                              </div>
+                              <button
+                                onClick={() =>
+                                  handleViewFormDetail(
+                                    "backgroundCheck",
+                                    "Background Check Form"
+                                  )
+                                }
+                                className="text-blue-600 hover:text-blue-800 text-sm font-medium px-4 py-2 rounded-lg hover:bg-blue-50 transition-colors"
+                              >
+                                View Details
+                              </button>
+                            </div>
+                          </div>
+
+                          {/* 10. Staff Misconduct Form */}
+                          <div className="p-4 mb-3 rounded-lg border border-gray-200 bg-white">
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <h5 className="font-medium">
+                                  10. Staff Misconduct Form
+                                </h5>
+                                <p className="text-sm text-gray-600">
+                                  Staff misconduct disclosure form
+                                </p>
+                              </div>
+                              <button
+                                onClick={() =>
+                                  handleViewFormDetail(
+                                    "misconductStatement",
+                                    "Staff Misconduct Form"
+                                  )
+                                }
+                                className="text-blue-600 hover:text-blue-800 text-sm font-medium px-4 py-2 rounded-lg hover:bg-blue-50 transition-colors"
+                              >
+                                View Details
+                              </button>
+                            </div>
+                          </div>
+
+                          {/* 11. TB or X-Ray Form */}
+                          <div className="p-4 mb-3 rounded-lg border border-gray-200 bg-white">
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <h5 className="font-medium">
+                                  11. TB or X-Ray Form
+                                </h5>
+                                <p className="text-sm text-gray-600">
+                                  Tuberculosis screening questionnaire
+                                </p>
+                              </div>
+                              <button
+                                onClick={() =>
+                                  handleViewFormDetail(
+                                    "tbSymptomScreen",
+                                    "TB or X-Ray Form"
+                                  )
+                                }
+                                className="text-blue-600 hover:text-blue-800 text-sm font-medium px-4 py-2 rounded-lg hover:bg-blue-50 transition-colors"
+                              >
+                                View Details
+                              </button>
+                            </div>
+                          </div>
+
+                          {/* 12. I-9 Employment Eligibility */}
+                          <div className="p-4 mb-3 rounded-lg border border-gray-200 bg-white">
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <h5 className="font-medium">
+                                  12. I-9 Employment Eligibility
                                 </h5>
                                 <p className="text-sm text-gray-600">
                                   Employment Eligibility Verification
@@ -1940,7 +1967,10 @@ export const HrDashboard = () => {
                               </div>
                               <button
                                 onClick={() =>
-                                  handleViewFormDetail("i9Form", "I-9 Form")
+                                  handleViewFormDetail(
+                                    "i9Form",
+                                    "I-9 Employment Eligibility"
+                                  )
                                 }
                                 className="text-blue-600 hover:text-blue-800 text-sm font-medium px-4 py-2 rounded-lg hover:bg-blue-50 transition-colors"
                               >
@@ -1949,12 +1979,12 @@ export const HrDashboard = () => {
                             </div>
                           </div>
 
-                          {/* 18. W-4 Tax Form */}
+                          {/* 13. W-4 Tax Form */}
                           <div className="p-4 mb-3 rounded-lg border border-gray-200 bg-white">
                             <div className="flex items-center justify-between">
                               <div>
                                 <h5 className="font-medium">
-                                  18. W-4 Tax Form
+                                  13. W-4 Tax Form
                                 </h5>
                                 <p className="text-sm text-gray-600">
                                   Employee's Withholding Certificate
@@ -1962,7 +1992,7 @@ export const HrDashboard = () => {
                               </div>
                               <button
                                 onClick={() =>
-                                  handleViewFormDetail("w4Form", "W-4 Form")
+                                  handleViewFormDetail("w4Form", "W-4 Tax Form")
                                 }
                                 className="text-blue-600 hover:text-blue-800 text-sm font-medium px-4 py-2 rounded-lg hover:bg-blue-50 transition-colors"
                               >
@@ -1971,12 +2001,12 @@ export const HrDashboard = () => {
                             </div>
                           </div>
 
-                          {/* 19. W-9 Tax Form */}
+                          {/* 14. W-9 Tax Form */}
                           <div className="p-4 mb-3 rounded-lg border border-gray-200 bg-white">
                             <div className="flex items-center justify-between">
                               <div>
                                 <h5 className="font-medium">
-                                  19. W-9 Tax Form
+                                  14. W-9 Tax Form
                                 </h5>
                                 <p className="text-sm text-gray-600">
                                   Taxpayer Identification Number and
@@ -1985,7 +2015,7 @@ export const HrDashboard = () => {
                               </div>
                               <button
                                 onClick={() =>
-                                  handleViewFormDetail("w9Form", "W-9 Form")
+                                  handleViewFormDetail("w9Form", "W-9 Tax Form")
                                 }
                                 className="text-blue-600 hover:text-blue-800 text-sm font-medium px-4 py-2 rounded-lg hover:bg-blue-50 transition-colors"
                               >
@@ -1994,12 +2024,12 @@ export const HrDashboard = () => {
                             </div>
                           </div>
 
-                          {/* 20. Direct Deposit Form */}
+                          {/* 15. Direct Deposit Form */}
                           <div className="p-4 mb-3 rounded-lg border border-gray-200 bg-white">
                             <div className="flex items-center justify-between">
                               <div>
                                 <h5 className="font-medium">
-                                  20. Direct Deposit Form
+                                  15. Direct Deposit Form
                                 </h5>
                                 <p className="text-sm text-gray-600">
                                   Banking information for payroll

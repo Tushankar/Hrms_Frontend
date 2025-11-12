@@ -202,7 +202,7 @@ const W4Form = () => {
         toast.success("W-4 Form saved successfully!");
         window.dispatchEvent(new Event("formStatusUpdated"));
         setTimeout(() => {
-          navigate("/employee/direct-deposit");
+          navigate("/employee/w9-form");
         }, 1500);
       }
     } catch (error) {

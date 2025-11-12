@@ -153,9 +153,7 @@ const PersonalInformationHR = () => {
                     Desired Salary
                   </label>
                   <p className="text-gray-900">
-                    {data.desiredSalary
-                      ? `${data.desiredSalary} ${data.salaryCurrency || "USD"}`
-                      : "N/A"}
+                    {data.desiredSalary ? `$${data.desiredSalary}` : "N/A"}
                     {data.desiredSalaryType && ` (${data.desiredSalaryType})`}
                   </p>
                 </div>

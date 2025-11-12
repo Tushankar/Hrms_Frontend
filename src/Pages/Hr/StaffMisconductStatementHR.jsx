@@ -54,42 +54,86 @@ const StaffMisconductStatementHR = () => {
         const response = await axios.get(apiUrl, { withCredentials: true });
 
         console.log("Staff misconduct statement API response:", response.data);
+        console.log("Response.data.data:", response.data?.data);
+        console.log("Response.data.data.forms:", response.data?.data?.forms);
+        console.log(
+          "Response.data.data.forms.misconductStatement:",
+          response.data?.data?.forms?.misconductStatement
+        );
 
-        // Check if we have data (the API returns data directly without a success flag)
-        if (response.data && response.data.data) {
+        // Check if we have data (the API returns data.data.forms.misconductStatement)
+        if (response.data && response.data.data && response.data.data.forms) {
           const applicationData = response.data.data.forms.misconductStatement;
+
+          if (!applicationData) {
+            console.warn("❌ No misconduct statement data found in response");
+            toast.info(
+              "No staff misconduct statement data found for this employee. The form has not been submitted yet."
+            );
+            setLoading(false);
+            return;
+          }
+
           console.log(
-            "Setting staff misconduct statement form data:",
+            "✅ Found misconduct statement form data:",
             applicationData
           );
+
+          // Check if we have any actual data
+          const hasData =
+            applicationData.staffTitle ||
+            applicationData.companyName ||
+            applicationData.employeeName ||
+            applicationData.employmentPosition ||
+            applicationData.dateField1 ||
+            applicationData.dateField2 ||
+            applicationData.signatureLine ||
+            applicationData.signatureField;
+
+          if (!hasData) {
+            console.warn(
+              "⚠️ Form exists but is empty - no data fields populated"
+            );
+            toast.warning(
+              "Form exists but has not been completed yet. Employee may still be filling it out."
+            );
+          } else {
+            console.log("✅ Form has data - displaying content");
+          }
 
           // Map backend data to form structure (matching employee form exactly)
           setFormData({
             // Staff Information
-            staffTitle: applicationData?.staffTitle || "",
-            companyName: applicationData?.companyName || "",
-            employeeNameParagraph: applicationData?.employeeNameParagraph || "",
-            employeeName: applicationData?.employeeName || "",
-            employmentPosition: applicationData?.employmentPosition || "",
+            staffTitle: applicationData.staffTitle || "",
+            companyName: applicationData.companyName || "",
+            employeeNameParagraph: applicationData.employeeNameParagraph || "",
+            employeeName: applicationData.employeeName || "",
+            employmentPosition: applicationData.employmentPosition || "",
 
-            // Signatures and Dates - handle digital signatures only
-            signatureLine: applicationData?.signatureLine || "",
-            dateField1: applicationData?.dateField1 || "",
-            exhibitName: applicationData?.exhibitName || "",
-            printName: applicationData?.printName || "",
-            signatureField: applicationData?.signatureField || "",
-            dateField2: applicationData?.dateField2 || "",
+            // Signatures and Dates - handle digital signatures
+            signatureLine: applicationData.signatureLine || "",
+            dateField1: applicationData.dateField1 || "",
+            exhibitName: applicationData.exhibitName || "",
+            printName: applicationData.printName || "",
+            signatureField: applicationData.signatureField || "",
+            dateField2: applicationData.dateField2 || "",
 
             // Notary Information
-            notaryDay: applicationData?.notaryDay || "",
-            notaryMonth: applicationData?.notaryMonth || "",
-            notaryYear: applicationData?.notaryYear || "",
+            notaryDay: applicationData.notaryDay || "",
+            notaryMonth: applicationData.notaryMonth || "",
+            notaryYear: applicationData.notaryYear || "",
           });
 
           // Load existing HR feedback
-          if (applicationData?.hrFeedback) {
+          if (applicationData.hrFeedback) {
             setExistingFeedback(applicationData.hrFeedback);
+            console.log(
+              "✅ Loaded existing HR feedback:",
+              applicationData.hrFeedback
+            );
           }
+
+          console.log("✅ Form data set in state successfully");
         } else {
           console.error(
             "No staff misconduct statement data received:",
@@ -442,6 +486,7 @@ const StaffMisconductStatementHR = () => {
                 existingReviewedAt={existingFeedback?.reviewedAt}
                 onNoteSaved={loadFormData}
                 formData={formData}
+                showSignature={false}
               />
             </div>
           </div>
