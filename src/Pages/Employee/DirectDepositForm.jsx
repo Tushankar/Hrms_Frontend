@@ -304,6 +304,30 @@ const DirectDepositForm = () => {
     setFormData({ ...formData, [field]: value });
   };
 
+  const handleLastFourDigitsChange = (accountIndex, digitIndex, value) => {
+    const currentDigits = formData.accounts[accountIndex].lastFourDigits || "";
+    const digitsArray = currentDigits.padEnd(4, " ").split("");
+    digitsArray[digitIndex] = value.replace(/\D/g, "") || " ";
+    const newDigits = digitsArray.join("").trim();
+    handleInputChange(accountIndex, "lastFourDigits", newDigits);
+  };
+
+  const handleRoutingNumberChange = (accountIndex, digitIndex, value) => {
+    const currentDigits = formData.accounts[accountIndex].routingNumber || "";
+    const digitsArray = currentDigits.padEnd(9, " ").split("");
+    digitsArray[digitIndex] = value.replace(/\D/g, "") || " ";
+    const newDigits = digitsArray.join("").trim();
+    handleInputChange(accountIndex, "routingNumber", newDigits);
+  };
+
+  const handleAccountNumberChange = (accountIndex, digitIndex, value) => {
+    const currentDigits = formData.accounts[accountIndex].accountNumber || "";
+    const digitsArray = currentDigits.padEnd(17, " ").split("");
+    digitsArray[digitIndex] = value.replace(/\D/g, "") || " ";
+    const newDigits = digitsArray.join("").trim();
+    handleInputChange(accountIndex, "accountNumber", newDigits);
+  };
+
   if (loading) {
     return (
       <Layout>
@@ -349,66 +373,68 @@ const DirectDepositForm = () => {
       )}
       <div className="max-w-4xl mx-auto bg-white p-6">
         {/* Header */}
-        <div className="text-center mb-4 border-t-[3px] border-black pt-2">
-          <h1
-            className="text-3xl font-black tracking-wide mb-1"
-            style={{
-              fontFamily: "Arial Black, sans-serif",
-              letterSpacing: "0.1em",
-            }}
-          >
-            PAYCHEX
-          </h1>
-          <h2 className="text-base font-bold">
-            Direct Deposit Enrollment/Change Form*
-          </h2>
+        <div className="mb-4 border-t-[3px] border-black pt-4">
+          <div className="text-center">
+            <h1
+              className="text-4xl font-black tracking-wide italic mb-0"
+              style={{
+                fontFamily: "Arial Black, sans-serif",
+                letterSpacing: "-0.05em",
+                fontWeight: "900",
+              }}
+            >
+              PAYCHEX
+            </h1>
+          </div>
+          <div className="text-center">
+            <h2 className="text-[17px] font-semibold tracking-[-0.01em] text-black font-[Arial,Helvetica,sans-serif]">
+              Direct Deposit Enrollment/Change Form*
+            </h2>
+          </div>
         </div>
 
         {/* Company and Employee Info */}
-        <div className="mb-3 text-[11px]">
-          <div className="flex mb-1.5">
-            <label className="font-bold whitespace-nowrap mr-2">
-              Company Name and/or Client Number
-            </label>
+        <div className="mb-3 text-[13px] text-black">
+          <div className="mb-2">
+            <span className="font-bold">Company Name and/or Client Number</span>
             <input
               type="text"
               value={formData.companyName}
               onChange={(e) =>
                 handleTopLevelChange("companyName", e.target.value)
               }
-              className="flex-1 border-b border-black px-1 outline-none bg-transparent"
+              className="border-0 border-b border-black outline-none bg-[#DDE5FE] ml-2 px-1 text-[13px] py-0"
+              style={{ width: "600px", height: "20px" }}
             />
           </div>
-          <div className="flex mb-1.5 items-end">
-            <label className="font-bold whitespace-nowrap mr-2">
-              Employee/Worker Name
-            </label>
+          <div className="mb-2">
+            <span className="font-bold">Employee/Worker Name</span>
             <input
               type="text"
               value={formData.employeeName}
               onChange={(e) =>
                 handleTopLevelChange("employeeName", e.target.value)
               }
-              className="flex-1 border-b border-black px-1 outline-none bg-transparent mr-6"
+              className="border-0 border-b border-black outline-none bg-[#DDE5FE] ml-2 px-1 text-[13px] py-0"
+              style={{ width: "350px", height: "20px" }}
             />
-            <label className="font-bold whitespace-nowrap mr-2">
-              Employee/Worker Number
-            </label>
+            <span className="font-bold ml-6">Employee/Worker Number</span>
             <input
               type="text"
               value={formData.employeeNumber}
               onChange={(e) =>
                 handleTopLevelChange("employeeNumber", e.target.value)
               }
-              className="w-32 border-b border-black px-1 outline-none bg-transparent"
+              className="border-0 border-b border-black outline-none bg-[#DDE5FE] ml-2 px-1 text-[13px] py-0"
+              style={{ width: "100px", height: "20px" }}
             />
           </div>
-          <p className="text-[10px] mb-0.5">
+          <p className="text-[10px] mb-0.5 pl-4 text-black">
             <span className="font-bold">Employee/Worker:</span> Retain a copy of
             this form for your records. Return the original to your
             employer/company.
           </p>
-          <p className="text-[10px]">
+          <p className="text-[10px] pl-4 text-black">
             <span className="font-bold">Employer/Company:</span> Please retain a
             copy of this document for your records.
           </p>
@@ -416,7 +442,7 @@ const DirectDepositForm = () => {
 
         {/* Main Form Section */}
         <div className="border-[2px] border-black">
-          <div className="bg-black text-white px-2 py-1.5 text-[10px] font-bold">
+          <div className="bg-black text-white px-4 py-2.5 text-[14px] font-bold whitespace-nowrap">
             COMPLETE TO ENROLL / ADD / CHANGE BANK ACCOUNTS –{" "}
             <span className="italic">
               PLEASE PRINT CLEARLY IN BLACK/BLUE INK ONLY
@@ -424,9 +450,9 @@ const DirectDepositForm = () => {
           </div>
 
           {/* Account 1 */}
-          <div className="border-b-[2px] border-black">
+          <div className="border-b-[5px] border-black">
             {/* Action Row */}
-            <div className="flex border-b border-black text-[10px]">
+            <div className="flex border-t border-b border-black text-[10px] text-black">
               <div className="flex items-center px-2 py-1.5 border-r border-black">
                 <input
                   type="checkbox"
@@ -438,9 +464,9 @@ const DirectDepositForm = () => {
                       e.target.checked ? "add" : ""
                     )
                   }
-                  className="mr-1 w-3 h-3"
+                  className="mr-1 w-3 h-3 bg-[#DDE5FE]"
                 />
-                <label className="font-bold whitespace-nowrap">Add new</label>
+                <label className="whitespace-nowrap">Add new</label>
               </div>
               <div className="flex items-center px-2 py-1.5 border-r border-black">
                 <input
@@ -453,9 +479,9 @@ const DirectDepositForm = () => {
                       e.target.checked ? "update" : ""
                     )
                   }
-                  className="mr-1 w-3 h-3"
+                  className="mr-1 w-3 h-3 bg-[#DDE5FE]"
                 />
-                <label className="font-bold whitespace-nowrap">
+                <label className="whitespace-nowrap">
                   Update existing account
                 </label>
               </div>
@@ -470,38 +496,47 @@ const DirectDepositForm = () => {
                       e.target.checked ? "replace" : ""
                     )
                   }
-                  className="mr-1 w-3 h-3"
+                  className="mr-1 w-3 h-3 bg-[#DDE5FE]"
                 />
-                <label className="font-bold whitespace-nowrap">
+                <label className="whitespace-nowrap">
                   Replace existing account
                 </label>
               </div>
               <div className="flex items-center px-2 py-1.5 flex-1">
-                <label className="font-bold whitespace-nowrap mr-1">
+                <label className="whitespace-nowrap mr-2">
                   Last 4 digits of the existing account number
                 </label>
-                <input
-                  type="text"
-                  maxLength="4"
-                  value={formData.accounts[0].lastFourDigits}
-                  onChange={(e) =>
-                    handleInputChange(
-                      0,
-                      "lastFourDigits",
-                      e.target.value.replace(/\D/g, "")
-                    )
-                  }
-                  className="w-12 border-b border-black px-1 outline-none bg-transparent"
-                />
+                <div className="flex gap-1">
+                  {[0, 1, 2, 3].map((digitIndex) => (
+                    <input
+                      key={digitIndex}
+                      type="text"
+                      maxLength="1"
+                      value={
+                        (formData.accounts[0].lastFourDigits || "")[
+                          digitIndex
+                        ] || ""
+                      }
+                      onChange={(e) =>
+                        handleLastFourDigitsChange(
+                          0,
+                          digitIndex,
+                          e.target.value
+                        )
+                      }
+                      className="w-6 h-6 text-center border border-black px-0 py-0 outline-none bg-[#DDE5FE] text-[13px] font-bold"
+                    />
+                  ))}
+                </div>
               </div>
             </div>
 
             {/* Account Type Row */}
-            <div className="flex border-b border-black text-[10px]">
-              <div className="px-2 py-1.5 border-r border-black font-bold whitespace-nowrap">
+            <div className="flex border-b border-black text-[10px] text-black">
+              <div className="flex items-center px-2 py-1.5 whitespace-nowrap">
                 Type of Account
               </div>
-              <div className="flex items-center px-2 py-1.5 border-r border-black">
+              <div className="flex items-center px-2 py-1.5">
                 <input
                   type="checkbox"
                   checked={formData.accounts[0].accountType === "checking"}
@@ -512,7 +547,7 @@ const DirectDepositForm = () => {
                       e.target.checked ? "checking" : ""
                     )
                   }
-                  className="mr-1 w-3 h-3"
+                  className="mr-1 w-3 h-3 bg-[#DDE5FE]"
                 />
                 <label className="whitespace-nowrap">Checking</label>
               </div>
@@ -527,12 +562,12 @@ const DirectDepositForm = () => {
                       e.target.checked ? "savings" : ""
                     )
                   }
-                  className="mr-1 w-3 h-3"
+                  className="mr-1 w-3 h-3 bg-[#DDE5FE]"
                 />
                 <label className="whitespace-nowrap">Savings</label>
               </div>
               <div className="flex items-center px-2 py-1.5 flex-1">
-                <label className="font-bold whitespace-nowrap mr-1">
+                <label className="whitespace-nowrap mr-1">
                   Account holder's Name:
                 </label>
                 <input
@@ -541,58 +576,70 @@ const DirectDepositForm = () => {
                   onChange={(e) =>
                     handleInputChange(0, "accountHolderName", e.target.value)
                   }
-                  className="flex-1 border-b border-black px-1 outline-none bg-transparent border-0"
+                  className="flex-1 border-0 border-b border-black px-1 py-0 outline-none bg-[#DDE5FE] text-[13px]"
                 />
               </div>
             </div>
 
             {/* Routing Number Row */}
-            <div className="flex border-b border-black text-[10px]">
-              <div className="px-2 py-1.5 border-r border-black font-bold whitespace-nowrap w-44">
+            <div className="flex border-b border-black text-[10px] text-black">
+              <div className="flex items-center px-2 py-1.5 whitespace-nowrap w-44">
                 Routing/Transit Number
               </div>
               <div className="flex-1 px-2 py-1.5">
-                <input
-                  type="text"
-                  maxLength="9"
-                  value={formData.accounts[0].routingNumber}
-                  onChange={(e) =>
-                    handleInputChange(
-                      0,
-                      "routingNumber",
-                      e.target.value.replace(/\D/g, "")
-                    )
-                  }
-                  className="w-full border-b border-black px-1 outline-none bg-transparent border-0"
-                />
+                <div className="flex gap-1">
+                  {[0, 1, 2, 3, 4, 5, 6, 7, 8].map((digitIndex) => (
+                    <input
+                      key={digitIndex}
+                      type="text"
+                      maxLength="1"
+                      value={
+                        (formData.accounts[0].routingNumber || "")[
+                          digitIndex
+                        ] || ""
+                      }
+                      onChange={(e) =>
+                        handleRoutingNumberChange(0, digitIndex, e.target.value)
+                      }
+                      className="w-6 h-6 text-center border border-black px-0 py-0 outline-none bg-[#DDE5FE] text-[13px] font-bold"
+                    />
+                  ))}
+                </div>
               </div>
             </div>
 
             {/* Account Number Row */}
-            <div className="flex border-b border-black text-[10px]">
-              <div className="px-2 py-1.5 border-r border-black font-bold whitespace-nowrap w-44">
+            <div className="flex border-b border-black text-[10px] text-black">
+              <div className="flex items-center px-2 py-1.5 whitespace-nowrap w-44">
                 Checking/Savings Account Number**
               </div>
               <div className="flex-1 px-2 py-1.5">
-                <input
-                  type="text"
-                  maxLength="17"
-                  value={formData.accounts[0].accountNumber}
-                  onChange={(e) =>
-                    handleInputChange(
-                      0,
-                      "accountNumber",
-                      e.target.value.replace(/\D/g, "")
-                    )
-                  }
-                  className="w-full border-b border-black px-1 outline-none bg-transparent border-0"
-                />
+                <div className="flex gap-1">
+                  {[
+                    0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16,
+                  ].map((digitIndex) => (
+                    <input
+                      key={digitIndex}
+                      type="text"
+                      maxLength="1"
+                      value={
+                        (formData.accounts[0].accountNumber || "")[
+                          digitIndex
+                        ] || ""
+                      }
+                      onChange={(e) =>
+                        handleAccountNumberChange(0, digitIndex, e.target.value)
+                      }
+                      className="w-6 h-6 text-center border border-black px-0 py-0 outline-none bg-[#DDE5FE] text-[13px] font-bold"
+                    />
+                  ))}
+                </div>
               </div>
             </div>
 
             {/* Bank Name Row */}
             <div className="flex border-b border-black text-[10px]">
-              <div className="px-2 py-1.5 border-r border-black font-bold whitespace-nowrap w-44">
+              <div className="flex items-center px-2 py-1.5 whitespace-nowrap w-44">
                 Financial Institution ("Bank") Name
               </div>
               <div className="flex-1 px-2 py-1.5 border-0">
@@ -602,17 +649,17 @@ const DirectDepositForm = () => {
                   onChange={(e) =>
                     handleInputChange(0, "bankName", e.target.value)
                   }
-                  className="w-full px-1 outline-none bg-transparent border-0"
+                  className="w-full px-1 py-0 outline-none bg-[#DDE5FE] text-[13px] border-0 border-b border-black"
                 />
               </div>
             </div>
 
             {/* Deposit Amount Row */}
-            <div className="flex text-[10px]">
-              <div className="px-2 py-1.5 border-r border-black font-bold whitespace-nowrap">
+            <div className="flex border-b border-black text-[10px]">
+              <div className="flex items-center px-2 py-1.5 whitespace-nowrap">
                 I wish to deposit (check one):
               </div>
-              <div className="flex items-center px-2 py-1.5 border-r border-black border-0">
+              <div className="flex items-center px-2 py-1.5 border-0">
                 <input
                   type="text"
                   value={formData.accounts[0].depositPercent}
@@ -623,11 +670,11 @@ const DirectDepositForm = () => {
                       e.target.value.replace(/\D/g, "")
                     )
                   }
-                  className="w-10 border-b border-black px-1 outline-none bg-transparent mr-1 border-0"
+                  className="w-10 border-0 border-b border-black px-1 py-0 outline-none bg-[#DDE5FE] text-[13px] mr-1"
                 />
                 <label className="whitespace-nowrap">% of Net</label>
               </div>
-              <div className="flex items-center px-2 py-1.5 border-r border-black border-0">
+              <div className="flex items-center px-2 py-1.5 border-0">
                 <label className="whitespace-nowrap mr-1">
                   Specific Dollar Amount $
                 </label>
@@ -641,9 +688,9 @@ const DirectDepositForm = () => {
                       e.target.value.replace(/\D/g, "")
                     )
                   }
-                  className="w-20 border-b border-black px-1 outline-none bg-transparent border-0"
+                  className="w-20 border-0 border-b border-black px-1 py-0 outline-none bg-[#DDE5FE] text-[13px]"
                 />
-                <span className="ml-1">.00</span>
+                <span className="ml-1 text-[13px] self-center">.00</span>
               </div>
               <div className="flex items-center px-2 py-1.5 flex-1">
                 <input
@@ -652,7 +699,7 @@ const DirectDepositForm = () => {
                   onChange={(e) =>
                     handleInputChange(0, "depositRemainder", e.target.checked)
                   }
-                  className="mr-1 w-3 h-3"
+                  className="mr-1 w-3 h-3 bg-[#DDE5FE]"
                 />
                 <label className="whitespace-nowrap">
                   Remainder of Net Pay
@@ -662,9 +709,9 @@ const DirectDepositForm = () => {
           </div>
 
           {/* Account 2 */}
-          <div className="border-b-[2px] border-black">
+          <div className="border-b-[5px] border-black">
             {/* Action Row */}
-            <div className="flex border-b border-black text-[10px]">
+            <div className="flex border-t border-b border-black text-[10px] text-black">
               <div className="flex items-center px-2 py-1.5 border-r border-black">
                 <input
                   type="checkbox"
@@ -676,9 +723,9 @@ const DirectDepositForm = () => {
                       e.target.checked ? "add" : ""
                     )
                   }
-                  className="mr-1 w-3 h-3"
+                  className="mr-1 w-3 h-3 bg-[#DDE5FE]"
                 />
-                <label className="font-bold whitespace-nowrap">Add new</label>
+                <label className="whitespace-nowrap">Add new</label>
               </div>
               <div className="flex items-center px-2 py-1.5 border-r border-black">
                 <input
@@ -691,9 +738,9 @@ const DirectDepositForm = () => {
                       e.target.checked ? "update" : ""
                     )
                   }
-                  className="mr-1 w-3 h-3"
+                  className="mr-1 w-3 h-3 bg-[#DDE5FE]"
                 />
-                <label className="font-bold whitespace-nowrap">
+                <label className="whitespace-nowrap">
                   Update existing account
                 </label>
               </div>
@@ -708,38 +755,47 @@ const DirectDepositForm = () => {
                       e.target.checked ? "replace" : ""
                     )
                   }
-                  className="mr-1 w-3 h-3"
+                  className="mr-1 w-3 h-3 bg-[#DDE5FE]"
                 />
-                <label className="font-bold whitespace-nowrap">
+                <label className="whitespace-nowrap">
                   Replace existing account
                 </label>
               </div>
               <div className="flex items-center px-2 py-1.5 flex-1">
-                <label className="font-bold whitespace-nowrap mr-1">
+                <label className="whitespace-nowrap mr-2">
                   Last 4 digits of the existing account number
                 </label>
-                <input
-                  type="text"
-                  maxLength="4"
-                  value={formData.accounts[1].lastFourDigits}
-                  onChange={(e) =>
-                    handleInputChange(
-                      1,
-                      "lastFourDigits",
-                      e.target.value.replace(/\D/g, "")
-                    )
-                  }
-                  className="w-12 border-b border-black px-1 outline-none bg-transparent"
-                />
+                <div className="flex gap-1">
+                  {[0, 1, 2, 3].map((digitIndex) => (
+                    <input
+                      key={digitIndex}
+                      type="text"
+                      maxLength="1"
+                      value={
+                        (formData.accounts[1].lastFourDigits || "")[
+                          digitIndex
+                        ] || ""
+                      }
+                      onChange={(e) =>
+                        handleLastFourDigitsChange(
+                          1,
+                          digitIndex,
+                          e.target.value
+                        )
+                      }
+                      className="w-6 h-6 text-center border border-black px-0 py-0 outline-none bg-[#DDE5FE] text-[13px] font-bold"
+                    />
+                  ))}
+                </div>
               </div>
             </div>
 
             {/* Account Type Row */}
             <div className="flex border-b border-black text-[10px]">
-              <div className="px-2 py-1.5 border-r border-black font-bold whitespace-nowrap">
+              <div className="flex items-center px-2 py-1.5  whitespace-nowrap">
                 Type of Account
               </div>
-              <div className="flex items-center px-2 py-1.5 border-r border-black">
+              <div className="flex items-center px-2 py-1.5">
                 <input
                   type="checkbox"
                   checked={formData.accounts[1].accountType === "checking"}
@@ -750,7 +806,7 @@ const DirectDepositForm = () => {
                       e.target.checked ? "checking" : ""
                     )
                   }
-                  className="mr-1 w-3 h-3"
+                  className="mr-1 w-3 h-3 bg-[#DDE5FE]"
                 />
                 <label className="whitespace-nowrap">Checking</label>
               </div>
@@ -765,12 +821,12 @@ const DirectDepositForm = () => {
                       e.target.checked ? "savings" : ""
                     )
                   }
-                  className="mr-1 w-3 h-3"
+                  className="mr-1 w-3 h-3 bg-[#DDE5FE]"
                 />
                 <label className="whitespace-nowrap">Savings</label>
               </div>
               <div className="flex items-center px-2 py-1.5 flex-1">
-                <label className="font-bold whitespace-nowrap mr-1">
+                <label className=" whitespace-nowrap mr-1">
                   Account holder's Name:
                 </label>
                 <input
@@ -779,58 +835,70 @@ const DirectDepositForm = () => {
                   onChange={(e) =>
                     handleInputChange(1, "accountHolderName", e.target.value)
                   }
-                  className="flex-1 border-b border-black px-1 outline-none bg-transparent border-0"
+                  className="flex-1 border-0 border-b border-black px-1 py-0 outline-none bg-[#DDE5FE] text-[13px]"
                 />
               </div>
             </div>
 
             {/* Routing Number Row */}
             <div className="flex border-b border-black text-[10px]">
-              <div className="px-2 py-1.5 border-r border-black font-bold whitespace-nowrap w-44">
+              <div className="flex items-center px-2 py-1.5 whitespace-nowrap w-44">
                 Routing/Transit Number
               </div>
               <div className="flex-1 px-2 py-1.5">
-                <input
-                  type="text"
-                  maxLength="9"
-                  value={formData.accounts[1].routingNumber}
-                  onChange={(e) =>
-                    handleInputChange(
-                      1,
-                      "routingNumber",
-                      e.target.value.replace(/\D/g, "")
-                    )
-                  }
-                  className="w-full border-b border-black px-1 outline-none bg-transparent border-0"
-                />
+                <div className="flex gap-1">
+                  {[0, 1, 2, 3, 4, 5, 6, 7, 8].map((digitIndex) => (
+                    <input
+                      key={digitIndex}
+                      type="text"
+                      maxLength="1"
+                      value={
+                        (formData.accounts[1].routingNumber || "")[
+                          digitIndex
+                        ] || ""
+                      }
+                      onChange={(e) =>
+                        handleRoutingNumberChange(1, digitIndex, e.target.value)
+                      }
+                      className="w-6 h-6 text-center border border-black px-0 py-0 outline-none bg-[#DDE5FE] text-[13px] font-bold"
+                    />
+                  ))}
+                </div>
               </div>
             </div>
 
             {/* Account Number Row */}
             <div className="flex border-b border-black text-[10px]">
-              <div className="px-2 py-1.5 border-r border-black font-bold whitespace-nowrap w-44">
+              <div className="flex items-center px-2 py-1.5  whitespace-nowrap w-44">
                 Checking/Savings Account Number**
               </div>
               <div className="flex-1 px-2 py-1.5">
-                <input
-                  type="text"
-                  maxLength="17"
-                  value={formData.accounts[1].accountNumber}
-                  onChange={(e) =>
-                    handleInputChange(
-                      1,
-                      "accountNumber",
-                      e.target.value.replace(/\D/g, "")
-                    )
-                  }
-                  className="w-full border-b border-black px-1 outline-none bg-transparent border-0"
-                />
+                <div className="flex gap-1">
+                  {[
+                    0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16,
+                  ].map((digitIndex) => (
+                    <input
+                      key={digitIndex}
+                      type="text"
+                      maxLength="1"
+                      value={
+                        (formData.accounts[1].accountNumber || "")[
+                          digitIndex
+                        ] || ""
+                      }
+                      onChange={(e) =>
+                        handleAccountNumberChange(1, digitIndex, e.target.value)
+                      }
+                      className="w-6 h-6 text-center border border-black px-0 py-0 outline-none bg-[#DDE5FE] text-[13px] font-bold"
+                    />
+                  ))}
+                </div>
               </div>
             </div>
 
             {/* Bank Name Row */}
             <div className="flex border-b border-black text-[10px]">
-              <div className="px-2 py-1.5 border-r border-black font-bold whitespace-nowrap w-44">
+              <div className="flex items-center px-2 py-1.5 whitespace-nowrap w-44">
                 Financial Institution ("Bank") Name
               </div>
               <div className="flex-1 px-2 py-1.5 border-0">
@@ -840,17 +908,17 @@ const DirectDepositForm = () => {
                   onChange={(e) =>
                     handleInputChange(1, "bankName", e.target.value)
                   }
-                  className="w-full px-1 outline-none bg-transparent border-0"
+                  className="w-full px-1 py-0 outline-none bg-[#DDE5FE] text-[13px] border-0 border-b border-black"
                 />
               </div>
             </div>
 
             {/* Deposit Amount Row */}
-            <div className="flex text-[10px]">
-              <div className="px-2 py-1.5 border-r border-black font-bold whitespace-nowrap">
+            <div className="flex border-b border-black text-[10px]">
+              <div className="flex items-center px-2 py-1.5 whitespace-nowrap">
                 I wish to deposit (check one):
               </div>
-              <div className="flex items-center px-2 py-1.5 border-r border-black border-0">
+              <div className="flex items-center px-2 py-1.5 border-0">
                 <input
                   type="text"
                   value={formData.accounts[1].depositPercent}
@@ -861,11 +929,11 @@ const DirectDepositForm = () => {
                       e.target.value.replace(/\D/g, "")
                     )
                   }
-                  className="w-10 border-b border-black px-1 outline-none bg-transparent mr-1 border-0"
+                  className="w-10 border-0 border-b border-black px-1 py-0 outline-none bg-[#DDE5FE] text-[13px] mr-1"
                 />
                 <label className="whitespace-nowrap">% of Net</label>
               </div>
-              <div className="flex items-center px-2 py-1.5 border-r border-black border-0">
+              <div className="flex items-center px-2 py-1.5 border-0">
                 <label className="whitespace-nowrap mr-1">
                   Specific Dollar Amount $
                 </label>
@@ -879,9 +947,9 @@ const DirectDepositForm = () => {
                       e.target.value.replace(/\D/g, "")
                     )
                   }
-                  className="w-20 border-b border-black px-1 outline-none bg-transparent border-0"
+                  className="w-20 border-0 border-b border-black px-1 py-0 outline-none bg-[#DDE5FE] text-[13px]"
                 />
-                <span className="ml-1">.00</span>
+                <span className="ml-1 text-[13px] self-center">.00</span>
               </div>
               <div className="flex items-center px-2 py-1.5 flex-1">
                 <input
@@ -890,7 +958,7 @@ const DirectDepositForm = () => {
                   onChange={(e) =>
                     handleInputChange(1, "depositRemainder", e.target.checked)
                   }
-                  className="mr-1 w-3 h-3"
+                  className="mr-1 w-3 h-3 bg-[#DDE5FE]"
                 />
                 <label className="whitespace-nowrap">
                   Remainder of Net Pay
@@ -900,9 +968,9 @@ const DirectDepositForm = () => {
           </div>
 
           {/* Account 3 */}
-          <div>
+          <div className="border-b-[5px] border-black">
             {/* Action Row */}
-            <div className="flex border-b border-black text-[10px]">
+            <div className="flex border-t border-b border-black text-[10px] text-black">
               <div className="flex items-center px-2 py-1.5 border-r border-black">
                 <input
                   type="checkbox"
@@ -914,9 +982,9 @@ const DirectDepositForm = () => {
                       e.target.checked ? "add" : ""
                     )
                   }
-                  className="mr-1 w-3 h-3"
+                  className="mr-1 w-3 h-3 bg-[#DDE5FE]"
                 />
-                <label className="font-bold whitespace-nowrap">Add new</label>
+                <label className="whitespace-nowrap">Add new</label>
               </div>
               <div className="flex items-center px-2 py-1.5 border-r border-black">
                 <input
@@ -929,9 +997,9 @@ const DirectDepositForm = () => {
                       e.target.checked ? "update" : ""
                     )
                   }
-                  className="mr-1 w-3 h-3"
+                  className="mr-1 w-3 h-3 bg-[#DDE5FE]"
                 />
-                <label className="font-bold whitespace-nowrap">
+                <label className="whitespace-nowrap">
                   Update existing account
                 </label>
               </div>
@@ -946,38 +1014,47 @@ const DirectDepositForm = () => {
                       e.target.checked ? "replace" : ""
                     )
                   }
-                  className="mr-1 w-3 h-3"
+                  className="mr-1 w-3 h-3 bg-[#DDE5FE]"
                 />
-                <label className="font-bold whitespace-nowrap">
+                <label className="whitespace-nowrap">
                   Replace existing account
                 </label>
               </div>
               <div className="flex items-center px-2 py-1.5 flex-1">
-                <label className="font-bold whitespace-nowrap mr-1">
+                <label className="whitespace-nowrap mr-2">
                   Last 4 digits of the existing account number
                 </label>
-                <input
-                  type="text"
-                  maxLength="4"
-                  value={formData.accounts[2].lastFourDigits}
-                  onChange={(e) =>
-                    handleInputChange(
-                      2,
-                      "lastFourDigits",
-                      e.target.value.replace(/\D/g, "")
-                    )
-                  }
-                  className="w-12 border-b border-black px-1 outline-none bg-transparent"
-                />
+                <div className="flex gap-1">
+                  {[0, 1, 2, 3].map((digitIndex) => (
+                    <input
+                      key={digitIndex}
+                      type="text"
+                      maxLength="1"
+                      value={
+                        (formData.accounts[2].lastFourDigits || "")[
+                          digitIndex
+                        ] || ""
+                      }
+                      onChange={(e) =>
+                        handleLastFourDigitsChange(
+                          2,
+                          digitIndex,
+                          e.target.value
+                        )
+                      }
+                      className="w-6 h-6 text-center border border-black px-0 py-0 outline-none bg-[#DDE5FE] text-[13px] font-bold"
+                    />
+                  ))}
+                </div>
               </div>
             </div>
 
             {/* Account Type Row */}
             <div className="flex border-b border-black text-[10px]">
-              <div className="px-2 py-1.5 border-r border-black font-bold whitespace-nowrap">
+              <div className="flex items-center px-2 py-1.5  whitespace-nowrap">
                 Type of Account
               </div>
-              <div className="flex items-center px-2 py-1.5 border-r border-black">
+              <div className="flex items-center px-2 py-1.5">
                 <input
                   type="checkbox"
                   checked={formData.accounts[2].accountType === "checking"}
@@ -988,7 +1065,7 @@ const DirectDepositForm = () => {
                       e.target.checked ? "checking" : ""
                     )
                   }
-                  className="mr-1 w-3 h-3"
+                  className="mr-1 w-3 h-3 bg-[#DDE5FE]"
                 />
                 <label className="whitespace-nowrap">Checking</label>
               </div>
@@ -1003,12 +1080,12 @@ const DirectDepositForm = () => {
                       e.target.checked ? "savings" : ""
                     )
                   }
-                  className="mr-1 w-3 h-3"
+                  className="mr-1 w-3 h-3 bg-[#DDE5FE]"
                 />
                 <label className="whitespace-nowrap">Savings</label>
               </div>
               <div className="flex items-center px-2 py-1.5 flex-1">
-                <label className="font-bold whitespace-nowrap mr-1">
+                <label className=" whitespace-nowrap mr-1">
                   Account holder's Name:
                 </label>
                 <input
@@ -1017,58 +1094,70 @@ const DirectDepositForm = () => {
                   onChange={(e) =>
                     handleInputChange(2, "accountHolderName", e.target.value)
                   }
-                  className="flex-1 border-b border-black px-1 outline-none bg-transparent border-0"
+                  className="flex-1 border-0 border-b border-black px-1 py-0 outline-none bg-[#DDE5FE] text-[13px]"
                 />
               </div>
             </div>
 
             {/* Routing Number Row */}
             <div className="flex border-b border-black text-[10px]">
-              <div className="px-2 py-1.5 border-r border-black font-bold whitespace-nowrap w-44">
+              <div className="flex items-center px-2 py-1.5 whitespace-nowrap w-44">
                 Routing/Transit Number
               </div>
               <div className="flex-1 px-2 py-1.5">
-                <input
-                  type="text"
-                  maxLength="9"
-                  value={formData.accounts[2].routingNumber}
-                  onChange={(e) =>
-                    handleInputChange(
-                      2,
-                      "routingNumber",
-                      e.target.value.replace(/\D/g, "")
-                    )
-                  }
-                  className="w-full border-b border-black px-1 outline-none bg-transparent border-0"
-                />
+                <div className="flex gap-1">
+                  {[0, 1, 2, 3, 4, 5, 6, 7, 8].map((digitIndex) => (
+                    <input
+                      key={digitIndex}
+                      type="text"
+                      maxLength="1"
+                      value={
+                        (formData.accounts[2].routingNumber || "")[
+                          digitIndex
+                        ] || ""
+                      }
+                      onChange={(e) =>
+                        handleRoutingNumberChange(2, digitIndex, e.target.value)
+                      }
+                      className="w-6 h-6 text-center border border-black px-0 py-0 outline-none bg-[#DDE5FE] text-[13px] font-bold"
+                    />
+                  ))}
+                </div>
               </div>
             </div>
 
             {/* Account Number Row */}
             <div className="flex border-b border-black text-[10px]">
-              <div className="px-2 py-1.5 border-r border-black font-bold whitespace-nowrap w-44">
+              <div className="flex items-center px-2 py-1.5  whitespace-nowrap w-44">
                 Checking/Savings Account Number**
               </div>
               <div className="flex-1 px-2 py-1.5">
-                <input
-                  type="text"
-                  maxLength="17"
-                  value={formData.accounts[2].accountNumber}
-                  onChange={(e) =>
-                    handleInputChange(
-                      2,
-                      "accountNumber",
-                      e.target.value.replace(/\D/g, "")
-                    )
-                  }
-                  className="w-full border-b border-black px-1 outline-none bg-transparent border-0"
-                />
+                <div className="flex gap-1">
+                  {[
+                    0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16,
+                  ].map((digitIndex) => (
+                    <input
+                      key={digitIndex}
+                      type="text"
+                      maxLength="1"
+                      value={
+                        (formData.accounts[2].accountNumber || "")[
+                          digitIndex
+                        ] || ""
+                      }
+                      onChange={(e) =>
+                        handleAccountNumberChange(2, digitIndex, e.target.value)
+                      }
+                      className="w-6 h-6 text-center border border-black px-0 py-0 outline-none bg-[#DDE5FE] text-[13px] font-bold"
+                    />
+                  ))}
+                </div>
               </div>
             </div>
 
             {/* Bank Name Row */}
             <div className="flex border-b border-black text-[10px]">
-              <div className="px-2 py-1.5 border-r border-black font-bold whitespace-nowrap w-44">
+              <div className="flex items-center px-2 py-1.5 whitespace-nowrap w-44">
                 Financial Institution ("Bank") Name
               </div>
               <div className="flex-1 px-2 py-1.5 border-0">
@@ -1078,17 +1167,17 @@ const DirectDepositForm = () => {
                   onChange={(e) =>
                     handleInputChange(2, "bankName", e.target.value)
                   }
-                  className="w-full px-1 outline-none bg-transparent border-0"
+                  className="w-full px-1 py-0 outline-none bg-[#DDE5FE] text-[13px] border-0 border-b border-black"
                 />
               </div>
             </div>
 
             {/* Deposit Amount Row */}
-            <div className="flex text-[10px]">
-              <div className="px-2 py-1.5 border-r border-black font-bold whitespace-nowrap">
+            <div className="flex border-b border-black text-[10px]">
+              <div className="flex items-center px-2 py-1.5 whitespace-nowrap">
                 I wish to deposit (check one):
               </div>
-              <div className="flex items-center px-2 py-1.5 border-r border-black border-0">
+              <div className="flex items-center px-2 py-1.5 border-0">
                 <input
                   type="text"
                   value={formData.accounts[2].depositPercent}
@@ -1099,11 +1188,11 @@ const DirectDepositForm = () => {
                       e.target.value.replace(/\D/g, "")
                     )
                   }
-                  className="w-10 border-b border-black px-1 outline-none bg-transparent mr-1 border-0"
+                  className="w-10 border-0 border-b border-black px-1 py-0 outline-none bg-[#DDE5FE] text-[13px] mr-1"
                 />
                 <label className="whitespace-nowrap">% of Net</label>
               </div>
-              <div className="flex items-center px-2 py-1.5 border-r border-black border-0">
+              <div className="flex items-center px-2 py-1.5 border-0">
                 <label className="whitespace-nowrap mr-1">
                   Specific Dollar Amount $
                 </label>
@@ -1117,9 +1206,9 @@ const DirectDepositForm = () => {
                       e.target.value.replace(/\D/g, "")
                     )
                   }
-                  className="w-20 border-b border-black px-1 outline-none bg-transparent border-0"
+                  className="w-20 border-0 border-b border-black px-1 py-0 outline-none bg-[#DDE5FE] text-[13px]"
                 />
-                <span className="ml-1">.00</span>
+                <span className="ml-1 text-[13px] self-center">.00</span>
               </div>
               <div className="flex items-center px-2 py-1.5 flex-1">
                 <input
@@ -1128,7 +1217,7 @@ const DirectDepositForm = () => {
                   onChange={(e) =>
                     handleInputChange(2, "depositRemainder", e.target.checked)
                   }
-                  className="mr-1 w-3 h-3"
+                  className="mr-1 w-3 h-3 bg-[#DDE5FE]"
                 />
                 <label className="whitespace-nowrap">
                   Remainder of Net Pay
@@ -1146,7 +1235,7 @@ const DirectDepositForm = () => {
               PLEASE PRINT CLEARLY IN BLACK/BLUE INK ONLY
             </span>
           </div>
-          <div className="p-3 text-[10px] leading-tight">
+          <div className="p-3 text-[10px] leading-tight text-black">
             <p className="mb-3">
               I authorize my employer/company to deposit and I authorize my
               earnings into the bank account(s) specified above and, if
@@ -1167,7 +1256,6 @@ const DirectDepositForm = () => {
             </p>
 
             <div className="flex items-center mb-3">
-              <div className="w-3.5 h-3.5 border-[2px] border-black mr-2 flex-shrink-0"></div>
               <label className="font-bold whitespace-nowrap mr-2">
                 Employee/Worker Signature:
               </label>
@@ -1177,7 +1265,7 @@ const DirectDepositForm = () => {
                 onChange={(e) =>
                   handleTopLevelChange("employeeSignature", e.target.value)
                 }
-                className="flex-1 border-b border-black px-1 outline-none bg-transparent mr-4"
+                className="flex-1 border-0 border-b border-black px-1 py-0 outline-none bg-[#DDE5FE] text-[13px] mr-4"
                 placeholder="Type your full name"
                 style={{ fontFamily: "Brush Script MT, cursive" }}
               />
@@ -1188,7 +1276,7 @@ const DirectDepositForm = () => {
                 onChange={(e) =>
                   handleTopLevelChange("employeeDate", e.target.value)
                 }
-                className="w-28 border-b border-black px-1 outline-none bg-transparent"
+                className="w-28 border-0 border-b border-black px-1 py-0 outline-none bg-[#DDE5FE] text-[13px]"
                 placeholder="M/DD/YY"
               />
             </div>
@@ -1212,12 +1300,11 @@ const DirectDepositForm = () => {
                 onChange={(e) =>
                   handleTopLevelChange("employerName", e.target.value)
                 }
-                className="flex-1 border-b border-black px-1 outline-none bg-transparent"
+                className="flex-1 border-0 border-b border-black px-1 py-0 outline-none bg-[#DDE5FE] text-[13px]"
               />
             </div>
 
             <div className="flex items-center mb-3">
-              <div className="w-3.5 h-3.5 border-[2px] border-black mr-2 flex-shrink-0"></div>
               <label className="font-bold whitespace-nowrap mr-2">
                 Employer/Company Representative Signature:
               </label>
@@ -1227,7 +1314,7 @@ const DirectDepositForm = () => {
                 onChange={(e) =>
                   handleTopLevelChange("employerSignature", e.target.value)
                 }
-                className="flex-1 border-b border-black px-1 outline-none bg-transparent mr-4"
+                className="flex-1 border-0 border-b border-black px-1 py-0 outline-none bg-[#DDE5FE] text-[13px] mr-4"
                 placeholder="Type full name"
                 style={{ fontFamily: "Brush Script MT, cursive" }}
               />
@@ -1238,12 +1325,12 @@ const DirectDepositForm = () => {
                 onChange={(e) =>
                   handleTopLevelChange("employerDate", e.target.value)
                 }
-                className="w-28 border-b border-black px-1 outline-none bg-transparent"
+                className="w-28 border-0 border-b border-black px-1 py-0 outline-none bg-[#DDE5FE] text-[13px]"
                 placeholder="M/DD/YY"
               />
             </div>
 
-            <div className="bg-gray-100 p-2 text-[10px] leading-tight">
+            <div className="bg-gray-100 p-2 text-[10px] leading-tight text-black">
               <p className="mb-1">
                 <span className="font-bold">
                   * All fields are required unless noted.
@@ -1264,7 +1351,7 @@ const DirectDepositForm = () => {
               </p>
             </div>
 
-            <div className="text-right mt-2 text-[10px]">
+            <div className="text-right mt-2 text-[10px] text-black">
               <p>DP0002 10/20</p>
               <p>Form Expires 10/31/23</p>
             </div>
@@ -1278,7 +1365,7 @@ const DirectDepositForm = () => {
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <Target className="w-5 h-5 text-blue-600" />
-              <span className="text-sm font-semibold text-gray-700">
+              <span className="text-sm font-semibold text-gray-900">
                 Application Progress
               </span>
             </div>
@@ -1286,12 +1373,12 @@ const DirectDepositForm = () => {
               <div className="text-lg font-bold text-blue-600">
                 {completedFormsCount}/20
               </div>
-              <div className="text-xs text-gray-600">Forms Completed</div>
+              <div className="text-xs text-gray-900">Forms Completed</div>
             </div>
           </div>
           <div className="mb-2">
             <div className="flex justify-between items-center mb-1">
-              <span className="text-xs text-gray-600">Overall Progress</span>
+              <span className="text-xs text-gray-900">Overall Progress</span>
               <span className="text-xs font-bold text-blue-600">
                 {overallProgress}%
               </span>
@@ -1303,7 +1390,7 @@ const DirectDepositForm = () => {
               ></div>
             </div>
           </div>
-          <div className="text-xs text-gray-600 text-center">
+          <div className="text-xs text-gray-900 text-center">
             📝 Current: Direct Deposit Form
           </div>
         </div>
