@@ -414,60 +414,64 @@ const DirectDepositFormHR = () => {
           {/* Form Content */}
           <div className="direct-deposit-page max-w-4xl mx-auto bg-white p-6">
             {/* Header */}
-            <div className="text-center mb-4 border-t-[3px] border-black pt-2">
-              <h1
-                className="text-3xl font-black tracking-wide mb-1"
-                style={{
-                  fontFamily: "Arial Black, sans-serif",
-                  letterSpacing: "0.1em",
-                }}
-              >
-                PAYCHEX
-              </h1>
-              <h2 className="text-base font-bold">
-                Direct Deposit Enrollment/Change Form*
-              </h2>
+            <div className="mb-4 border-t-[3px] border-black pt-4">
+              <div className="text-center">
+                <h1
+                  className="text-4xl font-black tracking-wide italic mb-0"
+                  style={{
+                    fontFamily: "Arial Black, sans-serif",
+                    letterSpacing: "-0.05em",
+                    fontWeight: "900",
+                  }}
+                >
+                  PAYCHEX
+                </h1>
+              </div>
+              <div className="text-center">
+                <h2 className="text-[17px] font-semibold tracking-[-0.01em] text-black font-[Arial,Helvetica,sans-serif]">
+                  Direct Deposit Enrollment/Change Form*
+                </h2>
+              </div>
             </div>
 
             {/* Company and Employee Info */}
-            <div className="mb-3 text-[11px]">
-              <div className="flex mb-1.5">
-                <label className="font-bold whitespace-nowrap mr-2">
+            <div className="mb-3 text-[13px] text-black">
+              <div className="mb-2">
+                <span className="font-bold">
                   Company Name and/or Client Number
-                </label>
+                </span>
                 <input
                   type="text"
                   value={formData.companyName}
                   readOnly
-                  className="flex-1 border-b border-black px-1 outline-none bg-transparent"
+                  className="border-0 border-b border-black outline-none bg-[#DDE5FE] ml-2 px-1 text-[13px] py-0"
+                  style={{ width: "600px", height: "20px" }}
                 />
               </div>
-              <div className="flex mb-1.5 items-end">
-                <label className="font-bold whitespace-nowrap mr-2">
-                  Employee/Worker Name
-                </label>
+              <div className="mb-2">
+                <span className="font-bold">Employee/Worker Name</span>
                 <input
                   type="text"
                   value={formData.employeeName}
                   readOnly
-                  className="flex-1 border-b border-black px-1 outline-none bg-transparent mr-6"
+                  className="border-0 border-b border-black outline-none bg-[#DDE5FE] ml-2 px-1 text-[13px] py-0"
+                  style={{ width: "350px", height: "20px" }}
                 />
-                <label className="font-bold whitespace-nowrap mr-2">
-                  Employee/Worker Number
-                </label>
+                <span className="font-bold ml-6">Employee/Worker Number</span>
                 <input
                   type="text"
                   value={formData.employeeNumber}
                   readOnly
-                  className="w-32 border-b border-black px-1 outline-none bg-transparent"
+                  className="border-0 border-b border-black outline-none bg-[#DDE5FE] ml-2 px-1 text-[13px] py-0"
+                  style={{ width: "100px", height: "20px" }}
                 />
               </div>
-              <p className="text-[10px] mb-0.5">
+              <p className="text-[10px] mb-0.5 pl-4 text-black">
                 <span className="font-bold">Employee/Worker:</span> Retain a
                 copy of this form for your records. Return the original to your
                 employer/company.
               </p>
-              <p className="text-[10px]">
+              <p className="text-[10px] pl-4 text-black">
                 <span className="font-bold">Employer/Company:</span> Please
                 retain a copy of this document for your records.
               </p>
@@ -475,7 +479,7 @@ const DirectDepositFormHR = () => {
 
             {/* Main Form Section */}
             <div className="border-[2px] border-black">
-              <div className="bg-black text-white px-2 py-1.5 text-[10px] font-bold">
+              <div className="bg-black text-white px-2 py-1.5 text-[10px] font-bold text-center">
                 COMPLETE TO ENROLL / ADD / CHANGE BANK ACCOUNTS –{" "}
                 <span className="italic">
                   PLEASE PRINT CLEARLY IN BLACK/BLUE INK ONLY
@@ -483,28 +487,26 @@ const DirectDepositFormHR = () => {
               </div>
 
               {/* Account 1 */}
-              <div className="border-b-[2px] border-black">
+              <div className="border-b-[5px] border-black">
                 {/* Action Row */}
-                <div className="flex border-b border-black text-[10px]">
+                <div className="flex border-t border-b border-black text-[10px] text-black">
                   <div className="flex items-center px-2 py-1.5 border-r border-black">
                     <input
                       type="checkbox"
                       checked={formData.accounts[0].action === "add"}
                       readOnly
-                      className="mr-1 w-3 h-3"
+                      className="mr-1 w-3 h-3 bg-[#DDE5FE]"
                     />
-                    <label className="font-bold whitespace-nowrap">
-                      Add new
-                    </label>
+                    <label className="whitespace-nowrap">Add new</label>
                   </div>
                   <div className="flex items-center px-2 py-1.5 border-r border-black">
                     <input
                       type="checkbox"
                       checked={formData.accounts[0].action === "update"}
                       readOnly
-                      className="mr-1 w-3 h-3"
+                      className="mr-1 w-3 h-3 bg-[#DDE5FE]"
                     />
-                    <label className="font-bold whitespace-nowrap">
+                    <label className="whitespace-nowrap">
                       Update existing account
                     </label>
                   </div>
@@ -513,37 +515,46 @@ const DirectDepositFormHR = () => {
                       type="checkbox"
                       checked={formData.accounts[0].action === "replace"}
                       readOnly
-                      className="mr-1 w-3 h-3"
+                      className="mr-1 w-3 h-3 bg-[#DDE5FE]"
                     />
-                    <label className="font-bold whitespace-nowrap">
+                    <label className="whitespace-nowrap">
                       Replace existing account
                     </label>
                   </div>
                   <div className="flex items-center px-2 py-1.5 flex-1">
-                    <label className="font-bold whitespace-nowrap mr-1">
+                    <label className="whitespace-nowrap mr-2">
                       Last 4 digits of the existing account number
                     </label>
-                    <input
-                      type="text"
-                      maxLength="4"
-                      value={formData.accounts[0].lastFourDigits}
-                      readOnly
-                      className="w-12 border-b border-black px-1 outline-none bg-transparent"
-                    />
+                    <div className="flex gap-1">
+                      {[0, 1, 2, 3].map((digitIndex) => (
+                        <input
+                          key={digitIndex}
+                          type="text"
+                          maxLength="1"
+                          value={
+                            (formData.accounts[0].lastFourDigits || "")[
+                              digitIndex
+                            ] || ""
+                          }
+                          readOnly
+                          className="w-6 h-6 text-center border border-black px-0 py-0 outline-none bg-[#DDE5FE] text-[13px] font-bold"
+                        />
+                      ))}
+                    </div>
                   </div>
                 </div>
 
                 {/* Account Type Row */}
-                <div className="flex border-b border-black text-[10px]">
-                  <div className="px-2 py-1.5 border-r border-black font-bold whitespace-nowrap">
+                <div className="flex border-b border-black text-[10px] text-black">
+                  <div className="flex items-center px-2 py-1.5 whitespace-nowrap">
                     Type of Account
                   </div>
-                  <div className="flex items-center px-2 py-1.5 border-r border-black">
+                  <div className="flex items-center px-2 py-1.5">
                     <input
                       type="checkbox"
                       checked={formData.accounts[0].accountType === "checking"}
                       readOnly
-                      className="mr-1 w-3 h-3"
+                      className="mr-1 w-3 h-3 bg-[#DDE5FE]"
                     />
                     <label className="whitespace-nowrap">Checking</label>
                   </div>
@@ -552,58 +563,79 @@ const DirectDepositFormHR = () => {
                       type="checkbox"
                       checked={formData.accounts[0].accountType === "savings"}
                       readOnly
-                      className="mr-1 w-3 h-3"
+                      className="mr-1 w-3 h-3 bg-[#DDE5FE]"
                     />
                     <label className="whitespace-nowrap">Savings</label>
                   </div>
                   <div className="flex items-center px-2 py-1.5 flex-1">
-                    <label className="font-bold whitespace-nowrap mr-1">
+                    <label className="whitespace-nowrap mr-1">
                       Account holder's Name:
                     </label>
                     <input
                       type="text"
                       value={formData.accounts[0].accountHolderName}
                       readOnly
-                      className="flex-1 border-b border-black px-1 outline-none bg-transparent border-0"
+                      className="flex-1 border-0 border-b border-black px-1 py-0 outline-none bg-[#DDE5FE] text-[13px]"
                     />
                   </div>
                 </div>
 
                 {/* Routing Number Row */}
-                <div className="flex border-b border-black text-[10px]">
-                  <div className="px-2 py-1.5 border-r border-black font-bold whitespace-nowrap w-44">
+                <div className="flex border-b border-black text-[10px] text-black">
+                  <div className="flex items-center px-2 py-1.5 whitespace-nowrap w-44">
                     Routing/Transit Number
                   </div>
                   <div className="flex-1 px-2 py-1.5">
-                    <input
-                      type="text"
-                      maxLength="9"
-                      value={formData.accounts[0].routingNumber}
-                      readOnly
-                      className="w-full border-b border-black px-1 outline-none bg-transparent border-0"
-                    />
+                    <div className="flex gap-1">
+                      {[0, 1, 2, 3, 4, 5, 6, 7, 8].map((digitIndex) => (
+                        <input
+                          key={digitIndex}
+                          type="text"
+                          maxLength="1"
+                          value={
+                            (formData.accounts[0].routingNumber || "")[
+                              digitIndex
+                            ] || ""
+                          }
+                          readOnly
+                          className="w-6 h-6 text-center border border-black px-0 py-0 outline-none bg-[#DDE5FE] text-[13px] font-bold"
+                        />
+                      ))}
+                    </div>
                   </div>
                 </div>
 
                 {/* Account Number Row */}
-                <div className="flex border-b border-black text-[10px]">
-                  <div className="px-2 py-1.5 border-r border-black font-bold whitespace-nowrap w-44">
+                <div className="flex border-b border-black text-[10px] text-black">
+                  <div className="flex items-center px-2 py-1.5 whitespace-nowrap w-44">
                     Checking/Savings Account Number**
                   </div>
                   <div className="flex-1 px-2 py-1.5">
-                    <input
-                      type="text"
-                      maxLength="17"
-                      value={formData.accounts[0].accountNumber}
-                      readOnly
-                      className="w-full border-b border-black px-1 outline-none bg-transparent border-0"
-                    />
+                    <div className="flex gap-1">
+                      {[
+                        0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,
+                        16,
+                      ].map((digitIndex) => (
+                        <input
+                          key={digitIndex}
+                          type="text"
+                          maxLength="1"
+                          value={
+                            (formData.accounts[0].accountNumber || "")[
+                              digitIndex
+                            ] || ""
+                          }
+                          readOnly
+                          className="w-6 h-6 text-center border border-black px-0 py-0 outline-none bg-[#DDE5FE] text-[13px] font-bold"
+                        />
+                      ))}
+                    </div>
                   </div>
                 </div>
 
                 {/* Bank Name Row */}
                 <div className="flex border-b border-black text-[10px]">
-                  <div className="px-2 py-1.5 border-r border-black font-bold whitespace-nowrap w-44">
+                  <div className="flex items-center px-2 py-1.5 whitespace-nowrap w-44">
                     Financial Institution ("Bank") Name
                   </div>
                   <div className="flex-1 px-2 py-1.5 border-0">
@@ -611,26 +643,26 @@ const DirectDepositFormHR = () => {
                       type="text"
                       value={formData.accounts[0].bankName}
                       readOnly
-                      className="w-full px-1 outline-none bg-transparent border-0"
+                      className="w-full px-1 py-0 outline-none bg-[#DDE5FE] text-[13px] border-0 border-b border-black"
                     />
                   </div>
                 </div>
 
                 {/* Deposit Amount Row */}
-                <div className="flex text-[10px]">
-                  <div className="px-2 py-1.5 border-r border-black font-bold whitespace-nowrap">
+                <div className="flex border-b border-black text-[10px]">
+                  <div className="flex items-center px-2 py-1.5 whitespace-nowrap">
                     I wish to deposit (check one):
                   </div>
-                  <div className="flex items-center px-2 py-1.5 border-r border-black border-0">
+                  <div className="flex items-center px-2 py-1.5 border-0">
                     <input
                       type="text"
                       value={formData.accounts[0].depositPercent}
                       readOnly
-                      className="w-10 border-b border-black px-1 outline-none bg-transparent mr-1 border-0"
+                      className="w-10 border-0 border-b border-black px-1 py-0 outline-none bg-[#DDE5FE] text-[13px] mr-1"
                     />
                     <label className="whitespace-nowrap">% of Net</label>
                   </div>
-                  <div className="flex items-center px-2 py-1.5 border-r border-black border-0">
+                  <div className="flex items-center px-2 py-1.5 border-0">
                     <label className="whitespace-nowrap mr-1">
                       Specific Dollar Amount $
                     </label>
@@ -638,16 +670,16 @@ const DirectDepositFormHR = () => {
                       type="text"
                       value={formData.accounts[0].depositAmount}
                       readOnly
-                      className="w-20 border-b border-black px-1 outline-none bg-transparent border-0"
+                      className="w-20 border-0 border-b border-black px-1 py-0 outline-none bg-[#DDE5FE] text-[13px]"
                     />
-                    <span className="ml-1">.00</span>
+                    <span className="ml-1 text-[13px] self-center">.00</span>
                   </div>
                   <div className="flex items-center px-2 py-1.5 flex-1">
                     <input
                       type="checkbox"
                       checked={formData.accounts[0].depositRemainder}
                       readOnly
-                      className="mr-1 w-3 h-3"
+                      className="mr-1 w-3 h-3 bg-[#DDE5FE]"
                     />
                     <label className="whitespace-nowrap">
                       Remainder of Net Pay
@@ -657,28 +689,26 @@ const DirectDepositFormHR = () => {
               </div>
 
               {/* Account 2 */}
-              <div className="border-b-[2px] border-black">
+              <div className="border-b-[5px] border-black">
                 {/* Action Row */}
-                <div className="flex border-b border-black text-[10px]">
+                <div className="flex border-t border-b border-black text-[10px] text-black">
                   <div className="flex items-center px-2 py-1.5 border-r border-black">
                     <input
                       type="checkbox"
                       checked={formData.accounts[1].action === "add"}
                       readOnly
-                      className="mr-1 w-3 h-3"
+                      className="mr-1 w-3 h-3 bg-[#DDE5FE]"
                     />
-                    <label className="font-bold whitespace-nowrap">
-                      Add new
-                    </label>
+                    <label className="whitespace-nowrap">Add new</label>
                   </div>
                   <div className="flex items-center px-2 py-1.5 border-r border-black">
                     <input
                       type="checkbox"
                       checked={formData.accounts[1].action === "update"}
                       readOnly
-                      className="mr-1 w-3 h-3"
+                      className="mr-1 w-3 h-3 bg-[#DDE5FE]"
                     />
-                    <label className="font-bold whitespace-nowrap">
+                    <label className="whitespace-nowrap">
                       Update existing account
                     </label>
                   </div>
@@ -687,37 +717,46 @@ const DirectDepositFormHR = () => {
                       type="checkbox"
                       checked={formData.accounts[1].action === "replace"}
                       readOnly
-                      className="mr-1 w-3 h-3"
+                      className="mr-1 w-3 h-3 bg-[#DDE5FE]"
                     />
-                    <label className="font-bold whitespace-nowrap">
+                    <label className="whitespace-nowrap">
                       Replace existing account
                     </label>
                   </div>
                   <div className="flex items-center px-2 py-1.5 flex-1">
-                    <label className="font-bold whitespace-nowrap mr-1">
+                    <label className="whitespace-nowrap mr-2">
                       Last 4 digits of the existing account number
                     </label>
-                    <input
-                      type="text"
-                      maxLength="4"
-                      value={formData.accounts[1].lastFourDigits}
-                      readOnly
-                      className="w-12 border-b border-black px-1 outline-none bg-transparent"
-                    />
+                    <div className="flex gap-1">
+                      {[0, 1, 2, 3].map((digitIndex) => (
+                        <input
+                          key={digitIndex}
+                          type="text"
+                          maxLength="1"
+                          value={
+                            (formData.accounts[1].lastFourDigits || "")[
+                              digitIndex
+                            ] || ""
+                          }
+                          readOnly
+                          className="w-6 h-6 text-center border border-black px-0 py-0 outline-none bg-[#DDE5FE] text-[13px] font-bold"
+                        />
+                      ))}
+                    </div>
                   </div>
                 </div>
 
                 {/* Account Type Row */}
                 <div className="flex border-b border-black text-[10px]">
-                  <div className="px-2 py-1.5 border-r border-black font-bold whitespace-nowrap">
+                  <div className="flex items-center px-2 py-1.5  whitespace-nowrap">
                     Type of Account
                   </div>
-                  <div className="flex items-center px-2 py-1.5 border-r border-black">
+                  <div className="flex items-center px-2 py-1.5">
                     <input
                       type="checkbox"
                       checked={formData.accounts[1].accountType === "checking"}
                       readOnly
-                      className="mr-1 w-3 h-3"
+                      className="mr-1 w-3 h-3 bg-[#DDE5FE]"
                     />
                     <label className="whitespace-nowrap">Checking</label>
                   </div>
@@ -726,58 +765,79 @@ const DirectDepositFormHR = () => {
                       type="checkbox"
                       checked={formData.accounts[1].accountType === "savings"}
                       readOnly
-                      className="mr-1 w-3 h-3"
+                      className="mr-1 w-3 h-3 bg-[#DDE5FE]"
                     />
                     <label className="whitespace-nowrap">Savings</label>
                   </div>
                   <div className="flex items-center px-2 py-1.5 flex-1">
-                    <label className="font-bold whitespace-nowrap mr-1">
+                    <label className=" whitespace-nowrap mr-1">
                       Account holder's Name:
                     </label>
                     <input
                       type="text"
                       value={formData.accounts[1].accountHolderName}
                       readOnly
-                      className="flex-1 border-b border-black px-1 outline-none bg-transparent border-0"
+                      className="flex-1 border-0 border-b border-black px-1 py-0 outline-none bg-[#DDE5FE] text-[13px]"
                     />
                   </div>
                 </div>
 
                 {/* Routing Number Row */}
                 <div className="flex border-b border-black text-[10px]">
-                  <div className="px-2 py-1.5 border-r border-black font-bold whitespace-nowrap w-44">
+                  <div className="flex items-center px-2 py-1.5 whitespace-nowrap w-44">
                     Routing/Transit Number
                   </div>
                   <div className="flex-1 px-2 py-1.5">
-                    <input
-                      type="text"
-                      maxLength="9"
-                      value={formData.accounts[1].routingNumber}
-                      readOnly
-                      className="w-full border-b border-black px-1 outline-none bg-transparent border-0"
-                    />
+                    <div className="flex gap-1">
+                      {[0, 1, 2, 3, 4, 5, 6, 7, 8].map((digitIndex) => (
+                        <input
+                          key={digitIndex}
+                          type="text"
+                          maxLength="1"
+                          value={
+                            (formData.accounts[1].routingNumber || "")[
+                              digitIndex
+                            ] || ""
+                          }
+                          readOnly
+                          className="w-6 h-6 text-center border border-black px-0 py-0 outline-none bg-[#DDE5FE] text-[13px] font-bold"
+                        />
+                      ))}
+                    </div>
                   </div>
                 </div>
 
                 {/* Account Number Row */}
                 <div className="flex border-b border-black text-[10px]">
-                  <div className="px-2 py-1.5 border-r border-black font-bold whitespace-nowrap w-44">
+                  <div className="flex items-center px-2 py-1.5  whitespace-nowrap w-44">
                     Checking/Savings Account Number**
                   </div>
                   <div className="flex-1 px-2 py-1.5">
-                    <input
-                      type="text"
-                      maxLength="17"
-                      value={formData.accounts[1].accountNumber}
-                      readOnly
-                      className="w-full border-b border-black px-1 outline-none bg-transparent border-0"
-                    />
+                    <div className="flex gap-1">
+                      {[
+                        0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,
+                        16,
+                      ].map((digitIndex) => (
+                        <input
+                          key={digitIndex}
+                          type="text"
+                          maxLength="1"
+                          value={
+                            (formData.accounts[1].accountNumber || "")[
+                              digitIndex
+                            ] || ""
+                          }
+                          readOnly
+                          className="w-6 h-6 text-center border border-black px-0 py-0 outline-none bg-[#DDE5FE] text-[13px] font-bold"
+                        />
+                      ))}
+                    </div>
                   </div>
                 </div>
 
                 {/* Bank Name Row */}
                 <div className="flex border-b border-black text-[10px]">
-                  <div className="px-2 py-1.5 border-r border-black font-bold whitespace-nowrap w-44">
+                  <div className="flex items-center px-2 py-1.5 whitespace-nowrap w-44">
                     Financial Institution ("Bank") Name
                   </div>
                   <div className="flex-1 px-2 py-1.5 border-0">
@@ -785,26 +845,26 @@ const DirectDepositFormHR = () => {
                       type="text"
                       value={formData.accounts[1].bankName}
                       readOnly
-                      className="w-full px-1 outline-none bg-transparent border-0"
+                      className="w-full px-1 py-0 outline-none bg-[#DDE5FE] text-[13px] border-0 border-b border-black"
                     />
                   </div>
                 </div>
 
                 {/* Deposit Amount Row */}
-                <div className="flex text-[10px]">
-                  <div className="px-2 py-1.5 border-r border-black font-bold whitespace-nowrap">
+                <div className="flex border-b border-black text-[10px]">
+                  <div className="flex items-center px-2 py-1.5 whitespace-nowrap">
                     I wish to deposit (check one):
                   </div>
-                  <div className="flex items-center px-2 py-1.5 border-r border-black border-0">
+                  <div className="flex items-center px-2 py-1.5 border-0">
                     <input
                       type="text"
                       value={formData.accounts[1].depositPercent}
                       readOnly
-                      className="w-10 border-b border-black px-1 outline-none bg-transparent mr-1 border-0"
+                      className="w-10 border-0 border-b border-black px-1 py-0 outline-none bg-[#DDE5FE] text-[13px] mr-1"
                     />
                     <label className="whitespace-nowrap">% of Net</label>
                   </div>
-                  <div className="flex items-center px-2 py-1.5 border-r border-black border-0">
+                  <div className="flex items-center px-2 py-1.5 border-0">
                     <label className="whitespace-nowrap mr-1">
                       Specific Dollar Amount $
                     </label>
@@ -812,16 +872,16 @@ const DirectDepositFormHR = () => {
                       type="text"
                       value={formData.accounts[1].depositAmount}
                       readOnly
-                      className="w-20 border-b border-black px-1 outline-none bg-transparent border-0"
+                      className="w-20 border-0 border-b border-black px-1 py-0 outline-none bg-[#DDE5FE] text-[13px]"
                     />
-                    <span className="ml-1">.00</span>
+                    <span className="ml-1 text-[13px] self-center">.00</span>
                   </div>
                   <div className="flex items-center px-2 py-1.5 flex-1">
                     <input
                       type="checkbox"
                       checked={formData.accounts[1].depositRemainder}
                       readOnly
-                      className="mr-1 w-3 h-3"
+                      className="mr-1 w-3 h-3 bg-[#DDE5FE]"
                     />
                     <label className="whitespace-nowrap">
                       Remainder of Net Pay
@@ -831,28 +891,26 @@ const DirectDepositFormHR = () => {
               </div>
 
               {/* Account 3 */}
-              <div>
+              <div className="border-b-[5px] border-black">
                 {/* Action Row */}
-                <div className="flex border-b border-black text-[10px]">
+                <div className="flex border-t border-b border-black text-[10px] text-black">
                   <div className="flex items-center px-2 py-1.5 border-r border-black">
                     <input
                       type="checkbox"
                       checked={formData.accounts[2].action === "add"}
                       readOnly
-                      className="mr-1 w-3 h-3"
+                      className="mr-1 w-3 h-3 bg-[#DDE5FE]"
                     />
-                    <label className="font-bold whitespace-nowrap">
-                      Add new
-                    </label>
+                    <label className="whitespace-nowrap">Add new</label>
                   </div>
                   <div className="flex items-center px-2 py-1.5 border-r border-black">
                     <input
                       type="checkbox"
                       checked={formData.accounts[2].action === "update"}
                       readOnly
-                      className="mr-1 w-3 h-3"
+                      className="mr-1 w-3 h-3 bg-[#DDE5FE]"
                     />
-                    <label className="font-bold whitespace-nowrap">
+                    <label className="whitespace-nowrap">
                       Update existing account
                     </label>
                   </div>
@@ -861,37 +919,46 @@ const DirectDepositFormHR = () => {
                       type="checkbox"
                       checked={formData.accounts[2].action === "replace"}
                       readOnly
-                      className="mr-1 w-3 h-3"
+                      className="mr-1 w-3 h-3 bg-[#DDE5FE]"
                     />
-                    <label className="font-bold whitespace-nowrap">
+                    <label className="whitespace-nowrap">
                       Replace existing account
                     </label>
                   </div>
                   <div className="flex items-center px-2 py-1.5 flex-1">
-                    <label className="font-bold whitespace-nowrap mr-1">
+                    <label className="whitespace-nowrap mr-2">
                       Last 4 digits of the existing account number
                     </label>
-                    <input
-                      type="text"
-                      maxLength="4"
-                      value={formData.accounts[2].lastFourDigits}
-                      readOnly
-                      className="w-12 border-b border-black px-1 outline-none bg-transparent"
-                    />
+                    <div className="flex gap-1">
+                      {[0, 1, 2, 3].map((digitIndex) => (
+                        <input
+                          key={digitIndex}
+                          type="text"
+                          maxLength="1"
+                          value={
+                            (formData.accounts[2].lastFourDigits || "")[
+                              digitIndex
+                            ] || ""
+                          }
+                          readOnly
+                          className="w-6 h-6 text-center border border-black px-0 py-0 outline-none bg-[#DDE5FE] text-[13px] font-bold"
+                        />
+                      ))}
+                    </div>
                   </div>
                 </div>
 
                 {/* Account Type Row */}
                 <div className="flex border-b border-black text-[10px]">
-                  <div className="px-2 py-1.5 border-r border-black font-bold whitespace-nowrap">
+                  <div className="flex items-center px-2 py-1.5  whitespace-nowrap">
                     Type of Account
                   </div>
-                  <div className="flex items-center px-2 py-1.5 border-r border-black">
+                  <div className="flex items-center px-2 py-1.5">
                     <input
                       type="checkbox"
                       checked={formData.accounts[2].accountType === "checking"}
                       readOnly
-                      className="mr-1 w-3 h-3"
+                      className="mr-1 w-3 h-3 bg-[#DDE5FE]"
                     />
                     <label className="whitespace-nowrap">Checking</label>
                   </div>
@@ -900,58 +967,79 @@ const DirectDepositFormHR = () => {
                       type="checkbox"
                       checked={formData.accounts[2].accountType === "savings"}
                       readOnly
-                      className="mr-1 w-3 h-3"
+                      className="mr-1 w-3 h-3 bg-[#DDE5FE]"
                     />
                     <label className="whitespace-nowrap">Savings</label>
                   </div>
                   <div className="flex items-center px-2 py-1.5 flex-1">
-                    <label className="font-bold whitespace-nowrap mr-1">
+                    <label className=" whitespace-nowrap mr-1">
                       Account holder's Name:
                     </label>
                     <input
                       type="text"
                       value={formData.accounts[2].accountHolderName}
                       readOnly
-                      className="flex-1 border-b border-black px-1 outline-none bg-transparent border-0"
+                      className="flex-1 border-0 border-b border-black px-1 py-0 outline-none bg-[#DDE5FE] text-[13px]"
                     />
                   </div>
                 </div>
 
                 {/* Routing Number Row */}
                 <div className="flex border-b border-black text-[10px]">
-                  <div className="px-2 py-1.5 border-r border-black font-bold whitespace-nowrap w-44">
+                  <div className="flex items-center px-2 py-1.5 whitespace-nowrap w-44">
                     Routing/Transit Number
                   </div>
                   <div className="flex-1 px-2 py-1.5">
-                    <input
-                      type="text"
-                      maxLength="9"
-                      value={formData.accounts[2].routingNumber}
-                      readOnly
-                      className="w-full border-b border-black px-1 outline-none bg-transparent border-0"
-                    />
+                    <div className="flex gap-1">
+                      {[0, 1, 2, 3, 4, 5, 6, 7, 8].map((digitIndex) => (
+                        <input
+                          key={digitIndex}
+                          type="text"
+                          maxLength="1"
+                          value={
+                            (formData.accounts[2].routingNumber || "")[
+                              digitIndex
+                            ] || ""
+                          }
+                          readOnly
+                          className="w-6 h-6 text-center border border-black px-0 py-0 outline-none bg-[#DDE5FE] text-[13px] font-bold"
+                        />
+                      ))}
+                    </div>
                   </div>
                 </div>
 
                 {/* Account Number Row */}
                 <div className="flex border-b border-black text-[10px]">
-                  <div className="px-2 py-1.5 border-r border-black font-bold whitespace-nowrap w-44">
+                  <div className="flex items-center px-2 py-1.5  whitespace-nowrap w-44">
                     Checking/Savings Account Number**
                   </div>
                   <div className="flex-1 px-2 py-1.5">
-                    <input
-                      type="text"
-                      maxLength="17"
-                      value={formData.accounts[2].accountNumber}
-                      readOnly
-                      className="w-full border-b border-black px-1 outline-none bg-transparent border-0"
-                    />
+                    <div className="flex gap-1">
+                      {[
+                        0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,
+                        16,
+                      ].map((digitIndex) => (
+                        <input
+                          key={digitIndex}
+                          type="text"
+                          maxLength="1"
+                          value={
+                            (formData.accounts[2].accountNumber || "")[
+                              digitIndex
+                            ] || ""
+                          }
+                          readOnly
+                          className="w-6 h-6 text-center border border-black px-0 py-0 outline-none bg-[#DDE5FE] text-[13px] font-bold"
+                        />
+                      ))}
+                    </div>
                   </div>
                 </div>
 
                 {/* Bank Name Row */}
                 <div className="flex border-b border-black text-[10px]">
-                  <div className="px-2 py-1.5 border-r border-black font-bold whitespace-nowrap w-44">
+                  <div className="flex items-center px-2 py-1.5 whitespace-nowrap w-44">
                     Financial Institution ("Bank") Name
                   </div>
                   <div className="flex-1 px-2 py-1.5 border-0">
@@ -959,26 +1047,26 @@ const DirectDepositFormHR = () => {
                       type="text"
                       value={formData.accounts[2].bankName}
                       readOnly
-                      className="w-full px-1 outline-none bg-transparent border-0"
+                      className="w-full px-1 py-0 outline-none bg-[#DDE5FE] text-[13px] border-0 border-b border-black"
                     />
                   </div>
                 </div>
 
                 {/* Deposit Amount Row */}
-                <div className="flex text-[10px]">
-                  <div className="px-2 py-1.5 border-r border-black font-bold whitespace-nowrap">
+                <div className="flex border-b border-black text-[10px]">
+                  <div className="flex items-center px-2 py-1.5 whitespace-nowrap">
                     I wish to deposit (check one):
                   </div>
-                  <div className="flex items-center px-2 py-1.5 border-r border-black border-0">
+                  <div className="flex items-center px-2 py-1.5 border-0">
                     <input
                       type="text"
                       value={formData.accounts[2].depositPercent}
                       readOnly
-                      className="w-10 border-b border-black px-1 outline-none bg-transparent mr-1 border-0"
+                      className="w-10 border-0 border-b border-black px-1 py-0 outline-none bg-[#DDE5FE] text-[13px] mr-1"
                     />
                     <label className="whitespace-nowrap">% of Net</label>
                   </div>
-                  <div className="flex items-center px-2 py-1.5 border-r border-black border-0">
+                  <div className="flex items-center px-2 py-1.5 border-0">
                     <label className="whitespace-nowrap mr-1">
                       Specific Dollar Amount $
                     </label>
@@ -986,16 +1074,16 @@ const DirectDepositFormHR = () => {
                       type="text"
                       value={formData.accounts[2].depositAmount}
                       readOnly
-                      className="w-20 border-b border-black px-1 outline-none bg-transparent border-0"
+                      className="w-20 border-0 border-b border-black px-1 py-0 outline-none bg-[#DDE5FE] text-[13px]"
                     />
-                    <span className="ml-1">.00</span>
+                    <span className="ml-1 text-[13px] self-center">.00</span>
                   </div>
                   <div className="flex items-center px-2 py-1.5 flex-1">
                     <input
                       type="checkbox"
                       checked={formData.accounts[2].depositRemainder}
                       readOnly
-                      className="mr-1 w-3 h-3"
+                      className="mr-1 w-3 h-3 bg-[#DDE5FE]"
                     />
                     <label className="whitespace-nowrap">
                       Remainder of Net Pay
@@ -1007,13 +1095,13 @@ const DirectDepositFormHR = () => {
 
             {/* Confirmation Statement */}
             <div className="mt-4 border-[2px] border-black">
-              <div className="bg-black text-white px-2 py-1.5 text-[10px] font-bold">
+              <div className="bg-black text-white px-2 py-1.5 text-[10px] font-bold text-center">
                 CONFIRMATION STATEMENT –{" "}
                 <span className="italic">
                   PLEASE PRINT CLEARLY IN BLACK/BLUE INK ONLY
                 </span>
               </div>
-              <div className="p-3 text-[10px] leading-tight">
+              <div className="p-3 text-[10px] leading-tight text-black">
                 <p className="mb-3">
                   I authorize my employer/company to deposit and I authorize my
                   earnings into the bank account(s) specified above and, if
@@ -1035,7 +1123,6 @@ const DirectDepositFormHR = () => {
                 </p>
 
                 <div className="flex items-center mb-3">
-                  <div className="w-3.5 h-3.5 border-[2px] border-black mr-2 flex-shrink-0"></div>
                   <label className="font-bold whitespace-nowrap mr-2">
                     Employee/Worker Signature:
                   </label>
@@ -1043,7 +1130,7 @@ const DirectDepositFormHR = () => {
                     type="text"
                     value={formData.employeeSignature}
                     readOnly
-                    className="flex-1 border-b border-black px-1 outline-none bg-transparent mr-4"
+                    className="flex-1 border-0 border-b border-black px-1 py-0 outline-none bg-[#DDE5FE] text-[13px] mr-4"
                     style={{ fontFamily: "Brush Script MT, cursive" }}
                   />
                   <label className="font-bold whitespace-nowrap mr-2">
@@ -1053,7 +1140,7 @@ const DirectDepositFormHR = () => {
                     type="text"
                     value={formData.employeeDate}
                     readOnly
-                    className="w-28 border-b border-black px-1 outline-none bg-transparent"
+                    className="w-28 border-0 border-b border-black px-1 py-0 outline-none bg-[#DDE5FE] text-[13px]"
                   />
                 </div>
 
@@ -1074,12 +1161,11 @@ const DirectDepositFormHR = () => {
                     type="text"
                     value={formData.employerName}
                     readOnly
-                    className="flex-1 border-b border-black px-1 outline-none bg-transparent"
+                    className="flex-1 border-0 border-b border-black px-1 py-0 outline-none bg-[#DDE5FE] text-[13px]"
                   />
                 </div>
 
                 <div className="flex items-center mb-3">
-                  <div className="w-3.5 h-3.5 border-[2px] border-black mr-2 flex-shrink-0"></div>
                   <label className="font-bold whitespace-nowrap mr-2">
                     Employer/Company Representative Signature:
                   </label>
@@ -1087,7 +1173,7 @@ const DirectDepositFormHR = () => {
                     type="text"
                     value={formData.employerSignature}
                     readOnly
-                    className="flex-1 border-b border-black px-1 outline-none bg-transparent mr-4"
+                    className="flex-1 border-0 border-b border-black px-1 py-0 outline-none bg-[#DDE5FE] text-[13px] mr-4"
                     style={{ fontFamily: "Brush Script MT, cursive" }}
                   />
                   <label className="font-bold whitespace-nowrap mr-2">
@@ -1097,11 +1183,11 @@ const DirectDepositFormHR = () => {
                     type="text"
                     value={formData.employerDate}
                     readOnly
-                    className="w-28 border-b border-black px-1 outline-none bg-transparent"
+                    className="w-28 border-0 border-b border-black px-1 py-0 outline-none bg-[#DDE5FE] text-[13px]"
                   />
                 </div>
 
-                <div className="bg-gray-100 p-2 text-[10px] leading-tight">
+                <div className="bg-gray-100 p-2 text-[10px] leading-tight text-black">
                   <p className="mb-1">
                     <span className="font-bold">
                       * All fields are required unless noted.
@@ -1122,7 +1208,7 @@ const DirectDepositFormHR = () => {
                   </p>
                 </div>
 
-                <div className="text-right mt-2 text-[10px]">
+                <div className="text-right mt-2 text-[10px] text-black">
                   <p>DP0002 10/20</p>
                   <p>Form Expires 10/31/23</p>
                 </div>
