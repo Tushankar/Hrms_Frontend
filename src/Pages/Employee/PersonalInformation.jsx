@@ -876,15 +876,20 @@ const PersonalInformation = () => {
                   <div
                     className={`m-6 p-4 rounded-lg border ${
                       formData.status === "completed" ||
-                      formData.status === "submitted"
+                      formData.status === "submitted" ||
+                      formData.status === "under_review" ||
+                      formData.status === "approved"
                         ? "bg-green-50 border-green-200"
                         : "bg-red-50 border-red-200"
                     }`}
                   >
                     <div className="flex items-center justify-center gap-3">
                       {formData.status === "completed" ||
-                      formData.status === "submitted" ? (
+                      formData.status === "submitted" ||
+                      formData.status === "approved" ? (
                         <CheckCircle className="w-6 h-6 text-green-600 flex-shrink-0" />
+                      ) : formData.status === "under_review" ? (
+                        <FileText className="w-6 h-6 text-blue-600 flex-shrink-0" />
                       ) : (
                         <FileText className="w-6 h-6 text-red-600 flex-shrink-0" />
                       )}
@@ -893,6 +898,14 @@ const PersonalInformation = () => {
                         formData.status === "submitted" ? (
                           <p className="text-base font-semibold text-green-800">
                             ✅ Progress Updated - Form Completed Successfully
+                          </p>
+                        ) : formData.status === "approved" ? (
+                          <p className="text-base font-semibold text-green-800">
+                            ✅ Form Approved
+                          </p>
+                        ) : formData.status === "under_review" ? (
+                          <p className="text-base font-semibold text-blue-800">
+                            📋 Form Under Review
                           </p>
                         ) : (
                           <p className="text-base font-semibold text-red-800">

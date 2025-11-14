@@ -261,14 +261,20 @@ const W4Form = () => {
       {!loading && (
         <div
           className={`mb-6 p-4 rounded-lg border ${
-            isFormCompleted
+            isFormCompleted ||
+            formStatus === "under_review" ||
+            formStatus === "approved"
               ? "bg-green-50 border-green-200"
               : "bg-red-50 border-red-200"
           }`}
         >
           <div className="flex items-center justify-center gap-3">
-            {isFormCompleted ? (
+            {isFormCompleted ||
+            formStatus === "under_review" ||
+            formStatus === "approved" ? (
               <CheckCircle className="w-6 h-6 text-green-600 flex-shrink-0" />
+            ) : formStatus === "under_review" ? (
+              <FileText className="w-6 h-6 text-blue-600 flex-shrink-0" />
             ) : (
               <FileText className="w-6 h-6 text-red-600 flex-shrink-0" />
             )}
@@ -276,6 +282,14 @@ const W4Form = () => {
               {isFormCompleted ? (
                 <p className="text-base font-semibold text-green-800">
                   ✅ Progress Updated - Form Completed Successfully
+                </p>
+              ) : formStatus === "approved" ? (
+                <p className="text-base font-semibold text-green-800">
+                  ✅ Form Approved
+                </p>
+              ) : formStatus === "under_review" ? (
+                <p className="text-base font-semibold text-blue-800">
+                  📋 Form Under Review
                 </p>
               ) : (
                 <p className="text-base font-semibold text-red-800">

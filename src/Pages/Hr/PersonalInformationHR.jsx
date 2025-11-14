@@ -834,7 +834,13 @@ const PersonalInformationHR = () => {
             />
 
             {/* Next Button */}
-            <div className="mt-6 flex justify-end">
+            <div className="mt-6 flex justify-center gap-4">
+              <button
+                onClick={() => navigate("/")}
+                className="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-6 rounded-lg transition-colors"
+              >
+                Exit to Dashboard
+              </button>
               <button
                 onClick={() => navigate(`/hr/education/${employeeId}`)}
                 className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg transition-colors flex items-center gap-2"

@@ -262,7 +262,7 @@ const TBSymptomScreenHR = () => {
         </div>
 
         {/* Navigation Buttons */}
-        <div className="flex justify-between items-center px-6 md:px-8 pb-6">
+        <div className="flex justify-center gap-4 items-center px-6 md:px-8 pb-6 mt-8">
           <button
             onClick={() =>
               navigate(`/hr/staff-misconduct-statement/${employeeId}`)
@@ -271,6 +271,12 @@ const TBSymptomScreenHR = () => {
           >
             <ArrowLeft className="w-4 h-4" />
             Previous: Staff Misconduct
+          </button>
+          <button
+            onClick={() => navigate("/")}
+            className="flex items-center gap-2 px-6 py-3 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 focus:ring-2 focus:ring-red-500 transition-all duration-200 shadow-md hover:shadow-lg"
+          >
+            Exit to Dashboard
           </button>
           <button
             onClick={() => navigate(`/hr/i9-form/${employeeId}`)}

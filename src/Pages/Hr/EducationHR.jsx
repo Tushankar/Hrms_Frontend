@@ -260,8 +260,35 @@ const EducationHR = () => {
               showSignature={false}
             />
 
-            {/* Next Button */}
-            <div className="mt-6 flex justify-end">
+            {/* Navigation Buttons */}
+            <div className="mt-6 flex justify-center gap-4">
+              <button
+                onClick={() =>
+                  navigate(`/hr/personal-information/${employeeId}`)
+                }
+                className="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-6 rounded-lg transition-colors flex items-center gap-2"
+              >
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15 19l-7-7 7-7"
+                  />
+                </svg>
+                Previous: Personal Information
+              </button>
+              <button
+                onClick={() => navigate("/")}
+                className="bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-6 rounded-lg transition-colors"
+              >
+                Exit to Dashboard
+              </button>
               <button
                 onClick={() => navigate(`/hr/references/${employeeId}`)}
                 className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg transition-colors flex items-center gap-2"

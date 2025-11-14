@@ -460,15 +460,20 @@ const References = () => {
                   <div
                     className={`m-6 p-4 rounded-lg border ${
                       applicationStatus === "completed" ||
-                      applicationStatus === "submitted"
+                      applicationStatus === "submitted" ||
+                      applicationStatus === "under_review" ||
+                      applicationStatus === "approved"
                         ? "bg-green-50 border-green-200"
                         : "bg-red-50 border-red-200"
                     }`}
                   >
                     <div className="flex items-center justify-center gap-3">
                       {applicationStatus === "completed" ||
-                      applicationStatus === "submitted" ? (
+                      applicationStatus === "submitted" ||
+                      applicationStatus === "approved" ? (
                         <CheckCircle className="w-6 h-6 text-green-600 flex-shrink-0" />
+                      ) : applicationStatus === "under_review" ? (
+                        <FileText className="w-6 h-6 text-blue-600 flex-shrink-0" />
                       ) : (
                         <FileText className="w-6 h-6 text-red-600 flex-shrink-0" />
                       )}
@@ -477,6 +482,14 @@ const References = () => {
                         applicationStatus === "submitted" ? (
                           <p className="text-base font-semibold text-green-800">
                             ✅ Progress Updated - Form Completed Successfully
+                          </p>
+                        ) : applicationStatus === "approved" ? (
+                          <p className="text-base font-semibold text-green-800">
+                            ✅ Form Approved
+                          </p>
+                        ) : applicationStatus === "under_review" ? (
+                          <p className="text-base font-semibold text-blue-800">
+                            📋 Form Under Review
                           </p>
                         ) : (
                           <p className="text-base font-semibold text-red-800">

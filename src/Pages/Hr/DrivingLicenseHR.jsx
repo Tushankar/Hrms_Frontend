@@ -135,7 +135,7 @@ const DrivingLicenseHR = () => {
           )}
 
           {/* Navigation Buttons */}
-          <div className="flex justify-between items-center px-6 md:px-8 pb-6">
+          <div className="flex justify-center gap-4 items-center px-6 md:px-8 pb-6">
             <button
               onClick={() =>
                 navigate(`/hr/employee-details-upload/${employeeId}`)
@@ -144,6 +144,12 @@ const DrivingLicenseHR = () => {
             >
               <ArrowLeft className="w-4 h-4" />
               Previous: Professional Certificates
+            </button>
+            <button
+              onClick={() => navigate("/")}
+              className="flex items-center gap-2 px-6 py-3 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 focus:ring-2 focus:ring-red-500 transition-all duration-200 shadow-md hover:shadow-lg"
+            >
+              Exit to Dashboard
             </button>
             <button
               onClick={() =>

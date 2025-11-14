@@ -1655,6 +1655,7 @@ const I9Form = () => {
   const [workAuthUploading, setWorkAuthUploading] = useState(false);
   const [workAuthSubmission, setWorkAuthSubmission] = useState(null);
   const [formData, setFormData] = useState({});
+  const [formStatus, setFormStatus] = useState("draft");
   const baseURL = import.meta.env.VITE__BASEURL;
 
   // useCallback to memoize the function and avoid re-creating it on each render.
@@ -1818,6 +1819,7 @@ const I9Form = () => {
             }
 
             setFormData(loadedFormData);
+            setFormStatus(i9FormData.status || "draft");
 
             // Load work authorization data
             if (i9FormData.workAuthorization) {
@@ -1996,14 +1998,19 @@ const I9Form = () => {
           {!isLoading && (
             <div
               className={`mb-6 p-4 rounded-lg border ${
-                formData && Object.keys(formData).length > 0
+                (formData && Object.keys(formData).length > 0) ||
+                formStatus === "under_review" ||
+                formStatus === "approved"
                   ? "bg-green-50 border-green-200"
                   : "bg-red-50 border-red-200"
               }`}
             >
               <div className="flex items-center justify-center gap-3">
-                {formData && Object.keys(formData).length > 0 ? (
+                {(formData && Object.keys(formData).length > 0) ||
+                formStatus === "approved" ? (
                   <CheckCircle className="w-6 h-6 text-green-600 flex-shrink-0" />
+                ) : formStatus === "under_review" ? (
+                  <FileText className="w-6 h-6 text-blue-600 flex-shrink-0" />
                 ) : (
                   <FileText className="w-6 h-6 text-red-600 flex-shrink-0" />
                 )}
@@ -2011,6 +2018,14 @@ const I9Form = () => {
                   {formData && Object.keys(formData).length > 0 ? (
                     <p className="text-base font-semibold text-green-800">
                       ✅ Progress Updated - Form Completed Successfully
+                    </p>
+                  ) : formStatus === "approved" ? (
+                    <p className="text-base font-semibold text-green-800">
+                      ✅ Form Approved
+                    </p>
+                  ) : formStatus === "under_review" ? (
+                    <p className="text-base font-semibold text-blue-800">
+                      📋 Form Under Review
                     </p>
                   ) : (
                     <p className="text-base font-semibold text-red-800">

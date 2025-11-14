@@ -37,6 +37,8 @@ const DirectDepositForm = () => {
   const [applicationId, setApplicationId] = useState(null);
   const [employeeId, setEmployeeId] = useState(null);
   const [isFormCompleted, setIsFormCompleted] = useState(false);
+  const [applicationStatus, setApplicationStatus] = useState("draft");
+  const [formStatus, setFormStatus] = useState("draft");
   const [overallProgress, setOverallProgress] = useState(0);
   const [completedFormsCount, setCompletedFormsCount] = useState(0);
   const baseURL = import.meta.env.VITE__BASEURL;
@@ -228,6 +230,7 @@ const DirectDepositForm = () => {
         };
 
         setFormData(reconstructedFormData);
+        setFormStatus(depositData.status || "draft");
 
         // Check if form has meaningful data
         const hasData =
@@ -346,14 +349,18 @@ const DirectDepositForm = () => {
       {!loading && (
         <div
           className={`mb-6 p-4 rounded-lg border ${
-            isFormCompleted
+            isFormCompleted ||
+            formStatus === "under_review" ||
+            formStatus === "approved"
               ? "bg-green-50 border-green-200"
               : "bg-red-50 border-red-200"
           }`}
         >
           <div className="flex items-center justify-center gap-3">
-            {isFormCompleted ? (
+            {isFormCompleted || formStatus === "approved" ? (
               <CheckCircle className="w-6 h-6 text-green-600 flex-shrink-0" />
+            ) : formStatus === "under_review" ? (
+              <FileText className="w-6 h-6 text-blue-600 flex-shrink-0" />
             ) : (
               <FileText className="w-6 h-6 text-red-600 flex-shrink-0" />
             )}
@@ -361,6 +368,14 @@ const DirectDepositForm = () => {
               {isFormCompleted ? (
                 <p className="text-base font-semibold text-green-800">
                   ✅ Progress Updated - Form Completed Successfully
+                </p>
+              ) : formStatus === "approved" ? (
+                <p className="text-base font-semibold text-green-800">
+                  ✅ Form Approved
+                </p>
+              ) : formStatus === "under_review" ? (
+                <p className="text-base font-semibold text-blue-800">
+                  📋 Form Under Review
                 </p>
               ) : (
                 <p className="text-base font-semibold text-red-800">

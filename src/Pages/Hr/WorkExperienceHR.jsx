@@ -417,7 +417,7 @@ const WorkExperienceHR = () => {
             />
 
             {/* Navigation Buttons */}
-            <div className="mt-6 flex justify-between">
+            <div className="mt-6 flex justify-center gap-4">
               <button
                 onClick={() => navigate(`/hr/references/${employeeId}`)}
                 className="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-6 rounded-lg transition-colors flex items-center gap-2"
@@ -436,6 +436,12 @@ const WorkExperienceHR = () => {
                   />
                 </svg>
                 Previous: References
+              </button>
+              <button
+                onClick={() => navigate("/")}
+                className="bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-6 rounded-lg transition-colors"
+              >
+                Exit to Dashboard
               </button>
               <button
                 onClick={() =>

@@ -60,35 +60,6 @@ const LegalDisclosuresHR = () => {
         </button>
 
         <div className="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
-          {/* Status Banner */}
-          <div
-            className={`m-6 p-4 rounded-lg border ${
-              formStatus === "completed" || formStatus === "submitted"
-                ? "bg-green-50 border-green-200"
-                : "bg-red-50 border-red-200"
-            }`}
-          >
-            <div className="flex items-center justify-center gap-3">
-              {formStatus === "completed" || formStatus === "submitted" ? (
-                <CheckCircle className="w-6 h-6 text-green-600 flex-shrink-0" />
-              ) : (
-                <FileText className="w-6 h-6 text-red-600 flex-shrink-0" />
-              )}
-              <div>
-                {formStatus === "completed" || formStatus === "submitted" ? (
-                  <p className="text-base font-semibold text-green-800">
-                    ✅ Progress Updated - Form Completed Successfully
-                  </p>
-                ) : (
-                  <p className="text-base font-semibold text-red-800">
-                    ⚠️ Not filled yet - Complete this form to update your
-                    progress
-                  </p>
-                )}
-              </div>
-            </div>
-          </div>
-
           <div className="bg-[#1F3A93] text-white p-4 md:p-6">
             <div className="text-center">
               <div className="flex flex-col sm:flex-row items-center justify-center mb-2">
@@ -214,7 +185,7 @@ const LegalDisclosuresHR = () => {
             />
 
             {/* Navigation Buttons */}
-            <div className="mt-6 flex justify-between">
+            <div className="mt-6 flex justify-center gap-4">
               <button
                 onClick={() =>
                   navigate(`/hr/professional-experience/${employeeId}`)
@@ -235,6 +206,12 @@ const LegalDisclosuresHR = () => {
                   />
                 </svg>
                 Previous: Military Service
+              </button>
+              <button
+                onClick={() => navigate("/")}
+                className="bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-6 rounded-lg transition-colors"
+              >
+                Exit to Dashboard
               </button>
               <button
                 onClick={() =>
