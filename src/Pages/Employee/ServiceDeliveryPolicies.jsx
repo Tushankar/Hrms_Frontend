@@ -61,14 +61,18 @@ export default function ServiceDeliveryPolicies() {
       const user = decodedToken?.user;
 
       if (!user?._id) {
-        console.error("User not found in token");
+        console.error("User not found in token for progress data");
         return;
       }
+
+      console.log("Fetching progress data for user:", user._id);
 
       const response = await axios.get(
         `${baseURL}/onboarding/get-application/${user._id}`,
         { withCredentials: true }
       );
+
+      console.log("Progress data response:", response.data);
 
       if (response.data?.data) {
         const backendData = response.data.data;
@@ -99,9 +103,10 @@ export default function ServiceDeliveryPolicies() {
         );
         setOverallProgress(percentage);
         setCompletedFormsCount(completedForms);
+        console.log("Progress updated:", { completedForms, percentage });
       }
     } catch (error) {
-      console.error("Error fetching progress:", error);
+      console.error("Error fetching progress:", error.message);
     }
   };
 
@@ -118,26 +123,52 @@ export default function ServiceDeliveryPolicies() {
         return;
       }
 
+      console.log("Initializing form for user:", user._id);
       setEmployeeId(user._id);
 
       // Get application
-      const appResponse = await axios.get(
-        `${baseURL}/onboarding/get-application/${user._id}`,
-        { withCredentials: true }
-      );
+      try {
+        const appResponse = await axios.get(
+          `${baseURL}/onboarding/get-application/${user._id}`,
+          { withCredentials: true }
+        );
 
-      if (appResponse.data?.data?.application) {
-        setApplicationId(appResponse.data.data.application._id);
+        console.log("Application response:", appResponse.data);
+
+        if (appResponse.data?.data?.application) {
+          setApplicationId(appResponse.data.data.application._id);
+          console.log(
+            "Application ID set:",
+            appResponse.data.data.application._id
+          );
+        }
+      } catch (fetchError) {
+        console.error("Error fetching application:", fetchError.message);
+        toast.error("Failed to load application data: " + fetchError.message);
       }
     } catch (error) {
       console.error("Error initializing form:", error);
+      toast.error("Failed to initialize form: " + error.message);
     }
   };
 
   // Load saved signature and date
   const loadSignatureAndDate = async () => {
     try {
-      console.log("Loading signature and date for service delivery policy");
+      console.log(
+        "Loading signature and date for service delivery policy with applicationId:",
+        applicationId
+      );
+
+      if (!applicationId) {
+        console.warn("Application ID not set, cannot load signature and date");
+        // Set today's date as default
+        const today = new Date();
+        const todayDate = today.toISOString().slice(0, 10);
+        setSignatureDate(todayDate);
+        return;
+      }
+
       const response = await axios.get(
         `${baseURL}/onboarding/get-service-delivery-policy/${applicationId}`,
         { withCredentials: true }
@@ -172,7 +203,7 @@ export default function ServiceDeliveryPolicies() {
         setSignatureDate(todayDate);
       }
     } catch (error) {
-      console.error("Error loading signature and date:", error);
+      console.error("Error loading signature and date:", error.message);
       // Set today's date as default if there's an error
       const today = new Date();
       const todayDate = today.toISOString().slice(0, 10);
@@ -181,8 +212,11 @@ export default function ServiceDeliveryPolicies() {
   };
 
   useEffect(() => {
-    fetchProgressData();
-    initializeForm();
+    const init = async () => {
+      await initializeForm();
+      fetchProgressData();
+    };
+    init();
   }, []);
 
   useEffect(() => {
@@ -579,6 +613,18 @@ export default function ServiceDeliveryPolicies() {
                       return;
                     }
 
+                    // Check if applicationId and employeeId are set
+                    if (!applicationId || !employeeId) {
+                      toast.error(
+                        "Form data not loaded. Please refresh and try again."
+                      );
+                      console.error("Missing applicationId or employeeId", {
+                        applicationId,
+                        employeeId,
+                      });
+                      return;
+                    }
+
                     setIsSaving(true);
                     try {
                       const saveData = {
@@ -591,6 +637,8 @@ export default function ServiceDeliveryPolicies() {
                         },
                         status: "completed",
                       };
+
+                      console.log("Saving service delivery policy:", saveData);
 
                       await axios.post(
                         `${baseURL}/onboarding/save-service-delivery-policy`,

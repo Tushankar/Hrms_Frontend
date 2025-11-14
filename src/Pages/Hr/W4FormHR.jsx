@@ -29,6 +29,7 @@ const W4FormHR = () => {
 
   const fetchSubmission = async () => {
     try {
+      console.log("Fetching W4 form for employee:", employeeId);
       const response = await axios.get(
         `${baseURL}/onboarding/get-application/${employeeId}`,
         {
@@ -44,48 +45,19 @@ const W4FormHR = () => {
       setSubmission(w4Data);
       if (w4Data) {
         console.log("Setting form data with:", w4Data);
-        // Data from get-application is already flattened, so use it directly
+        // Data from get-application is already flattened by backend, use it directly
         setFormData(w4Data);
+      } else {
+        console.warn("No W4 form data found for employee");
+        setFormData({});
       }
     } catch (error) {
       console.error("Error fetching submission:", error);
-      toast.error("Failed to load employee submission");
+      toast.error("Failed to load employee submission: " + error.message);
     } finally {
       setLoading(false);
     }
   };
-
-  const flattenData = (data) => ({
-    firstName: data.firstName || "",
-    lastName: data.lastName || "",
-    ssn: data.socialSecurityNumber || "",
-    address: data.address || "",
-    city: data.cityStateZip || "",
-    filingStatus: data.filingStatus || "",
-    childrenAmount: data.qualifyingChildren || "",
-    otherDependents: data.otherDependents || "",
-    step3Total: data.totalCredits || "",
-    step4a: data.otherIncome || "",
-    step4b: data.deductions || "",
-    step4c: data.extraWithholding || "",
-    signature: data.employeeSignature || "",
-    signatureDate: data.signatureDate || null,
-    employerName: data.employerName || "",
-    employmentDate: data.firstDateOfEmployment || "",
-    ein: data.employerEIN || "",
-    twoJobs: data.multipleJobsOption === "two_jobs",
-    multipleJobs1: data.multipleJobsWorksheet?.twoJobs?.amount || "",
-    multipleJobs2a: data.multipleJobsWorksheet?.threeJobs?.firstTwoJobs || "",
-    multipleJobs2b: data.multipleJobsWorksheet?.threeJobs?.thirdJob || "",
-    multipleJobs2c: data.multipleJobsWorksheet?.threeJobs?.total || "",
-    multipleJobs3: data.multipleJobsWorksheet?.payPeriods || "",
-    multipleJobs4: data.multipleJobsWorksheet?.extraWithholding || "",
-    deductions1: data.deductionsWorksheet?.itemizedDeductions || "",
-    deductions2: data.deductionsWorksheet?.standardDeduction || "",
-    deductions3: data.deductionsWorksheet?.difference || "",
-    deductions4: data.deductionsWorksheet?.otherAdjustments || "",
-    deductions5: data.deductionsWorksheet?.total || "",
-  });
 
   const handleDownloadFormAsPDF = async () => {
     setDownloading(true);
