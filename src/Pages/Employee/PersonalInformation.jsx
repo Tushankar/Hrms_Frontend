@@ -255,6 +255,7 @@ const PersonalInformation = () => {
     // Authorization Questions
     isUSCitizen: "",
     isAuthorizedToWork: "",
+    authorizedToWorkExplanation: "",
     hasWorkedHereBefore: "",
     previousWorkDate: "",
     hasBeenConvictedOfFelony: "",
@@ -715,8 +716,14 @@ const PersonalInformation = () => {
       missing.push("ID Country");
     if (!formData.isUSCitizen)
       missing.push("Are you a citizen of the United States?");
-    if (!formData.isAuthorizedToWork)
+    if (formData.isUSCitizen === "NO" && !formData.isAuthorizedToWork)
       missing.push("Are you authorized to work in the U.S.?");
+    if (
+      formData.isUSCitizen === "NO" &&
+      formData.isAuthorizedToWork === "YES" &&
+      !formData.authorizedToWorkExplanation
+    )
+      missing.push("Work Authorization Details");
     if (!formData.hasWorkedHereBefore)
       missing.push("Have you ever worked for this company?");
     if (formData.hasWorkedHereBefore === "YES" && !formData.previousWorkDate)
@@ -770,6 +777,10 @@ const PersonalInformation = () => {
         : true) &&
       formData.isUSCitizen &&
       formData.isAuthorizedToWork &&
+      (formData.isUSCitizen === "YES" ||
+        formData.isAuthorizedToWork === "NO" ||
+        (formData.isAuthorizedToWork === "YES" &&
+          formData.authorizedToWorkExplanation)) &&
       formData.hasWorkedHereBefore &&
       (formData.hasWorkedHereBefore !== "YES" || formData.previousWorkDate) &&
       formData.hasBeenConvictedOfFelony &&
@@ -1273,18 +1284,43 @@ const PersonalInformation = () => {
                                   name="isAuthorizedToWork"
                                   value="NO"
                                   checked={formData.isAuthorizedToWork === "NO"}
-                                  onChange={(e) =>
+                                  onChange={(e) => {
                                     handleInputChange(
                                       "isAuthorizedToWork",
                                       e.target.value
-                                    )
-                                  }
+                                    );
+                                    handleInputChange(
+                                      "authorizedToWorkExplanation",
+                                      ""
+                                    );
+                                  }}
                                   className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
                                   required
                                 />
                                 <span className="ml-2 text-gray-700">NO</span>
                               </label>
                             </div>
+                            {formData.isAuthorizedToWork === "YES" && (
+                              <div className="mt-4">
+                                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                  Please provide details about your work
+                                  authorization:{" "}
+                                  <span className="text-red-500">*</span>
+                                </label>
+                                <textarea
+                                  value={formData.authorizedToWorkExplanation}
+                                  onChange={(e) =>
+                                    handleInputChange(
+                                      "authorizedToWorkExplanation",
+                                      e.target.value
+                                    )
+                                  }
+                                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600 transition-colors duration-200 min-h-[100px]"
+                                  placeholder="Please provide details about your work authorization (e.g., visa type, expiration date, etc.)"
+                                  required
+                                />
+                              </div>
+                            )}
                           </div>
                         )}
 

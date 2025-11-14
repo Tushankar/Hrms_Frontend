@@ -1690,13 +1690,20 @@ export default function W9FormHR() {
           </div>
 
           {/* Navigation Buttons */}
-          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mt-6">
+          <div className="flex justify-between items-center px-6 md:px-8 pb-6">
             <button
-              type="button"
-              onClick={handlePrevious}
-              className="flex-1 px-4 sm:px-6 py-2 sm:py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors text-sm sm:text-base font-medium"
+              onClick={() => navigate(`/hr/w4-form/${employeeId}`)}
+              className="flex items-center gap-2 px-6 py-3 bg-gray-600 text-white font-semibold rounded-lg hover:bg-gray-700 focus:ring-2 focus:ring-gray-500 transition-all duration-200 shadow-md hover:shadow-lg"
             >
-              Back
+              <ArrowLeft className="w-4 h-4" />
+              Previous: W-4 Form
+            </button>
+            <button
+              onClick={() => navigate(`/hr/direct-deposit-form/${employeeId}`)}
+              className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#1F3A93] to-[#2748B4] text-white font-semibold rounded-lg hover:from-[#16306e] hover:to-[#1F3A93] focus:ring-2 focus:ring-[#1F3A93]/20 transition-all duration-200 shadow-md hover:shadow-lg"
+            >
+              Next: Direct Deposit
+              <ArrowLeft className="w-4 h-4 rotate-180" />
             </button>
           </div>
         </div>

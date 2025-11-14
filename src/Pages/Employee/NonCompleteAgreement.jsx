@@ -52,6 +52,8 @@ const NonCompleteAgreement = () => {
   const [signatureDate, setSignatureDate] = useState("");
   const [errors, setErrors] = useState({});
   const [savedSignatureUrl, setSavedSignatureUrl] = useState("");
+  const [companyRepSignature, setCompanyRepSignature] = useState("");
+  const [companyRepName, setCompanyRepName] = useState("");
   const baseURL = import.meta.env.VITE__BASEURL;
 
   // Helper to build normalized full URL
@@ -156,6 +158,24 @@ const NonCompleteAgreement = () => {
             ...prev,
             employeeSignatureName: agreementData.employeeSignatureName,
           }));
+        }
+
+        // Load company representative data only if it exists
+        if (
+          agreementData.companyRepSignature &&
+          agreementData.companyRepSignature.trim()
+        ) {
+          setCompanyRepSignature(agreementData.companyRepSignature);
+        } else {
+          setCompanyRepSignature("");
+        }
+        if (
+          agreementData.companyRepName &&
+          agreementData.companyRepName.trim()
+        ) {
+          setCompanyRepName(agreementData.companyRepName);
+        } else {
+          setCompanyRepName("");
         }
       } else {
         // No saved data, set today's date as default
@@ -686,13 +706,39 @@ const NonCompleteAgreement = () => {
                   <div className="space-y-8 sm:space-y-12">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-8">
                       <div>
-                        <div className="border-b border-black mb-2 h-8 sm:h-12"></div>
+                        <div className="border-b border-black mb-2 h-8 sm:h-12 flex items-end pb-1">
+                          {companyRepSignature ? (
+                            <p
+                              className="text-lg"
+                              style={{
+                                fontFamily: "'Great Vibes', cursive",
+                                fontSize: "28px",
+                                fontWeight: "400",
+                                letterSpacing: "0.5px",
+                              }}
+                            >
+                              {companyRepSignature}
+                            </p>
+                          ) : (
+                            <span className="text-gray-400 italic">
+                              Not provided yet
+                            </span>
+                          )}
+                        </div>
                         <p className="text-[10px] sm:text-xs">
                           Company Representative Signature
                         </p>
                       </div>
                       <div>
-                        <div className="border-b border-black mb-2 h-8 sm:h-12"></div>
+                        <div className="border-b border-black mb-2 h-8 sm:h-12 flex items-center px-2">
+                          {companyRepName ? (
+                            <span className="text-sm">{companyRepName}</span>
+                          ) : (
+                            <span className="text-gray-400 italic">
+                              Not provided yet
+                            </span>
+                          )}
+                        </div>
                         <p className="text-[10px] sm:text-xs">
                           Company Representative Name and Title
                         </p>

@@ -24,6 +24,8 @@ const NonCompeteAgreementHR = () => {
   const [formId, setFormId] = useState(null);
   const [formData, setFormData] = useState(null);
   const [selectedSignature, setSelectedSignature] = useState(null);
+  const [companyRepSignature, setCompanyRepSignature] = useState("");
+  const [companyRepName, setCompanyRepName] = useState("");
 
   const loadData = async () => {
     try {
@@ -43,6 +45,8 @@ const NonCompeteAgreementHR = () => {
         setFormId(data._id);
         setEmployeeName(data.employeeName || "Employee");
         setFormData(data);
+        setCompanyRepSignature(data.companyRepSignature || "");
+        setCompanyRepName(data.companyRepName || "");
       } else {
         console.warn("No non-compete agreement data found");
         setFormData(null);
@@ -322,13 +326,39 @@ const NonCompeteAgreementHR = () => {
                         <div className="space-y-12">
                           <div className="grid grid-cols-2 gap-8">
                             <div>
-                              <div className="border-b border-black mb-2 h-12"></div>
+                              <div className="border-b border-black mb-2 h-12 flex items-end pb-1">
+                                <input
+                                  type="text"
+                                  value={companyRepSignature}
+                                  onChange={(e) =>
+                                    setCompanyRepSignature(e.target.value)
+                                  }
+                                  placeholder="Company Representative Signature"
+                                  className="w-full bg-transparent border-none outline-none text-lg"
+                                  style={{
+                                    fontFamily: "'Great Vibes', cursive",
+                                    fontSize: "28px",
+                                    fontWeight: "400",
+                                    letterSpacing: "0.5px",
+                                  }}
+                                />
+                              </div>
                               <p className="text-xs">
                                 Company Representative Signature
                               </p>
                             </div>
                             <div>
-                              <div className="border-b border-black mb-2 h-12"></div>
+                              <div className="border-b border-black mb-2 h-12 flex items-center px-2">
+                                <input
+                                  type="text"
+                                  value={companyRepName}
+                                  onChange={(e) =>
+                                    setCompanyRepName(e.target.value)
+                                  }
+                                  placeholder="Name and Title"
+                                  className="w-full bg-transparent border-none outline-none text-sm"
+                                />
+                              </div>
                               <p className="text-xs">
                                 Company Representative Name and Title
                               </p>
@@ -472,7 +502,59 @@ const NonCompeteAgreementHR = () => {
                   onNoteSaved={loadData}
                   formData={formData}
                   showSignature={false}
+                  companyRepSignature={companyRepSignature}
+                  companyRepName={companyRepName}
+                  onCompanyRepUpdate={(signature, name) => {
+                    setCompanyRepSignature(signature);
+                    setCompanyRepName(name);
+                  }}
                 />
+
+                {/* Navigation Buttons */}
+                <div className="mt-6 flex justify-between">
+                  <button
+                    onClick={() =>
+                      navigate(`/hr/service-delivery-policies/${employeeId}`)
+                    }
+                    className="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-6 rounded-lg transition-colors flex items-center gap-2"
+                  >
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M15 19l-7-7 7-7"
+                      />
+                    </svg>
+                    Previous: Service Delivery
+                  </button>
+                  <button
+                    onClick={() =>
+                      navigate(`/hr/emergency-contact/${employeeId}`)
+                    }
+                    className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg transition-colors flex items-center gap-2"
+                  >
+                    Next: Emergency Contact
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 5l7 7-7 7"
+                      />
+                    </svg>
+                  </button>
+                </div>
               </div>
             </div>
           </div>

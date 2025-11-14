@@ -464,6 +464,28 @@ const EmergencyContactHR = () => {
               </div>
             </div>
           </div>
+
+          {/* Navigation Buttons */}
+          <div className="flex justify-between items-center px-6 md:px-8 pb-6">
+            <button
+              onClick={() =>
+                navigate(`/hr/non-compete-agreement/${employeeId}`)
+              }
+              className="flex items-center gap-2 px-6 py-3 bg-gray-600 text-white font-semibold rounded-lg hover:bg-gray-700 focus:ring-2 focus:ring-gray-500 transition-all duration-200 shadow-md hover:shadow-lg"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Previous: Non-Compete Agreement
+            </button>
+            <button
+              onClick={() =>
+                navigate(`/hr/employee-details-upload/${employeeId}`)
+              }
+              className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#1F3A93] to-[#2748B4] text-white font-semibold rounded-lg hover:from-[#16306e] hover:to-[#1F3A93] focus:ring-2 focus:ring-[#1F3A93]/20 transition-all duration-200 shadow-md hover:shadow-lg"
+            >
+              Next: Professional Certificates
+              <ArrowLeft className="w-4 h-4 rotate-180" />
+            </button>
+          </div>
         </div>
 
         {/* Toast Configuration */}

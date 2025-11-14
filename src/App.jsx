@@ -94,6 +94,7 @@ import CodeOfEthicsUpload from "./Pages/Hr/CodeOfEthicsUpload";
 import CodeOfEthicsSubmissions from "./Pages/Hr/CodeOfEthicsSubmissions";
 import ServiceDeliveryPolicyUpload from "./Pages/Hr/ServiceDeliveryPolicyUpload";
 import PCATrainingQuestionsManagement from "./Pages/Hr/PCATrainingQuestionsManagement";
+import PCATrainingQuestionsHR from "./Pages/Hr/PCATrainingQuestionsHR";
 import ServiceDeliveryPolicySubmissions from "./Pages/Hr/ServiceDeliveryPolicySubmissions";
 import NonCompeteSubmissions from "./Pages/Hr/NonCompeteSubmissions";
 import BackgroundCheckSubmissions from "./Pages/Hr/BackgroundCheckSubmissions";
@@ -634,6 +635,10 @@ function App() {
           <Route
             path="/hr/pca-training-management"
             element={<PCATrainingQuestionsManagement />}
+          />
+          <Route
+            path="/hr/pca-training-questions/:employeeId"
+            element={<PCATrainingQuestionsHR />}
           />
           <Route
             path="/hr/non-compete-submissions"

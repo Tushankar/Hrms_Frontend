@@ -14,11 +14,18 @@ const HRNotesInput = ({
   formData,
   formId,
   showSignature = true, // new prop: controls whether HR signature UI is shown
+  companyRepSignature = "",
+  companyRepName = "",
+  onCompanyRepUpdate,
 }) => {
   const [note, setNote] = useState("");
   const [saving, setSaving] = useState(false);
   const [sending, setSending] = useState(false);
   const [hrSignature, setHrSignature] = useState("");
+  const [localCompanyRepSignature, setLocalCompanyRepSignature] =
+    useState(companyRepSignature);
+  const [localCompanyRepName, setLocalCompanyRepName] =
+    useState(companyRepName);
 
   console.log("HRNotesInput rendered with props:", {
     formType,
@@ -59,7 +66,9 @@ const HRNotesInput = ({
   useEffect(() => {
     setNote(existingNote || "");
     setHrSignature(existingSignature || "");
-  }, [existingNote, existingSignature]);
+    setLocalCompanyRepSignature(companyRepSignature || "");
+    setLocalCompanyRepName(companyRepName || "");
+  }, [existingNote, existingSignature, companyRepSignature, companyRepName]);
 
   // Helper to build correct signature URL
   const buildSignatureUrl = (signaturePath) => {
@@ -157,6 +166,10 @@ const HRNotesInput = ({
           comment: note,
           reviewedAt: new Date(),
           signature: hrSignature,
+          ...(formType === "non-compete-agreement" && {
+            companyRepSignature: localCompanyRepSignature,
+            companyRepName: localCompanyRepName,
+          }),
         };
         console.log("Added hrFeedback to requestBody");
       } else if (formType === "education") {
@@ -166,10 +179,27 @@ const HRNotesInput = ({
           comment: note,
           reviewedAt: new Date(),
           signature: hrSignature,
+          ...(formType === "non-compete-agreement" && {
+            companyRepSignature: localCompanyRepSignature,
+            companyRepName: localCompanyRepName,
+          }),
         };
       } else if (formType === "references") {
         console.log("Matched references condition");
         requestBody.references = formData?.references || [];
+        requestBody.hrFeedback = {
+          comment: note,
+          reviewedAt: new Date(),
+          signature: hrSignature,
+          ...(formType === "non-compete-agreement" && {
+            companyRepSignature: localCompanyRepSignature,
+            companyRepName: localCompanyRepName,
+          }),
+        };
+      } else if (formType === "work-experience") {
+        console.log("Matched work-experience condition");
+        // Don't send workExperiences array - only send HR feedback
+        // The backend will preserve existing work experiences
         requestBody.hrFeedback = {
           comment: note,
           reviewedAt: new Date(),
@@ -187,6 +217,10 @@ const HRNotesInput = ({
           comment: note,
           reviewedAt: new Date(),
           signature: hrSignature,
+          ...(formType === "non-compete-agreement" && {
+            companyRepSignature: localCompanyRepSignature,
+            companyRepName: localCompanyRepName,
+          }),
         };
       } else {
         console.log("Matched else condition - merging into formData");
@@ -275,6 +309,59 @@ const HRNotesInput = ({
         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
         rows="4"
       />
+
+      {/* Company Representative Fields - Only show for non-compete agreement */}
+      {formType === "non-compete-agreement" && (
+        <div className="mt-4 space-y-4">
+          <h4 className="text-sm font-semibold text-gray-700">
+            Company Representative
+          </h4>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs text-gray-600 mb-1">
+                Signature
+              </label>
+              <input
+                type="text"
+                value={localCompanyRepSignature}
+                onChange={(e) => {
+                  setLocalCompanyRepSignature(e.target.value);
+                  if (onCompanyRepUpdate) {
+                    onCompanyRepUpdate(e.target.value, localCompanyRepName);
+                  }
+                }}
+                placeholder="Enter signature"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                style={{
+                  fontFamily: "'Great Vibes', cursive",
+                  fontSize: "18px",
+                  fontWeight: "400",
+                }}
+              />
+            </div>
+            <div>
+              <label className="block text-xs text-gray-600 mb-1">
+                Name and Title
+              </label>
+              <input
+                type="text"
+                value={localCompanyRepName}
+                onChange={(e) => {
+                  setLocalCompanyRepName(e.target.value);
+                  if (onCompanyRepUpdate) {
+                    onCompanyRepUpdate(
+                      localCompanyRepSignature,
+                      e.target.value
+                    );
+                  }
+                }}
+                placeholder="Enter name and title"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+              />
+            </div>
+          </div>
+        </div>
+      )}
 
       {showSignature && existingSignature && (
         <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
