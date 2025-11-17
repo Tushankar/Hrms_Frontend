@@ -30,8 +30,8 @@ const DrivingLicenseHR = () => {
         }
       );
       const drivingLicenseData = response.data?.data?.forms?.drivingLicense;
-      if (drivingLicenseData?.employeeUploadedForm) {
-        setSubmission(drivingLicenseData.employeeUploadedForm);
+      if (drivingLicenseData) {
+        setSubmission(drivingLicenseData);
       }
     } catch (error) {
       console.error("Error fetching submission:", error);
@@ -69,14 +69,14 @@ const DrivingLicenseHR = () => {
             </div>
           ) : (
             <>
-              {!submission && (
+              {!submission?.employeeUploadedForm && (
                 <div className="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg text-center">
                   <p className="text-yellow-800">
                     No driving license submission found for this employee.
                   </p>
                 </div>
               )}
-              {submission && (
+              {submission?.employeeUploadedForm && (
                 <div className="border border-gray-200 rounded-lg p-6">
                   <h2 className="text-xl font-semibold text-gray-800 mb-4">
                     Employee Driving License
@@ -88,28 +88,31 @@ const DrivingLicenseHR = () => {
                         submitted
                       </span>
                     </p>
-                    {submission.filename && (
+                    {submission.employeeUploadedForm.filename && (
                       <p className="text-sm text-gray-600">
                         File:{" "}
                         <span className="font-medium">
-                          {submission.filename}
+                          {submission.employeeUploadedForm.filename}
                         </span>
                       </p>
                     )}
-                    {submission.uploadedAt && (
+                    {submission.employeeUploadedForm.uploadedAt && (
                       <p className="text-sm text-gray-600">
                         Uploaded:{" "}
                         <span className="font-medium">
-                          {new Date(submission.uploadedAt).toLocaleDateString()}
+                          {new Date(
+                            submission.employeeUploadedForm.uploadedAt
+                          ).toLocaleDateString()}
                         </span>
                       </p>
                     )}
-                    {(submission.filePath || submission.fileUrl) && (
+                    {(submission.employeeUploadedForm.filePath ||
+                      submission.employeeUploadedForm.fileUrl) && (
                       <button
                         onClick={() =>
                           window.open(
-                            submission.fileUrl ||
-                              `${baseURL}/${submission.filePath}`,
+                            submission.employeeUploadedForm.fileUrl ||
+                              `${baseURL}/${submission.employeeUploadedForm.filePath}`,
                             "_blank"
                           )
                         }

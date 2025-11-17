@@ -238,9 +238,26 @@ const HRNotesInput = ({
       console.log("Full body:", JSON.stringify(requestBody, null, 2));
       console.log("Endpoint:", getEndpoint(formType));
 
-      await axios.post(`${baseURL}${getEndpoint(formType)}`, requestBody, {
-        withCredentials: true,
-      });
+      // Special handling for tbSymptomScreen - use submit-notes endpoint
+      if (formType === "tbSymptomScreen") {
+        const submitNotesPayload = {
+          userId: employeeId,
+          notes: note.trim(),
+          formType: "TBSymptomScreen",
+          timestamp: new Date().toISOString(),
+        };
+        await axios.post(
+          `${baseURL}/onboarding/submit-notes`,
+          submitNotesPayload,
+          {
+            withCredentials: true,
+          }
+        );
+      } else {
+        await axios.post(`${baseURL}${getEndpoint(formType)}`, requestBody, {
+          withCredentials: true,
+        });
+      }
 
       // Also save HR notes to employee dashboard if sending to employee
       if (setSending) {

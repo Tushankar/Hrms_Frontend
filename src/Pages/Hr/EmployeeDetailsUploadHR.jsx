@@ -340,7 +340,7 @@ const EmployeeDetailsUploadHR = () => {
 
               {/* HR Notes Section */}
               <HRNotesInput
-                formType="jobDescription"
+                formType="job-description"
                 employeeId={employeeId}
                 existingNote={formData?.hrFeedback?.comment}
                 existingReviewedAt={formData?.hrFeedback?.reviewedAt}

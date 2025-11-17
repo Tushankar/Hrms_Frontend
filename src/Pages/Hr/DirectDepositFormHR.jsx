@@ -264,7 +264,7 @@ const DirectDepositFormHR = () => {
       const payload = {
         userId: employeeId,
         notes: notes.trim(),
-        formType: "directDeposit",
+        formType: "DirectDeposit",
         timestamp: new Date().toISOString(),
       };
 

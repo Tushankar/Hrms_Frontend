@@ -13,6 +13,7 @@ import {
 import toast, { Toaster } from "react-hot-toast";
 import { Layout } from "../../Components/Common/layout/Layout";
 import Navbar from "../../Components/Common/Navbar/Navbar";
+import HRNotesIndicator from "../../Components/Common/HRNotesIndicator/HRNotesIndicator";
 import axios from "axios";
 import Cookies from "js-cookie";
 
@@ -25,6 +26,7 @@ const DrivingLicenseUpload = () => {
   const [applicationId, setApplicationId] = useState(null);
   const [employeeId, setEmployeeId] = useState(null);
   const [governmentIdType, setGovernmentIdType] = useState("");
+  const [hrFeedback, setHrFeedback] = useState(null);
   const baseURL = import.meta.env.VITE__BASEURL;
 
   useEffect(() => {
@@ -77,6 +79,11 @@ const DrivingLicenseUpload = () => {
               setSubmission(
                 licenseResponse.data.drivingLicense.employeeUploadedForm
               );
+            }
+
+            // Fetch HR feedback if available
+            if (licenseResponse.data?.drivingLicense?.hrFeedback) {
+              setHrFeedback(licenseResponse.data.drivingLicense.hrFeedback);
             }
           } catch (error) {
             console.log("Driving license not yet created:", error.message);
@@ -376,6 +383,13 @@ const DrivingLicenseUpload = () => {
                       <span className="font-medium">
                         Document submitted successfully
                       </span>
+                      {hrFeedback && (
+                        <HRNotesIndicator
+                          hrFeedback={hrFeedback}
+                          formStatus="submitted"
+                          formTitle="Government ID Document Upload"
+                        />
+                      )}
                     </div>
                     <div className="space-y-2">
                       <p className="text-sm text-gray-600">

@@ -323,6 +323,7 @@ export const EmployeeTaskManagement = () => {
               backendData.application?.applicationStatus
             ),
             formData: backendData.forms?.legalDisclosures,
+            hrFeedback: backendData.forms?.legalDisclosures?.hrFeedback,
             applicationId: backendData.application?._id,
             isEditable: isFormEditable(
               backendData.forms?.legalDisclosures,
@@ -663,6 +664,7 @@ export const EmployeeTaskManagement = () => {
               backendData.application?.applicationStatus
             ),
             formData: backendData.forms?.drivingLicense,
+            hrFeedback: backendData.forms?.drivingLicense?.hrFeedback,
             applicationId: backendData.application?._id,
             isEditable: isFormEditable(
               backendData.forms?.drivingLicense,
