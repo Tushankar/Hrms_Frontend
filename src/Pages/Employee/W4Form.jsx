@@ -38,6 +38,7 @@ const W4Form = () => {
   const [applicationId, setApplicationId] = useState(null);
   const [employeeId, setEmployeeId] = useState(null);
   const [isFormCompleted, setIsFormCompleted] = useState(false);
+  const [formStatus, setFormStatus] = useState("draft");
   const [overallProgress, setOverallProgress] = useState(0);
   const [completedFormsCount, setCompletedFormsCount] = useState(0);
   const baseURL = import.meta.env.VITE__BASEURL;
@@ -125,6 +126,7 @@ const W4Form = () => {
         );
         // Backend already returns data in flat format, so use it directly
         setFormData(response.data.w4Form);
+        setFormStatus(response.data.w4Form?.status || "draft");
         // Check if form has meaningful data (not just empty strings)
         const hasData = Object.values(response.data.w4Form).some(
           (value) => value && value.toString().trim() !== ""
@@ -134,10 +136,20 @@ const W4Form = () => {
       } else {
         console.log("No w4Form data found in response:", response.data);
         setIsFormCompleted(false);
+        setFormStatus("draft");
       }
     } catch (error) {
-      console.error("Error loading W4 data:", error);
-      setIsFormCompleted(false);
+      if (error.response?.status === 404) {
+        // W4 form doesn't exist yet - this is expected, user hasn't started yet
+        console.log("📄 W4 form not created yet - starting fresh");
+        setFormData({});
+        setFormStatus("draft");
+        setIsFormCompleted(false);
+      } else {
+        console.error("Error loading W4 data:", error);
+        setIsFormCompleted(false);
+        setFormStatus("draft");
+      }
     }
   };
 

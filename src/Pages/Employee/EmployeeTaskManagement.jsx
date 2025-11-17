@@ -142,6 +142,9 @@ export const EmployeeTaskManagement = () => {
       }
 
       console.log("Fetching onboarding data for employee:", employeeId);
+      console.log(
+        `🔄 Refresh type: ${showRefreshToast ? "manual" : "auto/initial"}`
+      );
       const response = await axios.get(
         `${baseURL}/onboarding/get-application/${employeeId}`,
         {
@@ -153,7 +156,12 @@ export const EmployeeTaskManagement = () => {
         "🔍 Backend response for application status:",
         response.data?.data?.application?.applicationStatus
       );
+      console.log(
+        "📊 Full application object:",
+        response.data?.data?.application
+      );
       console.log("🔍 Full backend response:", response.data);
+      console.log("🔍 Application object:", response.data?.data?.application);
 
       if (response.data && response.data.data) {
         const backendData = response.data.data;
@@ -565,48 +573,74 @@ export const EmployeeTaskManagement = () => {
                   .split("T")[0]
               : new Date().toISOString().split("T")[0],
             status: (() => {
-              const employeeUploadedForm =
-                backendData.forms?.jobDescriptionPCA?.employeeUploadedForm ||
-                backendData.forms?.jobDescriptionCNA?.employeeUploadedForm ||
-                backendData.forms?.jobDescriptionLPN?.employeeUploadedForm ||
-                backendData.forms?.jobDescriptionRN?.employeeUploadedForm;
-              return employeeUploadedForm ? "Completed" : "Pending";
+              const jobDescStatus =
+                backendData.forms?.jobDescriptionPCA?.status ||
+                backendData.forms?.jobDescriptionCNA?.status ||
+                backendData.forms?.jobDescriptionLPN?.status ||
+                backendData.forms?.jobDescriptionRN?.status;
+
+              // If status is "completed" or "submitted", form is completed
+              if (
+                jobDescStatus === "completed" ||
+                jobDescStatus === "submitted"
+              ) {
+                return "Completed";
+              }
+              return "Pending";
             })(),
             submissionStatus: (() => {
-              const employeeUploadedForm =
-                backendData.forms?.jobDescriptionPCA?.employeeUploadedForm ||
-                backendData.forms?.jobDescriptionCNA?.employeeUploadedForm ||
-                backendData.forms?.jobDescriptionLPN?.employeeUploadedForm ||
-                backendData.forms?.jobDescriptionRN?.employeeUploadedForm;
-              return employeeUploadedForm ? "Submitted" : "Not Started";
+              const jobDescStatus =
+                backendData.forms?.jobDescriptionPCA?.status ||
+                backendData.forms?.jobDescriptionCNA?.status ||
+                backendData.forms?.jobDescriptionLPN?.status ||
+                backendData.forms?.jobDescriptionRN?.status;
+
+              if (
+                jobDescStatus === "completed" ||
+                jobDescStatus === "submitted"
+              ) {
+                return "Submitted";
+              }
+              return "Not Started";
             })(),
             formsCompleted: (() => {
-              const employeeUploadedForm =
-                backendData.forms?.jobDescriptionPCA?.employeeUploadedForm ||
-                backendData.forms?.jobDescriptionCNA?.employeeUploadedForm ||
-                backendData.forms?.jobDescriptionLPN?.employeeUploadedForm ||
-                backendData.forms?.jobDescriptionRN?.employeeUploadedForm;
-              return employeeUploadedForm ? 1 : 0;
+              const jobDescStatus =
+                backendData.forms?.jobDescriptionPCA?.status ||
+                backendData.forms?.jobDescriptionCNA?.status ||
+                backendData.forms?.jobDescriptionLPN?.status ||
+                backendData.forms?.jobDescriptionRN?.status;
+
+              if (
+                jobDescStatus === "completed" ||
+                jobDescStatus === "submitted"
+              ) {
+                return 1;
+              }
+              return 0;
             })(),
             totalForms: 1,
-            hrReviewStatus: null,
+            hrReviewStatus: getHrReviewStatus(
+              {
+                status:
+                  backendData.forms?.jobDescriptionPCA?.status ||
+                  backendData.forms?.jobDescriptionCNA?.status ||
+                  backendData.forms?.jobDescriptionLPN?.status ||
+                  backendData.forms?.jobDescriptionRN?.status,
+              },
+              backendData.application?.applicationStatus
+            ),
             formData: {
-              employeeUploadedForm:
-                backendData.forms?.jobDescriptionPCA?.employeeUploadedForm ||
-                backendData.forms?.jobDescriptionCNA?.employeeUploadedForm ||
-                backendData.forms?.jobDescriptionLPN?.employeeUploadedForm ||
-                backendData.forms?.jobDescriptionRN?.employeeUploadedForm,
+              status:
+                backendData.forms?.jobDescriptionPCA?.status ||
+                backendData.forms?.jobDescriptionCNA?.status ||
+                backendData.forms?.jobDescriptionLPN?.status ||
+                backendData.forms?.jobDescriptionRN?.status,
               // Include hrFeedback from the job description form for notes display
               hrFeedback:
                 backendData.forms?.jobDescriptionPCA?.hrFeedback ||
                 backendData.forms?.jobDescriptionCNA?.hrFeedback ||
                 backendData.forms?.jobDescriptionLPN?.hrFeedback ||
                 backendData.forms?.jobDescriptionRN?.hrFeedback,
-              status:
-                backendData.forms?.jobDescriptionPCA?.status ||
-                backendData.forms?.jobDescriptionCNA?.status ||
-                backendData.forms?.jobDescriptionLPN?.status ||
-                backendData.forms?.jobDescriptionRN?.status,
             },
             applicationId: backendData.application?._id,
             isEditable: true,
@@ -633,7 +667,10 @@ export const EmployeeTaskManagement = () => {
               ? 1
               : 0,
             totalForms: 1,
-            hrReviewStatus: null,
+            hrReviewStatus: getHrReviewStatus(
+              backendData.forms?.backgroundCheck,
+              backendData.application?.applicationStatus
+            ),
             formData: backendData.forms?.backgroundCheck || {},
             applicationId: backendData.application?._id,
             isEditable: isFormEditable(
@@ -989,6 +1026,14 @@ export const EmployeeTaskManagement = () => {
             : []),
         ];
 
+        // Log task creation for debugging
+        console.log("📋 Created tasks with hrReviewStatus:");
+        transformedTasks.forEach((task) => {
+          console.log(
+            `  - ${task.name}: hrReviewStatus="${task.hrReviewStatus}"`
+          );
+        });
+
         setTasks(transformedTasks);
 
         // Set application status and editable status
@@ -1098,30 +1143,41 @@ export const EmployeeTaskManagement = () => {
   };
 
   const getHrReviewStatus = (formData, applicationStatus) => {
-    if (!formData) return null;
+    // IMPORTANT: Check application status FIRST - this is the source of truth for HR review status
+    // Application status is set when HR moves the task through the Kanban board
 
-    // If form is not submitted yet, no HR review status
-    if (!formData.status || formData.status === "draft") return null;
-
-    // Use individual form status if available, otherwise fall back to application status
-    const statusToCheck = formData.status || applicationStatus;
-
-    // Map status to HR review status
-    switch (statusToCheck) {
-      case "draft":
-        return null; // Not submitted yet
-      case "submitted":
-      case "completed":
-        return "Pending Review"; // Submitted but not yet reviewed
-      case "under_review":
-        return "Under Review"; // HR is actively reviewing
-      case "approved":
-        return "Approved"; // HR approved the application
-      case "rejected":
-        return "Needs Revision"; // HR rejected the application
-      default:
-        return null;
+    if (applicationStatus === "under_review") {
+      return "Under Review"; // HR is reviewing (In Progress stage)
     }
+
+    if (applicationStatus === "in_review_final") {
+      return "Final Review"; // HR is doing final review before decision (In Review stage)
+    }
+
+    if (applicationStatus === "rejected") {
+      return "Rejected"; // Application was rejected by HR
+    }
+
+    if (applicationStatus === "approved") {
+      return "Approved"; // Application was approved by HR
+    }
+
+    // If no application status or form not submitted yet
+    if (!formData || !formData.status || formData.status === "draft") {
+      return null; // Not submitted yet
+    }
+
+    // If form is submitted but application status is still draft/submitted, it's pending review
+    if (formData.status === "submitted" || formData.status === "completed") {
+      return "Pending Review"; // Submitted but not yet reviewed by HR
+    }
+
+    // Handle individual form statuses (these may be set by form-specific operations)
+    if (formData.status === "under_review") {
+      return "Under Review";
+    }
+
+    return null;
   };
 
   // Helper function to get CPR certificate status (checks if cprFirstAidCertificate file exists)
@@ -1505,72 +1561,89 @@ export const EmployeeTaskManagement = () => {
     await fetchOnboardingData(true);
   };
 
-  // Auto refresh every 60 seconds if status is submitted or under_review
-  // COMMENTED OUT: Only fetch on page load/refresh or manual click
-  // useEffect(() => {
-  //   let interval;
+  // Auto refresh every 30 seconds if status is submitted, under_review, or in_review_final
+  // This ensures employees see HR review status changes in real-time
+  useEffect(() => {
+    let interval;
 
-  //   if (
-  //     applicationStatus === "submitted" ||
-  //     applicationStatus === "under_review"
-  //   ) {
-  //     interval = setInterval(async () => {
-  //       if (!loading) {
-  //         console.log("Auto-refreshing due to pending HR review...");
-  //         await fetchOnboardingData(false); // Silent refresh
-  //       }
-  //     }, 60000); // 60 seconds (reduced from 30)
-  //   }
+    if (
+      applicationStatus === "submitted" ||
+      applicationStatus === "under_review" ||
+      applicationStatus === "in_review_final"
+    ) {
+      console.log(
+        `✅ Auto-refresh ENABLED for applicationStatus: ${applicationStatus}`
+      );
+      interval = setInterval(async () => {
+        if (!loading) {
+          console.log("🔄 Auto-refreshing due to pending HR review...");
+          console.log(`📊 Current applicationStatus: ${applicationStatus}`);
+          await fetchOnboardingData(false); // Silent refresh
+        } else {
+          console.log("⏸️ Auto-refresh skipped - still loading");
+        }
+      }, 30000); // 30 seconds
+    } else {
+      console.log(
+        `❌ Auto-refresh DISABLED - applicationStatus is: ${applicationStatus}`
+      );
+    }
 
-  //   return () => {
-  //     if (interval) {
-  //       clearInterval(interval);
-  //     }
-  //   };
-  // }, [applicationStatus, loading]);
+    return () => {
+      if (interval) {
+        clearInterval(interval);
+      }
+    };
+  }, [applicationStatus, loading]);
 
-  // Auto refresh when user returns to page (e.g., after submitting a form)
-  // COMMENTED OUT: Only fetch on page load/refresh or manual click
-  // useEffect(() => {
-  //   let focusTimeout;
-  //   let lastFetchTime = 0;
-  //   const MIN_FETCH_INTERVAL = 5000; // Minimum 5 seconds between fetches
+  // Auto refresh when user returns to page or focuses the window
+  // This ensures employees see HR review status changes when switching back to the tab
+  useEffect(() => {
+    let focusTimeout;
+    let lastFetchTime = 0;
+    const MIN_FETCH_INTERVAL = 5000; // Minimum 5 seconds between fetches
 
-  //   const handleFocus = () => {
-  //     const now = Date.now();
-  //     if (loading || now - lastFetchTime < MIN_FETCH_INTERVAL) {
-  //       console.log("Page focused - skipped refresh (too soon or already loading)");
-  //       return;
-  //     }
-  //
-  //     // Debounce with 1 second delay
-  //     clearTimeout(focusTimeout);
-  //     focusTimeout = setTimeout(() => {
-  //       console.log("Page focused - refreshing data...");
-  //       lastFetchTime = Date.now();
-  //       fetchOnboardingData(false); // Silent refresh
-  //     }, 1000);
-  //   };
+    const handleFocus = () => {
+      const now = Date.now();
+      if (loading || now - lastFetchTime < MIN_FETCH_INTERVAL) {
+        console.log(
+          "🔍 Page focused - skipped refresh (too soon or already loading)"
+        );
+        return;
+      }
 
-  //   const handleVisibilityChange = () => {
-  //     const now = Date.now();
-  //     if (!document.hidden && !loading && now - lastFetchTime >= MIN_FETCH_INTERVAL) {
-  //       console.log("Page became visible - refreshing data...");
-  //       lastFetchTime = Date.now();
-  //       fetchOnboardingData(false); // Silent refresh
-  //     }
-  //   };
+      // Debounce with 1 second delay
+      clearTimeout(focusTimeout);
+      focusTimeout = setTimeout(() => {
+        console.log("🔍 Page focused - refreshing data...");
+        lastFetchTime = Date.now();
+        fetchOnboardingData(false); // Silent refresh
+      }, 1000);
+    };
 
-  //   // Listen for window focus and visibility change events
-  //   window.addEventListener("focus", handleFocus);
-  //   document.addEventListener("visibilitychange", handleVisibilityChange);
+    const handleVisibilityChange = () => {
+      const now = Date.now();
+      if (
+        !document.hidden &&
+        !loading &&
+        now - lastFetchTime >= MIN_FETCH_INTERVAL
+      ) {
+        console.log("🔍 Page became visible - refreshing data...");
+        lastFetchTime = Date.now();
+        fetchOnboardingData(false); // Silent refresh
+      }
+    };
 
-  //   return () => {
-  //     clearTimeout(focusTimeout);
-  //     window.removeEventListener("focus", handleFocus);
-  //     document.removeEventListener("visibilitychange", handleVisibilityChange);
-  //   };
-  // }, [loading]);
+    // Listen for window focus and visibility change events
+    window.addEventListener("focus", handleFocus);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      clearTimeout(focusTimeout);
+      window.removeEventListener("focus", handleFocus);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [loading]);
 
   // Calculate overall progress
   const calculateOverallProgress = () => {
@@ -1915,10 +1988,14 @@ export const EmployeeTaskManagement = () => {
     switch (reviewStatus) {
       case "Approved":
         return "bg-emerald-100 text-emerald-700";
+      case "Rejected":
+        return "bg-red-100 text-red-700";
       case "Needs Revision":
         return "bg-red-100 text-red-700";
       case "Under Review":
         return "bg-purple-100 text-purple-700";
+      case "Final Review":
+        return "bg-orange-100 text-orange-700"; // Orange for final review stage
       case "Pending Review":
         return "bg-blue-100 text-blue-700";
       case "Rejected": // Legacy status

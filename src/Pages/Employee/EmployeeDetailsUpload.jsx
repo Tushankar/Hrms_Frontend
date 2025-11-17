@@ -88,12 +88,6 @@ const EmployeeDetailsUpload = () => {
       window.removeEventListener("formStatusUpdated", handleFormStatusUpdate);
   }, []);
 
-  useEffect(() => {
-    if (positionType && applicationId) {
-      fetchUploadedDocument(applicationId, positionType);
-    }
-  }, [positionType, applicationId]);
-
   const checkSubmission = async () => {
     try {
       const userCookie = Cookies.get("user");
@@ -110,13 +104,32 @@ const EmployeeDetailsUpload = () => {
       );
 
       if (appResponse.data?.data?.application) {
-        setApplicationId(appResponse.data.data.application._id);
+        const appId = appResponse.data.data.application._id;
+        setApplicationId(appId);
 
         // Get position type
         const savedPosition =
           appResponse.data?.data?.forms?.positionType?.positionAppliedFor;
+
+        console.log("🔍 Saved Position:", savedPosition);
+        console.log("🔍 Application ID:", appId);
+
         if (savedPosition) {
           setPositionType(savedPosition);
+          console.log("✅ Setting position type to:", savedPosition);
+
+          // Fetch documents immediately after setting position
+          try {
+            await fetchUploadedDocument(appId, savedPosition);
+          } catch (docError) {
+            console.error(
+              "Error fetching documents in checkSubmission:",
+              docError
+            );
+          }
+        } else {
+          console.warn("⚠️ No saved position found");
+          setUploadedDocuments([]);
         }
 
         // Calculate progress
@@ -142,14 +155,6 @@ const EmployeeDetailsUpload = () => {
         );
         setOverallProgress(percentage);
         setCompletedFormsCount(completedForms);
-
-        // Fetch uploaded document if position type is available
-        if (savedPosition) {
-          await fetchUploadedDocument(
-            appResponse.data.data.application._id,
-            savedPosition
-          );
-        }
       }
     } catch (error) {
       console.error("Error checking submission:", error);
@@ -160,33 +165,44 @@ const EmployeeDetailsUpload = () => {
 
   const fetchUploadedDocument = async (appId, posType) => {
     try {
+      console.log("📂 Fetching documents for:", { appId, posType });
       const response = await axios.get(
         `${baseURL}/onboarding/get-uploaded-documents/${appId}/${posType}`,
         { withCredentials: true }
       );
 
-      if (
-        response.data?.data?.documents &&
-        response.data.data.documents.length > 0
-      ) {
-        // Convert filePath to full URL if needed
-        const documents = response.data.data.documents.map((doc) => ({
-          ...doc,
-          fullUrl: doc.filePath.startsWith("http")
-            ? doc.filePath
-            : `${baseURL}/${doc.filePath}`,
-        }));
-        setUploadedDocuments(documents);
+      console.log("📦 Full documents response:", response.data);
+
+      const documents = response.data?.data?.documents || [];
+      console.log("📋 Documents array:", documents);
+      console.log("📊 Document count:", documents.length);
+
+      if (documents && documents.length > 0) {
+        // Convert filePath to full URL if needed and add _id for consistent key usage
+        const processedDocuments = documents.map((doc, index) => {
+          console.log(`Processing document ${index}:`, doc);
+          return {
+            ...doc,
+            _id: doc._id || `doc-${index}-${Date.now()}`, // Generate ID if not present
+            fullUrl: doc.filePath.startsWith("http")
+              ? doc.filePath
+              : `${baseURL}/${doc.filePath}`,
+          };
+        });
+        console.log("✅ Processed documents:", processedDocuments);
+        setUploadedDocuments(processedDocuments);
       } else {
+        console.log("❌ No documents found or empty array");
         setUploadedDocuments([]);
       }
     } catch (error) {
-      console.error("Error fetching uploaded documents:", error);
+      console.error("❌ Error fetching uploaded documents:", error);
+      console.error("Error details:", error.response?.data || error.message);
       setUploadedDocuments([]);
     }
   };
 
-  const removeUploadedDocument = async (documentId) => {
+  const removeUploadedDocument = async (documentId, filePath) => {
     if (!applicationId || !positionType) {
       toast.error("Missing required information");
       return;
@@ -205,7 +221,7 @@ const EmployeeDetailsUpload = () => {
         {
           applicationId,
           positionType,
-          documentId,
+          documentId: documentId || filePath, // Use filePath as fallback
         },
         { withCredentials: true }
       );
@@ -213,7 +229,9 @@ const EmployeeDetailsUpload = () => {
       if (response.data?.success) {
         // Remove document from local state
         setUploadedDocuments(
-          uploadedDocuments.filter((doc) => doc._id !== documentId)
+          uploadedDocuments.filter(
+            (doc) => doc._id !== documentId && doc.filePath !== filePath
+          )
         );
         toast.success("Document removed successfully");
         window.dispatchEvent(new Event("formStatusUpdated"));
@@ -533,7 +551,9 @@ const EmployeeDetailsUpload = () => {
                                 View
                               </a>
                               <button
-                                onClick={() => removeUploadedDocument(doc._id)}
+                                onClick={() =>
+                                  removeUploadedDocument(doc._id, doc.filePath)
+                                }
                                 className="px-3 py-1 text-xs bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors whitespace-nowrap"
                               >
                                 Remove

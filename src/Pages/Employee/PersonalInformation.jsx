@@ -622,7 +622,11 @@ const PersonalInformation = () => {
           ? formData.governmentIdCountry
           : true) &&
         formData.isUSCitizen &&
-        formData.isAuthorizedToWork &&
+        (formData.isUSCitizen === "YES" || formData.isAuthorizedToWork) &&
+        (formData.isUSCitizen === "YES" ||
+          formData.isAuthorizedToWork === "NO" ||
+          (formData.isAuthorizedToWork === "YES" &&
+            formData.authorizedToWorkExplanation)) &&
         formData.hasWorkedHereBefore &&
         (formData.hasWorkedHereBefore !== "YES" || formData.previousWorkDate) &&
         formData.hasBeenConvictedOfFelony &&
@@ -652,6 +656,23 @@ const PersonalInformation = () => {
 
       // Remove status from formData if it exists to avoid conflicts
       const { status: formDataStatus, ...cleanFormData } = formData;
+
+      // Clean up conditional fields based on form logic
+      // If US citizen, clear the authorized to work fields
+      if (cleanFormData.isUSCitizen === "YES") {
+        cleanFormData.isAuthorizedToWork = "";
+        cleanFormData.authorizedToWorkExplanation = "";
+      }
+
+      // If never worked here before, clear the previous work date
+      if (cleanFormData.hasWorkedHereBefore === "NO") {
+        cleanFormData.previousWorkDate = "";
+      }
+
+      // If no felony, clear the felony explanation
+      if (cleanFormData.hasBeenConvictedOfFelony === "NO") {
+        cleanFormData.felonyExplanation = "";
+      }
 
       const response = await axios.post(
         `${baseURL}/onboarding/save-personal-information`,
@@ -776,7 +797,7 @@ const PersonalInformation = () => {
         ? formData.governmentIdCountry
         : true) &&
       formData.isUSCitizen &&
-      formData.isAuthorizedToWork &&
+      (formData.isUSCitizen === "YES" || formData.isAuthorizedToWork) &&
       (formData.isUSCitizen === "YES" ||
         formData.isAuthorizedToWork === "NO" ||
         (formData.isAuthorizedToWork === "YES" &&

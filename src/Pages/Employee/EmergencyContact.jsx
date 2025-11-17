@@ -44,6 +44,7 @@ const EmergencyContact = () => {
   const [template, setTemplate] = useState(null);
   const [submission, setSubmission] = useState(null);
   const [applicationId, setApplicationId] = useState(null);
+  const [applicationStatus, setApplicationStatus] = useState("draft");
   const [overallProgress, setOverallProgress] = useState(0);
 
   // Consolidate loading and uploading states for simpler logic
@@ -112,6 +113,9 @@ const EmergencyContact = () => {
       const applicationData = appResponse.data?.data;
       if (applicationData?.application) {
         setApplicationId(applicationData.application._id);
+        setApplicationStatus(
+          applicationData.application.applicationStatus || "draft"
+        );
 
         // Set existing submission data for this form
         const emergencyContactForm = applicationData.forms?.emergencyContact;

@@ -328,14 +328,18 @@ export const Taskmanagement = () => {
       // Also update application status if we have an applicationId
       if (item.applicationId) {
         try {
+          console.log(
+            `📋 Updating application status for applicationId: ${item.applicationId}`
+          );
           const appStatusMapping = {
             "To Do": "submitted",
-            "In Progress": "submitted",
-            "In Review": "submitted",
+            "In Progress": "under_review", // HR is reviewing the application
+            "In Review": "in_review_final", // HR is doing final review before decision
             Complete: "approved",
           };
 
           const appStatus = appStatusMapping[newStatus] || "submitted";
+          console.log(`📊 Mapped status: ${newStatus} → ${appStatus}`);
 
           const appResponse = await apiClient.put(
             `/onboarding/update-status/${item.applicationId}`,
@@ -345,11 +349,15 @@ export const Taskmanagement = () => {
             }
           );
 
-          console.log("✅ Application status also updated");
+          console.log("✅ Application status updated successfully:", appStatus);
+          console.log("✅ Response:", appResponse.data);
         } catch (appError) {
           console.error("⚠️ Error updating application status:", appError);
+          console.error("⚠️ Error details:", appError.response?.data);
           // Don't show error for application update failure as task update succeeded
         }
+      } else {
+        console.warn("⚠️ No applicationId found in task item:", item);
       }
 
       setDraggedItem(null);
@@ -547,7 +555,9 @@ export const Taskmanagement = () => {
   // Handle view application details (similar to HrDashboard)
   const handleViewApplication = async (task) => {
     setSelectedApplication(task);
-    const formsData = await fetchEmployeeForms(task.employeeEmail || task.employeeId);
+    const formsData = await fetchEmployeeForms(
+      task.employeeEmail || task.employeeId
+    );
     if (formsData) {
       setApplicationForms(formsData);
       setShowDetailModal(true);
@@ -1846,217 +1856,221 @@ export const Taskmanagement = () => {
                     </div>
                   ) : employeeFormsData ? (
                     <div className="space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {[
-                        { key: "i9Form", name: "I-9 Form", icon: "🆔" },
-                        { key: "w4Form", name: "W-4 Form", icon: "💰" },
-                        { key: "w9Form", name: "W-9 Form", icon: "📋" },
-                        {
-                          key: "emergencyContact",
-                          name: "Emergency Contact",
-                          icon: "🚨",
-                        },
-                        {
-                          key: "directDeposit",
-                          name: "Direct Deposit",
-                          icon: "🏦",
-                        },
-                        {
-                          key: "misconductStatement",
-                          name: "Misconduct Statement",
-                          icon: "⚖️",
-                        },
-                        {
-                          key: "codeOfEthics",
-                          name: "Code of Ethics",
-                          icon: "📜",
-                        },
-                        {
-                          key: "serviceDeliveryPolicy",
-                          name: "Service Delivery Policy",
-                          icon: "🔄",
-                        },
-                        {
-                          key: "nonCompeteAgreement",
-                          name: "Non-Compete Agreement",
-                          icon: "🤝",
-                        },
-                        {
-                          key: "backgroundCheck",
-                          name: "Background Check",
-                          icon: "🔍",
-                        },
-                        {
-                          key: "tbSymptomScreen",
-                          name: "TB Symptom Screen",
-                          icon: "🏥",
-                        },
-                        {
-                          key: "orientationChecklist",
-                          name: "Orientation Checklist",
-                          icon: "✅",
-                        },
-                        {
-                          key: "orientationPresentation",
-                          name: "Orientation Presentation",
-                          icon: "📊",
-                        },
-                        {
-                          key: "jobDescriptionPCA",
-                          name: "PCA Job Description",
-                          icon: "👩‍⚕️",
-                        },
-                        {
-                          key: "jobDescriptionCNA",
-                          name: "CNA Job Description",
-                          icon: "👨‍⚕️",
-                        },
-                        {
-                          key: "jobDescriptionLPN",
-                          name: "LPN Job Description",
-                          icon: "🩺",
-                        },
-                        {
-                          key: "jobDescriptionRN",
-                          name: "RN Job Description",
-                          icon: "👩‍⚕️",
-                        },
-                      ].map((form) => (
-                        <div
-                          key={form.key}
-                          className={`p-4 rounded-lg border-2 transition-all cursor-pointer ${
-                            employeeFormsData[form.key]
-                              ? "border-green-200 bg-green-50 hover:bg-green-100 hover:border-green-300"
-                              : "border-gray-200 bg-gray-50 hover:bg-gray-100"
-                          }`}
-                          onClick={() => {
-                            if (employeeFormsData[form.key]) {
-                              handleFormClick(
-                                form.key,
-                                employeeFormsData[form.key]
-                              );
-                            } else {
-                              console.log(`No data available for ${form.key}`);
-                              toast(`${form.name} has not been submitted yet`);
-                            }
-                          }}
-                        >
-                          <div className="flex items-center gap-3 mb-3">
-                            <span className="text-2xl">{form.icon}</span>
-                            <div>
-                              <h3 className="font-medium text-gray-900">
-                                {form.name}
-                              </h3>
-                              <p className="text-sm text-gray-600">
-                                {employeeFormsData[form.key]
-                                  ? "Submitted"
-                                  : "Not Submitted"}
-                              </p>
-                            </div>
-                          </div>
-
-                          {employeeFormsData[form.key] && (
-                            <div className="space-y-2">
-                              <div className="flex items-center gap-2">
-                                <span className="text-green-600 text-sm font-medium">
-                                  ✓ Complete
-                                </span>
-                                <span className="text-gray-500 text-sm">
-                                  {employeeFormsData[form.key].status ||
-                                    "Submitted"}
-                                </span>
-                              </div>
-
-                              {/* Show some key fields from the form */}
-                              {form.key === "i9Form" && (
-                                <div className="text-xs text-gray-600 space-y-1">
-                                  <p>
-                                    <strong>Name:</strong>{" "}
-                                    {employeeFormsData[form.key].firstName}{" "}
-                                    {employeeFormsData[form.key].lastName}
-                                  </p>
-                                  <p>
-                                    <strong>Citizenship:</strong>{" "}
-                                    {
-                                      employeeFormsData[form.key]
-                                        .citizenshipStatus
-                                    }
-                                  </p>
-                                </div>
-                              )}
-
-                              {form.key === "emergencyContact" && (
-                                <div className="text-xs text-gray-600 space-y-1">
-                                  <p>
-                                    <strong>Contact:</strong>{" "}
-                                    {employeeFormsData[form.key].contactName}
-                                  </p>
-                                  <p>
-                                    <strong>Relationship:</strong>{" "}
-                                    {employeeFormsData[form.key].relationship}
-                                  </p>
-                                  <p>
-                                    <strong>Phone:</strong>{" "}
-                                    {employeeFormsData[form.key].phoneNumber}
-                                  </p>
-                                </div>
-                              )}
-
-                              {/* Job Description Forms Preview */}
-                              {(form.key === "jobDescriptionPCA" ||
-                                form.key === "jobDescriptionCNA" ||
-                                form.key === "jobDescriptionLPN" ||
-                                form.key === "jobDescriptionRN") && (
-                                <div className="text-xs text-gray-600 space-y-1">
-                                  <p>
-                                    <strong>Type:</strong>{" "}
-                                    {employeeFormsData[form.key]
-                                      .jobDescriptionType ||
-                                      form.key.replace("jobDescription", "")}
-                                  </p>
-                                  <p>
-                                    <strong>Employee:</strong>{" "}
-                                    {employeeFormsData[form.key].employeeInfo
-                                      ?.employeeName || "Not specified"}
-                                  </p>
-                                  {employeeFormsData[form.key].acknowledgment
-                                    ?.hasReadJobDescription && (
-                                    <p>
-                                      <strong>Status:</strong> Acknowledged
-                                    </p>
-                                  )}
-                                </div>
-                              )}
-
-                              {employeeFormsData[form.key].createdAt && (
-                                <p className="text-xs text-gray-500">
-                                  Submitted:{" "}
-                                  {new Date(
-                                    employeeFormsData[form.key].createdAt
-                                  ).toLocaleDateString()}
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {[
+                          { key: "i9Form", name: "I-9 Form", icon: "🆔" },
+                          { key: "w4Form", name: "W-4 Form", icon: "💰" },
+                          { key: "w9Form", name: "W-9 Form", icon: "📋" },
+                          {
+                            key: "emergencyContact",
+                            name: "Emergency Contact",
+                            icon: "🚨",
+                          },
+                          {
+                            key: "directDeposit",
+                            name: "Direct Deposit",
+                            icon: "🏦",
+                          },
+                          {
+                            key: "misconductStatement",
+                            name: "Misconduct Statement",
+                            icon: "⚖️",
+                          },
+                          {
+                            key: "codeOfEthics",
+                            name: "Code of Ethics",
+                            icon: "📜",
+                          },
+                          {
+                            key: "serviceDeliveryPolicy",
+                            name: "Service Delivery Policy",
+                            icon: "🔄",
+                          },
+                          {
+                            key: "nonCompeteAgreement",
+                            name: "Non-Compete Agreement",
+                            icon: "🤝",
+                          },
+                          {
+                            key: "backgroundCheck",
+                            name: "Background Check",
+                            icon: "🔍",
+                          },
+                          {
+                            key: "tbSymptomScreen",
+                            name: "TB Symptom Screen",
+                            icon: "🏥",
+                          },
+                          {
+                            key: "orientationChecklist",
+                            name: "Orientation Checklist",
+                            icon: "✅",
+                          },
+                          {
+                            key: "orientationPresentation",
+                            name: "Orientation Presentation",
+                            icon: "📊",
+                          },
+                          {
+                            key: "jobDescriptionPCA",
+                            name: "PCA Job Description",
+                            icon: "👩‍⚕️",
+                          },
+                          {
+                            key: "jobDescriptionCNA",
+                            name: "CNA Job Description",
+                            icon: "👨‍⚕️",
+                          },
+                          {
+                            key: "jobDescriptionLPN",
+                            name: "LPN Job Description",
+                            icon: "🩺",
+                          },
+                          {
+                            key: "jobDescriptionRN",
+                            name: "RN Job Description",
+                            icon: "👩‍⚕️",
+                          },
+                        ].map((form) => (
+                          <div
+                            key={form.key}
+                            className={`p-4 rounded-lg border-2 transition-all cursor-pointer ${
+                              employeeFormsData[form.key]
+                                ? "border-green-200 bg-green-50 hover:bg-green-100 hover:border-green-300"
+                                : "border-gray-200 bg-gray-50 hover:bg-gray-100"
+                            }`}
+                            onClick={() => {
+                              if (employeeFormsData[form.key]) {
+                                handleFormClick(
+                                  form.key,
+                                  employeeFormsData[form.key]
+                                );
+                              } else {
+                                console.log(
+                                  `No data available for ${form.key}`
+                                );
+                                toast(
+                                  `${form.name} has not been submitted yet`
+                                );
+                              }
+                            }}
+                          >
+                            <div className="flex items-center gap-3 mb-3">
+                              <span className="text-2xl">{form.icon}</span>
+                              <div>
+                                <h3 className="font-medium text-gray-900">
+                                  {form.name}
+                                </h3>
+                                <p className="text-sm text-gray-600">
+                                  {employeeFormsData[form.key]
+                                    ? "Submitted"
+                                    : "Not Submitted"}
                                 </p>
-                              )}
-
-                              <div className="mt-3 pt-3 border-t border-green-200">
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleFormClick(
-                                      form.key,
-                                      employeeFormsData[form.key]
-                                    );
-                                  }}
-                                  className="w-full text-center bg-blue-50 hover:bg-blue-100 text-blue-600 hover:text-blue-800 text-sm font-medium py-2 px-3 rounded-md transition-all duration-200 flex items-center justify-center gap-2"
-                                >
-                                  <FileText size={14} />
-                                  View Form Details
-                                </button>
                               </div>
                             </div>
-                          )}
-                        </div>
-                      ))}
-                    </div>
+
+                            {employeeFormsData[form.key] && (
+                              <div className="space-y-2">
+                                <div className="flex items-center gap-2">
+                                  <span className="text-green-600 text-sm font-medium">
+                                    ✓ Complete
+                                  </span>
+                                  <span className="text-gray-500 text-sm">
+                                    {employeeFormsData[form.key].status ||
+                                      "Submitted"}
+                                  </span>
+                                </div>
+
+                                {/* Show some key fields from the form */}
+                                {form.key === "i9Form" && (
+                                  <div className="text-xs text-gray-600 space-y-1">
+                                    <p>
+                                      <strong>Name:</strong>{" "}
+                                      {employeeFormsData[form.key].firstName}{" "}
+                                      {employeeFormsData[form.key].lastName}
+                                    </p>
+                                    <p>
+                                      <strong>Citizenship:</strong>{" "}
+                                      {
+                                        employeeFormsData[form.key]
+                                          .citizenshipStatus
+                                      }
+                                    </p>
+                                  </div>
+                                )}
+
+                                {form.key === "emergencyContact" && (
+                                  <div className="text-xs text-gray-600 space-y-1">
+                                    <p>
+                                      <strong>Contact:</strong>{" "}
+                                      {employeeFormsData[form.key].contactName}
+                                    </p>
+                                    <p>
+                                      <strong>Relationship:</strong>{" "}
+                                      {employeeFormsData[form.key].relationship}
+                                    </p>
+                                    <p>
+                                      <strong>Phone:</strong>{" "}
+                                      {employeeFormsData[form.key].phoneNumber}
+                                    </p>
+                                  </div>
+                                )}
+
+                                {/* Job Description Forms Preview */}
+                                {(form.key === "jobDescriptionPCA" ||
+                                  form.key === "jobDescriptionCNA" ||
+                                  form.key === "jobDescriptionLPN" ||
+                                  form.key === "jobDescriptionRN") && (
+                                  <div className="text-xs text-gray-600 space-y-1">
+                                    <p>
+                                      <strong>Type:</strong>{" "}
+                                      {employeeFormsData[form.key]
+                                        .jobDescriptionType ||
+                                        form.key.replace("jobDescription", "")}
+                                    </p>
+                                    <p>
+                                      <strong>Employee:</strong>{" "}
+                                      {employeeFormsData[form.key].employeeInfo
+                                        ?.employeeName || "Not specified"}
+                                    </p>
+                                    {employeeFormsData[form.key].acknowledgment
+                                      ?.hasReadJobDescription && (
+                                      <p>
+                                        <strong>Status:</strong> Acknowledged
+                                      </p>
+                                    )}
+                                  </div>
+                                )}
+
+                                {employeeFormsData[form.key].createdAt && (
+                                  <p className="text-xs text-gray-500">
+                                    Submitted:{" "}
+                                    {new Date(
+                                      employeeFormsData[form.key].createdAt
+                                    ).toLocaleDateString()}
+                                  </p>
+                                )}
+
+                                <div className="mt-3 pt-3 border-t border-green-200">
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleFormClick(
+                                        form.key,
+                                        employeeFormsData[form.key]
+                                      );
+                                    }}
+                                    className="w-full text-center bg-blue-50 hover:bg-blue-100 text-blue-600 hover:text-blue-800 text-sm font-medium py-2 px-3 rounded-md transition-all duration-200 flex items-center justify-center gap-2"
+                                  >
+                                    <FileText size={14} />
+                                    View Form Details
+                                  </button>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   ) : (
                     <div className="flex items-center justify-center py-12">
@@ -2161,62 +2175,242 @@ export const Taskmanagement = () => {
               <div className="p-6">
                 {applicationForms ? (
                   <div className="space-y-6">
-                    {/* Forms List */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {[
-                        { key: "personalInformation", name: "Personal Information", icon: "👤" },
-                        { key: "professionalExperience", name: "Professional Experience", icon: "💼" },
-                        { key: "workExperience", name: "Work Experience", icon: "🏢" },
-                        { key: "education", name: "Education", icon: "🎓" },
-                        { key: "references", name: "References", icon: "📞" },
-                        { key: "legalDisclosures", name: "Legal Disclosures", icon: "⚖️" },
-                        { key: "jobDescriptionPCA", name: "Job Description", icon: "📋" },
-                        { key: "codeOfEthics", name: "Code of Ethics", icon: "📜" },
-                        { key: "serviceDeliveryPolicies", name: "Service Delivery", icon: "🔄" },
-                        { key: "nonCompeteAgreement", name: "Non-Compete", icon: "🤝" },
-                        { key: "emergencyContact", name: "Emergency Contact", icon: "🚨" },
-                        { key: "employeeDetailsUpload", name: "Certificates", icon: "📄" },
-                        { key: "drivingLicense", name: "Driver's License", icon: "🚗" },
-                        { key: "backgroundCheck", name: "Background Check", icon: "🔍" },
-                        { key: "tbSymptomScreen", name: "TB Screen", icon: "🏥" },
-                        { key: "i9Form", name: "I-9 Form", icon: "🆔" },
-                        { key: "w4Form", name: "W-4 Form", icon: "💰" },
-                        { key: "w9Form", name: "W-9 Form", icon: "📊" },
-                        { key: "directDeposit", name: "Direct Deposit", icon: "🏦" },
-                        { key: "orientationPresentation", name: "Orientation", icon: "📊" },
-                        { key: "orientationChecklist", name: "Checklist", icon: "✅" },
-                      ].map((form) => (
-                        <div
-                          key={form.key}
-                          className={`p-4 rounded-lg border-2 transition-all cursor-pointer ${
-                            applicationForms[form.key]
-                              ? "border-green-200 bg-green-50 hover:bg-green-100"
-                              : "border-gray-200 bg-gray-50"
-                          }`}
-                          onClick={() => {
-                            if (applicationForms[form.key]) {
-                              handleViewFormDetail(form.key, form.name);
-                            }
-                          }}
-                        >
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                              <span className="text-2xl">{form.icon}</span>
-                              <div>
-                                <h5 className="font-medium">{form.name}</h5>
-                                <p className="text-sm text-gray-600">
-                                  {applicationForms[form.key] ? "Submitted" : "Not Submitted"}
-                                </p>
+                    {/* Forms List - Organized by sections */}
+                    <div className="space-y-6">
+                      {/* PART 1 - Personal Information */}
+                      <div className="p-4 bg-blue-50 rounded-lg border-2 border-blue-300">
+                        <h3 className="font-bold text-blue-900 mb-4">
+                          PART 1: Personal Information
+                        </h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {[
+                            {
+                              key: "personalInformation",
+                              name: "1. Personal Information",
+                              icon: "👤",
+                            },
+                            {
+                              key: "education",
+                              name: "2. Education",
+                              icon: "🎓",
+                            },
+                            {
+                              key: "references",
+                              name: "3. References",
+                              icon: "📞",
+                            },
+                            {
+                              key: "workExperience",
+                              name: "4. Previous Employment",
+                              icon: "🏢",
+                            },
+                            {
+                              key: "professionalExperience",
+                              name: "5. Military Service",
+                              icon: "💼",
+                            },
+                            {
+                              key: "legalDisclosures",
+                              name: "6. Disclaimer and Signature",
+                              icon: "⚖️",
+                            },
+                          ].map((form) => (
+                            <div
+                              key={form.key}
+                              className={`p-4 rounded-lg border-2 transition-all cursor-pointer ${
+                                applicationForms[form.key]
+                                  ? "border-green-200 bg-green-50 hover:bg-green-100"
+                                  : "border-gray-200 bg-gray-50"
+                              }`}
+                              onClick={() => {
+                                if (applicationForms[form.key]) {
+                                  handleViewFormDetail(form.key, form.name);
+                                }
+                              }}
+                            >
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                  <span className="text-2xl">{form.icon}</span>
+                                  <div>
+                                    <h5 className="font-medium">{form.name}</h5>
+                                    <p className="text-sm text-gray-600">
+                                      {applicationForms[form.key]
+                                        ? "Submitted"
+                                        : "Not Submitted"}
+                                    </p>
+                                  </div>
+                                </div>
+                                {applicationForms[form.key] && (
+                                  <button className="text-blue-600 hover:text-blue-800 text-sm font-medium px-4 py-2 rounded-lg hover:bg-blue-50">
+                                    View
+                                  </button>
+                                )}
                               </div>
                             </div>
-                            {applicationForms[form.key] && (
-                              <button className="text-blue-600 hover:text-blue-800 text-sm font-medium px-4 py-2 rounded-lg hover:bg-blue-50">
-                                View
-                              </button>
-                            )}
-                          </div>
+                          ))}
                         </div>
-                      ))}
+                      </div>
+
+                      {/* PART 2 - Documents to Submit */}
+                      <div className="p-4 bg-green-50 rounded-lg border-2 border-green-300">
+                        <h3 className="font-bold text-green-900 mb-4">
+                          PART 2: Documents to Submit (15 Forms)
+                        </h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {[
+                            {
+                              key: "jobDescriptionPCA",
+                              name: "1. Job Description",
+                              icon: "📋",
+                            },
+                            {
+                              key: "codeOfEthics",
+                              name: "2. Code of Ethics",
+                              icon: "📜",
+                            },
+                            {
+                              key: "serviceDeliveryPolicies",
+                              name: "3. Service Delivery",
+                              icon: "🔄",
+                            },
+                            {
+                              key: "nonCompeteAgreement",
+                              name: "4. Non-Compete",
+                              icon: "🤝",
+                            },
+                            {
+                              key: "emergencyContact",
+                              name: "5. Emergency Contact",
+                              icon: "🚨",
+                            },
+                            {
+                              key: "employeeDetailsUpload",
+                              name: "6. Professional Certificate(s)",
+                              icon: "📄",
+                            },
+                            {
+                              key: "backgroundCheck",
+                              name: "7. CPR/First Aid Certificate",
+                              icon: "🏥",
+                            },
+                            {
+                              key: "drivingLicense",
+                              name: "8. Government ID",
+                              icon: "🚗",
+                            },
+                            {
+                              key: "backgroundCheck",
+                              name: "9. Background Check",
+                              icon: "🔍",
+                            },
+                            {
+                              key: "misconductStatement",
+                              name: "10. Staff Misconduct",
+                              icon: "⚠️",
+                            },
+                            {
+                              key: "tbSymptomScreen",
+                              name: "11. TB or X-Ray Form",
+                              icon: "🏥",
+                            },
+                            { key: "i9Form", name: "12. I-9 Form", icon: "🆔" },
+                            { key: "w4Form", name: "13. W-4 Form", icon: "💰" },
+                            { key: "w9Form", name: "14. W-9 Form", icon: "📊" },
+                            {
+                              key: "directDeposit",
+                              name: "15. Direct Deposit",
+                              icon: "🏦",
+                            },
+                          ].map((form) => (
+                            <div
+                              key={form.key}
+                              className={`p-4 rounded-lg border-2 transition-all cursor-pointer ${
+                                applicationForms[form.key]
+                                  ? "border-green-200 bg-green-50 hover:bg-green-100"
+                                  : "border-gray-200 bg-gray-50"
+                              }`}
+                              onClick={() => {
+                                if (applicationForms[form.key]) {
+                                  handleViewFormDetail(form.key, form.name);
+                                }
+                              }}
+                            >
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                  <span className="text-2xl">{form.icon}</span>
+                                  <div>
+                                    <h5 className="font-medium">{form.name}</h5>
+                                    <p className="text-sm text-gray-600">
+                                      {applicationForms[form.key]
+                                        ? "Submitted"
+                                        : "Not Submitted"}
+                                    </p>
+                                  </div>
+                                </div>
+                                {applicationForms[form.key] && (
+                                  <button className="text-blue-600 hover:text-blue-800 text-sm font-medium px-4 py-2 rounded-lg hover:bg-blue-50">
+                                    View
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* PART 3 - Orientation Documentation */}
+                      <div className="p-4 bg-purple-50 rounded-lg border-2 border-purple-300">
+                        <h3 className="font-bold text-purple-900 mb-4">
+                          PART 3: Orientation Documentation
+                        </h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {[
+                            {
+                              key: "orientationPresentation",
+                              name: "1. Orientation Presentation",
+                              icon: "📊",
+                            },
+                            {
+                              key: "orientationChecklist",
+                              name: "2. Orientation Checklist",
+                              icon: "✅",
+                            },
+                          ].map((form) => (
+                            <div
+                              key={form.key}
+                              className={`p-4 rounded-lg border-2 transition-all cursor-pointer ${
+                                applicationForms[form.key]
+                                  ? "border-green-200 bg-green-50 hover:bg-green-100"
+                                  : "border-gray-200 bg-gray-50"
+                              }`}
+                              onClick={() => {
+                                if (applicationForms[form.key]) {
+                                  handleViewFormDetail(form.key, form.name);
+                                }
+                              }}
+                            >
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                  <span className="text-2xl">{form.icon}</span>
+                                  <div>
+                                    <h5 className="font-medium">{form.name}</h5>
+                                    <p className="text-sm text-gray-600">
+                                      {applicationForms[form.key]
+                                        ? "Submitted"
+                                        : "Not Submitted"}
+                                    </p>
+                                  </div>
+                                </div>
+                                {applicationForms[form.key] && (
+                                  <button className="text-blue-600 hover:text-blue-800 text-sm font-medium px-4 py-2 rounded-lg hover:bg-blue-50">
+                                    View
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
                     </div>
 
                     {/* HR Notes Section */}
@@ -2234,7 +2428,11 @@ export const Taskmanagement = () => {
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500"
                         />
                         <button
-                          onClick={() => handleSendHrNoteToEmployee(selectedApplication.applicationId)}
+                          onClick={() =>
+                            handleSendHrNoteToEmployee(
+                              selectedApplication.applicationId
+                            )
+                          }
                           disabled={!hrNoteToEmployee.trim() || isSendingNote}
                           className="px-6 py-2 bg-yellow-600 hover:bg-yellow-700 disabled:bg-gray-400 text-white rounded-lg flex items-center gap-2"
                         >

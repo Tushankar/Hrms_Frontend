@@ -146,8 +146,14 @@ const EditSymptomScreenForm = () => {
         setUploadedDocuments([]);
       }
     } catch (error) {
-      console.error("Error fetching uploaded documents:", error);
-      setUploadedDocuments([]);
+      // 404 is expected when no documents exist yet - don't log as error
+      if (error.response?.status === 404) {
+        console.log("📄 No TB Symptom Screen documents found yet");
+        setUploadedDocuments([]);
+      } else {
+        console.error("❌ Error fetching uploaded documents:", error);
+        setUploadedDocuments([]);
+      }
     }
   };
 
