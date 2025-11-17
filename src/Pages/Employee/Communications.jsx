@@ -6,7 +6,20 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import { DocumentIcon, ImageIcon, PinIcon } from "../../assets/Svgs/AllSvgs";
-import { ArrowDownUp, Ellipsis, Phone, Search, Send, ArrowLeft, MoreVertical, Paperclip, Smile, Mic, Check, CheckCheck } from "lucide-react";
+import {
+  ArrowDownUp,
+  Ellipsis,
+  Phone,
+  Search,
+  Send,
+  ArrowLeft,
+  MoreVertical,
+  Paperclip,
+  Smile,
+  Mic,
+  Check,
+  CheckCheck,
+} from "lucide-react";
 import DPImg1 from "../../assets/DPImg1.png";
 export const Communications = () => {
   const baseURL = import.meta.env.VITE__BASEURL;
@@ -22,22 +35,27 @@ export const Communications = () => {
   const peerConnectionRef = useRef(null);
   const localStreamRef = useRef(null);
   const iceCandidateQueue = useRef([]); // Queue for ICE candidates
-   const [showMobileChat, setShowMobileChat] = useState(false);
+  const [showMobileChat, setShowMobileChat] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
   const handleEmployeeClick = (employeeId) => {
-   setReceiverId(employeeId);
-        setCallStatus("");
-        setShowMobileChat(true);
+    setReceiverId(employeeId);
+    setCallStatus("");
+    setShowMobileChat(true);
   };
 
-  const selectedEmployee = employeeList.find((employee) => employee._id === receiverId);
+  const selectedEmployee = employeeList.find(
+    (employee) => employee._id === receiverId
+  );
 
   const getAllEmployeeList = async (token) => {
     try {
-      const getEmployee = await axios.get(`${baseURL}/employee/get-all-employee`, {
-        headers: { Authorization: token },
-      });
+      const getEmployee = await axios.get(
+        `${baseURL}/employee/get-all-employee`,
+        {
+          headers: { Authorization: token },
+        }
+      );
       if (getEmployee.status === 200) {
         const filteredEmployees = getEmployee.data.employessList.filter(
           (employee) => employee.userRole === "hr"
@@ -111,7 +129,10 @@ export const Communications = () => {
     setCallStatus("calling");
     peerConnectionRef.current = createPeerConnection();
     try {
-      localStreamRef.current = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+      localStreamRef.current = await navigator.mediaDevices.getUserMedia({
+        audio: true,
+        video: false,
+      });
       localStreamRef.current.getTracks().forEach((track) => {
         peerConnectionRef.current.addTrack(track, localStreamRef.current);
       });
@@ -160,14 +181,24 @@ export const Communications = () => {
       console.log("Waiting for userId to initialize WebSocket");
       return;
     }
-    console.log("Employee userId:", userId, "receiverId:", receiverId || "Not set");
+    console.log(
+      "Employee userId:",
+      userId,
+      "receiverId:",
+      receiverId || "Not set"
+    );
 
     if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
       console.log("Reusing existing WebSocket connection");
       return;
     }
 
-    const ws = new WebSocket("wss://hrms-backend-t38z.onrender.com");
+    // Construct WebSocket URL from base URL
+    const wsProtocol = baseURL.startsWith("https") ? "wss://" : "ws://";
+    const wsURL = baseURL.replace(/^https?:\/\//, wsProtocol);
+    console.log("Connecting to WebSocket:", wsURL);
+
+    const ws = new WebSocket(wsURL);
 
     ws.onopen = () => {
       if (!userId) {
@@ -191,14 +222,21 @@ export const Communications = () => {
         setCallStatus("calling");
         peerConnectionRef.current = createPeerConnection();
         try {
-          localStreamRef.current = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+          localStreamRef.current = await navigator.mediaDevices.getUserMedia({
+            audio: true,
+            video: false,
+          });
           localStreamRef.current.getTracks().forEach((track) => {
             peerConnectionRef.current.addTrack(track, localStreamRef.current);
           });
-          await peerConnectionRef.current.setRemoteDescription(new RTCSessionDescription(data.offer));
+          await peerConnectionRef.current.setRemoteDescription(
+            new RTCSessionDescription(data.offer)
+          );
           // Process queued ICE candidates
           for (const candidate of iceCandidateQueue.current) {
-            await peerConnectionRef.current.addIceCandidate(new RTCIceCandidate(candidate));
+            await peerConnectionRef.current.addIceCandidate(
+              new RTCIceCandidate(candidate)
+            );
           }
           iceCandidateQueue.current = []; // Clear queue
           const answer = await peerConnectionRef.current.createAnswer();
@@ -218,16 +256,25 @@ export const Communications = () => {
           alert("Failed to answer call.");
         }
       } else if (data.event === "call-answer") {
-        await peerConnectionRef.current.setRemoteDescription(new RTCSessionDescription(data.answer));
+        await peerConnectionRef.current.setRemoteDescription(
+          new RTCSessionDescription(data.answer)
+        );
         // Process queued ICE candidates
         for (const candidate of iceCandidateQueue.current) {
-          await peerConnectionRef.current.addIceCandidate(new RTCIceCandidate(candidate));
+          await peerConnectionRef.current.addIceCandidate(
+            new RTCIceCandidate(candidate)
+          );
         }
         iceCandidateQueue.current = []; // Clear queue
         setCallStatus("in-call");
       } else if (data.event === "ice-candidate") {
-        if (peerConnectionRef.current && peerConnectionRef.current.remoteDescription) {
-          await peerConnectionRef.current.addIceCandidate(new RTCIceCandidate(data.candidate));
+        if (
+          peerConnectionRef.current &&
+          peerConnectionRef.current.remoteDescription
+        ) {
+          await peerConnectionRef.current.addIceCandidate(
+            new RTCIceCandidate(data.candidate)
+          );
         } else {
           console.log("Queuing ICE candidate:", data.candidate);
           iceCandidateQueue.current.push(data.candidate);
@@ -245,7 +292,9 @@ export const Communications = () => {
       ) {
         setMessages((prev) => {
           if (!prev.some((msg) => msg._id === data._id)) {
-            return [...prev, data].sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+            return [...prev, data].sort(
+              (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
+            );
           }
           return prev;
         });
@@ -259,8 +308,13 @@ export const Communications = () => {
     ws.onclose = () => {
       console.log("WebSocket Disconnected, attempting to reconnect...");
       setTimeout(() => {
-        if (!socketRef.current || socketRef.current.readyState === WebSocket.CLOSED) {
-          socketRef.current = new WebSocket("wss://hrms-backend-t38z.onrender.com");
+        if (
+          !socketRef.current ||
+          socketRef.current.readyState === WebSocket.CLOSED
+        ) {
+          const wsProtocol = baseURL.startsWith("https") ? "wss://" : "ws://";
+          const wsURL = baseURL.replace(/^https?:\/\//, wsProtocol);
+          socketRef.current = new WebSocket(wsURL);
           socketRef.current.onopen = ws.onopen;
           socketRef.current.onmessage = ws.onmessage;
           socketRef.current.onerror = ws.onerror;
@@ -288,45 +342,79 @@ export const Communications = () => {
   }, [userId, receiverId]);
 
   const sendMessage = () => {
-    if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN && newMessage.trim()) {
-      const messageData = {
-        event: "message",
-        senderId: userId,
-        receiverId,
-        content: newMessage,
-      };
+    if (!socketRef.current) {
+      console.error("Socket not initialized");
+      alert("Connection not ready. Please wait...");
+      return;
+    }
+
+    if (socketRef.current.readyState !== WebSocket.OPEN) {
+      console.error(
+        "WebSocket is not open. Current state:",
+        socketRef.current.readyState
+      );
+      alert("Connection lost. Attempting to reconnect...");
+      return;
+    }
+
+    if (!newMessage.trim()) {
+      return;
+    }
+
+    if (!userId || !receiverId) {
+      console.error("User ID or Receiver ID missing", { userId, receiverId });
+      alert("Error: User information missing");
+      return;
+    }
+
+    const messageData = {
+      event: "message",
+      senderId: userId,
+      receiverId,
+      content: newMessage,
+    };
+
+    try {
       socketRef.current.send(JSON.stringify(messageData));
       setNewMessage("");
-    } else {
-      console.error("WebSocket is not open or user ID is missing");
+      console.log("Message sent successfully");
+    } catch (error) {
+      console.error("Error sending message:", error);
+      alert("Failed to send message. Please try again.");
     }
   };
-  const filteredEmployees = employeeList.filter(employee => 
-        employee.userName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        employee.email.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredEmployees = employeeList.filter(
+    (employee) =>
+      employee.userName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      employee.email.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+  const getLastMessage = (employeeId) => {
+    const employeeMessages = messages.filter(
+      (msg) =>
+        (msg.sender === userId && msg.receiver === employeeId) ||
+        (msg.sender === employeeId && msg.receiver === userId)
     );
-    const getLastMessage = (employeeId) => {
-        const employeeMessages = messages.filter(
-            msg => (msg.sender === userId && msg.receiver === employeeId) ||
-                   (msg.sender === employeeId && msg.receiver === userId)
-        );
-        return employeeMessages[employeeMessages.length - 1];
-    };
-    const formatTime = (date) => {
-        const d = new Date(date);
-        return d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
-    };
-    const isLastMessageInGroup = (index, messages) => {
-        if (index === messages.length - 1) return true;
-        const currentMessage = messages[index];
-        const nextMessage = messages[index + 1];
-        return currentMessage.sender !== nextMessage.sender;
-    };
+    return employeeMessages[employeeMessages.length - 1];
+  };
+  const formatTime = (date) => {
+    const d = new Date(date);
+    return d.toLocaleTimeString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    });
+  };
+  const isLastMessageInGroup = (index, messages) => {
+    if (index === messages.length - 1) return true;
+    const currentMessage = messages[index];
+    const nextMessage = messages[index + 1];
+    return currentMessage.sender !== nextMessage.sender;
+  };
   const messagesEndRef = useRef(null);
   // Scroll to bottom of messages when new messages are added
   useEffect(() => {
     if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [messages]);
   return (
@@ -335,7 +423,11 @@ export const Communications = () => {
         <Navbar />
         <div className="flex h-[calc(100vh-80px)]">
           {/* Sidebar - Employee List */}
-          <div className={`${showMobileChat ? 'hidden md:flex' : 'flex'} w-full md:w-[30%] lg:w-[25%] flex-col bg-white border-r border-gray-200`}>
+          <div
+            className={`${
+              showMobileChat ? "hidden md:flex" : "flex"
+            } w-full md:w-[30%] lg:w-[25%] flex-col bg-white border-r border-gray-200`}
+          >
             {/* Header */}
             <div className="bg-[#1F3A93] text-white p-4">
               <div className="flex justify-between items-center mb-4">
@@ -348,7 +440,10 @@ export const Communications = () => {
               </div>
               {/* Search Bar */}
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+                <Search
+                  className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                  size={18}
+                />
                 <input
                   type="text"
                   placeholder="Search or start new chat"
@@ -368,13 +463,18 @@ export const Communications = () => {
                 return (
                   <div
                     key={employee._id}
-                    className={`flex items-center gap-3 px-4 py-3 hover:bg-blue-50 cursor-pointer transition-colors ${isSelected ? 'bg-blue-50' : ''
-                      }`}
+                    className={`flex items-center gap-3 px-4 py-3 hover:bg-blue-50 cursor-pointer transition-colors ${
+                      isSelected ? "bg-blue-50" : ""
+                    }`}
                     onClick={() => handleEmployeeClick(employee._id)}
                   >
                     <div className="relative flex-shrink-0">
                       <img
-                        src={employee.profileImage ? `${baseURL}/${employee.profileImage}` : DPImg1}
+                        src={
+                          employee.profileImage
+                            ? `${baseURL}/${employee.profileImage}`
+                            : DPImg1
+                        }
                         alt={employee.userName}
                         className="w-12 h-12 rounded-full object-cover"
                       />
@@ -382,7 +482,9 @@ export const Communications = () => {
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex justify-between items-start">
-                        <h3 className="font-medium text-gray-900 truncate">{employee.userName}</h3>
+                        <h3 className="font-medium text-gray-900 truncate">
+                          {employee.userName}
+                        </h3>
                         {lastMsg && (
                           <span className="text-xs text-gray-500 flex-shrink-0 ml-2">
                             {formatTime(lastMsg.createdAt)}
@@ -400,7 +502,11 @@ export const Communications = () => {
           </div>
 
           {/* Chat Area */}
-          <div className={`${showMobileChat ? 'flex' : 'hidden md:flex'} flex-1 flex-col bg-[#F0F4F8]`}>
+          <div
+            className={`${
+              showMobileChat ? "flex" : "hidden md:flex"
+            } flex-1 flex-col bg-[#F0F4F8]`}
+          >
             {selectedEmployee ? (
               <>
                 {/* Chat Header */}
@@ -413,13 +519,21 @@ export const Communications = () => {
                       <ArrowLeft size={24} />
                     </button>
                     <img
-                      src={selectedEmployee.profileImage ? `${baseURL}/${selectedEmployee.profileImage}` : DPImg1}
+                      src={
+                        selectedEmployee.profileImage
+                          ? `${baseURL}/${selectedEmployee.profileImage}`
+                          : DPImg1
+                      }
                       alt={selectedEmployee.userName}
                       className="w-10 h-10 rounded-full object-cover"
                     />
                     <div>
-                      <h3 className="font-medium">{selectedEmployee.userName}</h3>
-                      <p className="text-xs opacity-80">{selectedEmployee.jobDesignation}</p>
+                      <h3 className="font-medium">
+                        {selectedEmployee.userName}
+                      </h3>
+                      <p className="text-xs opacity-80">
+                        {selectedEmployee.jobDesignation}
+                      </p>
                     </div>
                   </div>
                   <div className="flex items-center gap-4">
@@ -451,19 +565,28 @@ export const Communications = () => {
                   <div className="max-w-3xl mx-auto">
                     {messages.map((message, index) => {
                       const isSender = message.sender === userId;
-                      const showProfileImage = !isSender && isLastMessageInGroup(index, messages);
-                      const nextMessageSameSender = index < messages.length - 1 && messages[index + 1].sender === message.sender;
+                      const showProfileImage =
+                        !isSender && isLastMessageInGroup(index, messages);
+                      const nextMessageSameSender =
+                        index < messages.length - 1 &&
+                        messages[index + 1].sender === message.sender;
 
                       return (
                         <div
                           key={index}
-                          className={`flex mb-2 ${isSender ? 'justify-end' : 'justify-start'}`}
+                          className={`flex mb-2 ${
+                            isSender ? "justify-end" : "justify-start"
+                          }`}
                         >
                           {!isSender && (
                             <div className="w-8 mr-2 flex items-end">
                               {showProfileImage && (
                                 <img
-                                  src={selectedEmployee.profileImage ? `${baseURL}/${selectedEmployee.profileImage}` : DPImg1}
+                                  src={
+                                    selectedEmployee.profileImage
+                                      ? `${baseURL}/${selectedEmployee.profileImage}`
+                                      : DPImg1
+                                  }
                                   alt={selectedEmployee.userName}
                                   className="w-8 h-8 rounded-full object-cover"
                                 />
@@ -471,18 +594,28 @@ export const Communications = () => {
                             </div>
                           )}
                           <div
-                            className={`relative max-w-[70%] px-3 py-2 rounded-lg shadow-sm ${isSender
-                                ? 'bg-[#1F3A93] text-white rounded-br-none'
-                                : 'bg-white rounded-bl-none'
-                              } ${!nextMessageSameSender ? 'mb-3' : ''}`}
+                            className={`relative max-w-[70%] px-3 py-2 rounded-lg shadow-sm ${
+                              isSender
+                                ? "bg-[#1F3A93] text-white rounded-br-none"
+                                : "bg-white rounded-bl-none"
+                            } ${!nextMessageSameSender ? "mb-3" : ""}`}
                           >
-                            <p className="text-sm break-words">{message.content}</p>
+                            <p className="text-sm break-words">
+                              {message.content}
+                            </p>
                             <div className="flex items-center gap-1 mt-1 justify-end">
-                              <span className={`text-xs ${isSender ? 'text-blue-100' : 'text-gray-500'}`}>
+                              <span
+                                className={`text-xs ${
+                                  isSender ? "text-blue-100" : "text-gray-500"
+                                }`}
+                              >
                                 {formatTime(message.createdAt)}
                               </span>
                               {isSender && (
-                                <CheckCheck size={16} className="text-blue-200" />
+                                <CheckCheck
+                                  size={16}
+                                  className="text-blue-200"
+                                />
                               )}
                             </div>
                           </div>
@@ -514,10 +647,11 @@ export const Communications = () => {
                   <button
                     onClick={sendMessage}
                     disabled={!newMessage.trim()}
-                    className={`${newMessage.trim()
-                        ? 'bg-[#1F3A93] hover:bg-[#16307E]'
-                        : 'bg-gray-400'
-                      } text-white p-2 rounded-full transition-colors`}
+                    className={`${
+                      newMessage.trim()
+                        ? "bg-[#1F3A93] hover:bg-[#16307E]"
+                        : "bg-gray-400"
+                    } text-white p-2 rounded-full transition-colors`}
                   >
                     {newMessage.trim() ? <Send size={20} /> : <Mic size={20} />}
                   </button>
@@ -529,8 +663,12 @@ export const Communications = () => {
                   <div className="w-32 h-32 bg-blue-100 rounded-full mx-auto mb-4 flex items-center justify-center">
                     <Phone size={48} className="text-[#1F3A93]" />
                   </div>
-                  <h3 className="text-xl font-medium text-gray-700 mb-2">Select a chat to start messaging</h3>
-                  <p className="text-gray-500">Choose from your contacts to begin a conversation</p>
+                  <h3 className="text-xl font-medium text-gray-700 mb-2">
+                    Select a chat to start messaging
+                  </h3>
+                  <p className="text-gray-500">
+                    Choose from your contacts to begin a conversation
+                  </p>
                 </div>
               </div>
             )}
