@@ -74,7 +74,7 @@ const TBSymptomScreenHR = () => {
       );
 
       const response = await axios.get(
-        `${baseURL}/onboarding/get-uploaded-documents/${applicationId}/tbSymptomScreen`,
+        `${baseURL}/onboarding/tb-symptom-screen/get-tb-uploaded-documents/${applicationId}/tbSymptomScreen`,
         {
           withCredentials: true,
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },

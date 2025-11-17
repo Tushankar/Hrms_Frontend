@@ -107,7 +107,7 @@ const EmployeeDetailsUploadHR = () => {
       );
 
       const response = await axios.get(
-        `${baseURL}/onboarding/get-uploaded-documents/${applicationId}/${posType}`,
+        `${baseURL}/onboarding/professional-certificates/get-uploaded-documents/${applicationId}/${posType}`,
         {
           withCredentials: true,
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
@@ -116,13 +116,23 @@ const EmployeeDetailsUploadHR = () => {
 
       console.log("Documents Response:", response.data);
 
-      if (response.data?.success && response.data?.data?.documents) {
-        console.log("📄 Documents fetched:", response.data.data.documents);
-        setUploadedDocuments(response.data.data.documents || []);
+      // Handle response - backend returns data.documents
+      const documents = response.data?.data?.documents || [];
+
+      if (documents && documents.length > 0) {
+        console.log("📄 Documents fetched:", documents);
+        // Add fullUrl to documents if not present
+        const processedDocuments = documents.map((doc) => ({
+          ...doc,
+          fullUrl:
+            doc.fullUrl ||
+            (doc.filePath?.startsWith("http")
+              ? doc.filePath
+              : `${baseURL}/${doc.filePath}`),
+        }));
+        setUploadedDocuments(processedDocuments);
       } else {
-        console.warn(
-          "No documents found in response or response not successful"
-        );
+        console.log("No documents found in response");
         setUploadedDocuments([]);
       }
     } catch (error) {
@@ -231,11 +241,13 @@ const EmployeeDetailsUploadHR = () => {
                             </div>
                             <div className="flex gap-2 flex-shrink-0">
                               <a
-                                href={`${baseURL}/${
-                                  doc.filePath.startsWith("/")
-                                    ? doc.filePath.substring(1)
-                                    : doc.filePath
-                                }`}
+                                href={
+                                  doc.fullUrl ||
+                                  `${baseURL}/${doc.filePath?.replace(
+                                    /\\/g,
+                                    "/"
+                                  )}`
+                                }
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="inline-flex items-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium whitespace-nowrap"
@@ -244,11 +256,13 @@ const EmployeeDetailsUploadHR = () => {
                                 View
                               </a>
                               <a
-                                href={`${baseURL}/${
-                                  doc.filePath.startsWith("/")
-                                    ? doc.filePath.substring(1)
-                                    : doc.filePath
-                                }`}
+                                href={
+                                  doc.fullUrl ||
+                                  `${baseURL}/${doc.filePath?.replace(
+                                    /\\/g,
+                                    "/"
+                                  )}`
+                                }
                                 download
                                 className="inline-flex items-center gap-2 px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium whitespace-nowrap"
                               >

@@ -139,6 +139,10 @@ const EmployeeDetailsUpload = () => {
           backendData.application?.completedForms || [];
         const completedSet = new Set(completedFormsArray);
 
+        // Check if professional certificate is completed for this position
+        const hasProfessionalCertificate = backendData.professionalCertificateCompleted || 
+          (savedPosition && backendData.application?.professionalCertificates?.[savedPosition]?.length > 0);
+        
         const completedForms = FORM_KEYS.filter((key) => {
           const form = forms[key];
           return (
@@ -149,12 +153,16 @@ const EmployeeDetailsUpload = () => {
             completedSet.has(key)
           );
         }).length;
+        
+        // Add professional certificate to completed count if documents are uploaded
+        const totalCompletedForms = completedForms + (hasProfessionalCertificate ? 1 : 0);
+        const totalForms = FORM_KEYS.length + 1; // +1 for professional certificate
 
         const percentage = Math.round(
-          (completedForms / FORM_KEYS.length) * 100
+          (totalCompletedForms / totalForms) * 100
         );
         setOverallProgress(percentage);
-        setCompletedFormsCount(completedForms);
+        setCompletedFormsCount(totalCompletedForms);
       }
     } catch (error) {
       console.error("Error checking submission:", error);
@@ -167,7 +175,7 @@ const EmployeeDetailsUpload = () => {
     try {
       console.log("📂 Fetching documents for:", { appId, posType });
       const response = await axios.get(
-        `${baseURL}/onboarding/get-uploaded-documents/${appId}/${posType}`,
+        `${baseURL}/onboarding/professional-certificates/get-uploaded-documents/${appId}/${posType}`,
         { withCredentials: true }
       );
 
@@ -181,12 +189,14 @@ const EmployeeDetailsUpload = () => {
         // Convert filePath to full URL if needed and add _id for consistent key usage
         const processedDocuments = documents.map((doc, index) => {
           console.log(`Processing document ${index}:`, doc);
+          const fullUrl = doc.filePath.startsWith("http")
+            ? doc.filePath
+            : `${baseURL}/${doc.filePath.replace(/\\/g, "/")}`;
+          console.log(`Generated URL for document ${index}:`, fullUrl);
           return {
             ...doc,
             _id: doc._id || `doc-${index}-${Date.now()}`, // Generate ID if not present
-            fullUrl: doc.filePath.startsWith("http")
-              ? doc.filePath
-              : `${baseURL}/${doc.filePath}`,
+            fullUrl,
           };
         });
         console.log("✅ Processed documents:", processedDocuments);
@@ -217,7 +227,7 @@ const EmployeeDetailsUpload = () => {
 
     try {
       const response = await axios.post(
-        `${baseURL}/onboarding/remove-document`,
+        `${baseURL}/onboarding/professional-certificates/remove-document`,
         {
           applicationId,
           positionType,
@@ -309,7 +319,7 @@ const EmployeeDetailsUpload = () => {
       formData.append("positionType", positionType);
 
       const response = await axios.post(
-        `${baseURL}/onboarding/employee-upload-multiple-documents`,
+        `${baseURL}/onboarding/professional-certificates/employee-upload-multiple-documents`,
         formData,
         {
           withCredentials: true,
@@ -324,6 +334,17 @@ const EmployeeDetailsUpload = () => {
         setUploadedFiles([]);
         if (fileInputRef.current) {
           fileInputRef.current.value = "";
+        }
+
+        // Debug: Check what's actually saved in the database
+        try {
+          const debugResponse = await axios.get(
+            `${baseURL}/onboarding/professional-certificates/debug-application/${applicationId}`,
+            { withCredentials: true }
+          );
+          console.log("🔍 Debug - Database content:", debugResponse.data);
+        } catch (debugError) {
+          console.error("🔍 Debug endpoint error:", debugError);
         }
 
         // Fetch the uploaded documents to update the display
@@ -342,16 +363,23 @@ const EmployeeDetailsUpload = () => {
 
   const handleSaveAndNext = async () => {
     try {
+      // Check if documents are uploaded before proceeding
+      if (!uploadedDocuments || uploadedDocuments.length === 0) {
+        toast.error("Please upload at least one document before proceeding");
+        return;
+      }
+
       const status = "completed";
 
       console.log("Saving employee details upload with status:", status);
       console.log("Application ID:", applicationId);
       console.log("Employee ID:", employeeId);
       console.log("Position Type:", positionType);
+      console.log("Uploaded Documents Count:", uploadedDocuments.length);
 
-      // Save the job description form status
+      // Save the professional certificate form status
       const saveResponse = await axios.post(
-        `${baseURL}/onboarding/job-description/save-status`,
+        `${baseURL}/onboarding/professional-certificates/save-status`,
         {
           applicationId,
           employeeId,
@@ -372,10 +400,15 @@ const EmployeeDetailsUpload = () => {
       // Small delay to ensure data is processed before navigation
       await new Promise((resolve) => setTimeout(resolve, 300));
 
+      toast.success("Professional certificate saved successfully!");
       navigate("/employee/cpr-first-aid-certificate");
     } catch (error) {
       console.error("Error in Save & Next:", error);
-      toast.error("Failed to save and proceed");
+      if (error.response?.data?.message) {
+        toast.error(error.response.data.message);
+      } else {
+        toast.error("Failed to save and proceed");
+      }
     }
   };
 
@@ -396,19 +429,19 @@ const EmployeeDetailsUpload = () => {
           {!loading && (
             <div
               className={`mb-6 p-4 rounded-lg border ${
-                uploadedDocuments.length > 0
+                uploadedDocuments && uploadedDocuments.length > 0
                   ? "bg-green-50 border-green-200"
                   : "bg-red-50 border-red-200"
               }`}
             >
               <div className="flex items-center justify-center gap-3">
-                {uploadedDocuments.length > 0 ? (
+                {uploadedDocuments && uploadedDocuments.length > 0 ? (
                   <CheckCircle className="w-6 h-6 text-green-600 flex-shrink-0" />
                 ) : (
                   <FileText className="w-6 h-6 text-red-600 flex-shrink-0" />
                 )}
                 <div>
-                  {uploadedDocuments.length > 0 ? (
+                  {uploadedDocuments && uploadedDocuments.length > 0 ? (
                     <p className="text-base font-semibold text-green-800">
                       ✅ {uploadedDocuments.length} document(s) uploaded
                       successfully
@@ -735,7 +768,7 @@ const EmployeeDetailsUpload = () => {
                   </div>
                   <div className="text-right">
                     <div className="text-lg font-bold text-blue-600">
-                      {completedFormsCount}/20
+                      {completedFormsCount}/{FORM_KEYS.length + 1}
                     </div>
                     <div className="text-xs text-gray-600">Forms Completed</div>
                   </div>

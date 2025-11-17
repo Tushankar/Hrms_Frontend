@@ -127,7 +127,7 @@ const EditSymptomScreenForm = () => {
   const fetchUploadedDocument = async (appId) => {
     try {
       const response = await axios.get(
-        `${baseURL}/onboarding/get-uploaded-documents/${appId}/tbSymptomScreen`,
+        `${baseURL}/onboarding/tb-symptom-screen/get-tb-uploaded-documents/${appId}/tbSymptomScreen`,
         { withCredentials: true }
       );
 
@@ -262,7 +262,7 @@ const EditSymptomScreenForm = () => {
 
     try {
       const response = await axios.post(
-        `${baseURL}/onboarding/remove-document`,
+        `${baseURL}/onboarding/tb-symptom-screen/remove-tb-document`,
         {
           applicationId,
           positionType: "tbSymptomScreen",
