@@ -41,6 +41,31 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
+// Format phone number as +1 (XXX) XXX-XXXX
+const formatPhone = (value) => {
+  if (!value) return "";
+
+  // Remove +1 prefix if it exists, then remove all non-digit characters
+  const withoutPrefix = String(value).replace(/^\+1\s*/, "");
+  const cleaned = withoutPrefix.replace(/\D/g, "");
+
+  // Limit to 10 digits
+  const limited = cleaned.slice(0, 10);
+
+  // Format as +1 (XXX) XXX-XXXX
+  if (limited.length === 0) {
+    return "";
+  } else if (limited.length <= 3) {
+    return `+1 (${limited}`;
+  } else if (limited.length <= 6) {
+    return `+1 (${limited.slice(0, 3)}) ${limited.slice(3)}`;
+  } else {
+    return `+1 (${limited.slice(0, 3)}) ${limited.slice(3, 6)}-${limited.slice(
+      6
+    )}`;
+  }
+};
+
 export const EmployeeDashboard = () => {
   const userToken = Cookies.get("session");
   const decodedToken = userToken && jwtDecode(userToken);
@@ -1173,9 +1198,14 @@ export const EmployeeDashboard = () => {
   };
 
   const handleProfileInputChange = (field, value) => {
+    // Format phone number if it's the phone field
+    let formattedValue = value;
+    if (field === "phone") {
+      formattedValue = formatPhone(value);
+    }
     setProfileData((prev) => ({
       ...prev,
-      [field]: value,
+      [field]: formattedValue,
     }));
   };
 
@@ -1183,12 +1213,15 @@ export const EmployeeDashboard = () => {
     try {
       setIsUpdatingProfile(true);
 
+      // Extract only digits from formatted phone number
+      const phoneDigitsOnly = profileData.phone.replace(/\D/g, "");
+
       const formData = new FormData();
 
       // Add text fields
       formData.append("userName", profileData.userName);
       formData.append("email", profileData.email);
-      formData.append("phone", profileData.phone);
+      formData.append("phone", phoneDigitsOnly);
       formData.append("country", profileData.country);
       formData.append("addressLine1", profileData.addressLine1);
       formData.append("state", profileData.state);
@@ -1503,7 +1536,7 @@ export const EmployeeDashboard = () => {
                         Phone
                       </p>
                       <p className="font-semibold text-gray-900 text-base mt-2">
-                        {user?.phoneNumber}
+                        {formatPhone(user?.phoneNumber)}
                       </p>
                     </div>
                   </div>
