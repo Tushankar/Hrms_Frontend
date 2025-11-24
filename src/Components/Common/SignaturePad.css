@@ -1,0 +1,57 @@
+/* Signature Canvas Styles */
+.signature-canvas {
+  border-radius: 8px;
+  cursor: crosshair;
+}
+
+.signature-canvas:hover {
+  background-color: rgba(249, 250, 251, 0.8);
+}
+
+/* Remove any text selection from signature canvas */
+.signature-canvas canvas {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  touch-action: none;
+}
+
+/* Ensure canvas is responsive */
+@media (max-width: 768px) {
+  .signature-canvas canvas {
+    max-width: 100%;
+    height: auto;
+  }
+}
+
+/* Button hover states */
+.signature-button {
+  transition: all 0.2s ease-in-out;
+}
+
+.signature-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.signature-button:active {
+  transform: translateY(0);
+}
+
+/* Signature container */
+.signature-container {
+  position: relative;
+  background: linear-gradient(to bottom, #ffffff, #f9fafb);
+}
+
+/* Signature overlay instructions */
+.signature-overlay {
+  opacity: 0.5;
+  transition: opacity 0.3s ease;
+}
+
+.signature-canvas:hover + .signature-overlay,
+.signature-canvas:focus + .signature-overlay {
+  opacity: 0.2;
+}
