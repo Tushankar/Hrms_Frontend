@@ -506,35 +506,6 @@ export const EmployeeTaskManagement = () => {
               : {}),
           },
           {
-            id: "misconduct-form",
-            name: "Staff Misconduct Statement",
-            priority: "Medium",
-            type: "Documentation",
-            creationDate: backendData.application?.createdAt
-              ? new Date(backendData.application.createdAt)
-                  .toISOString()
-                  .split("T")[0]
-              : new Date().toISOString().split("T")[0],
-            status: getFormStatus(backendData.forms?.misconductStatement),
-            submissionStatus: getSubmissionStatus(
-              backendData.forms?.misconductStatement
-            ),
-            formsCompleted: getCompletionCount(
-              backendData.forms?.misconductStatement
-            ),
-            totalForms: 1,
-            hrReviewStatus: getHrReviewStatus(
-              backendData.forms?.misconductStatement,
-              backendData.application?.applicationStatus
-            ),
-            formData: backendData.forms?.misconductStatement,
-            applicationId: backendData.application?._id,
-            isEditable: isFormEditable(
-              backendData.forms?.misconductStatement,
-              backendData.application?.applicationStatus
-            ),
-          },
-          {
             id: "emergency-contact",
             name: "Emergency Contact Form",
             priority: "Medium",
@@ -736,6 +707,35 @@ export const EmployeeTaskManagement = () => {
             applicationId: backendData.application?._id,
             isEditable: isFormEditable(
               backendData.forms?.backgroundCheck,
+              backendData.application?.applicationStatus
+            ),
+          },
+          {
+            id: "misconduct-form",
+            name: "Staff Misconduct Statement",
+            priority: "Medium",
+            type: "Documentation",
+            creationDate: backendData.application?.createdAt
+              ? new Date(backendData.application.createdAt)
+                  .toISOString()
+                  .split("T")[0]
+              : new Date().toISOString().split("T")[0],
+            status: getFormStatus(backendData.forms?.misconductStatement),
+            submissionStatus: getSubmissionStatus(
+              backendData.forms?.misconductStatement
+            ),
+            formsCompleted: getCompletionCount(
+              backendData.forms?.misconductStatement
+            ),
+            totalForms: 1,
+            hrReviewStatus: getHrReviewStatus(
+              backendData.forms?.misconductStatement,
+              backendData.application?.applicationStatus
+            ),
+            formData: backendData.forms?.misconductStatement,
+            applicationId: backendData.application?._id,
+            isEditable: isFormEditable(
+              backendData.forms?.misconductStatement,
               backendData.application?.applicationStatus
             ),
           },
@@ -1355,20 +1355,6 @@ export const EmployeeTaskManagement = () => {
         isEditable: true,
       },
       {
-        id: "misconduct-form",
-        name: "Staff Misconduct Statement",
-        priority: "Medium",
-        type: "Documentation",
-        creationDate: new Date().toISOString().split("T")[0],
-        status: "Pending",
-        submissionStatus: "Not Started",
-        formsCompleted: 0,
-        totalForms: 1,
-        hrReviewStatus: null,
-        formData: null,
-        isEditable: true,
-      },
-      {
         id: "emergency-contact",
         name: "Emergency Contact Form",
         priority: "Medium",
@@ -1400,6 +1386,20 @@ export const EmployeeTaskManagement = () => {
       {
         id: "background-check",
         name: "Background Check Form",
+        priority: "Medium",
+        type: "Documentation",
+        creationDate: new Date().toISOString().split("T")[0],
+        status: "Pending",
+        submissionStatus: "Not Started",
+        formsCompleted: 0,
+        totalForms: 1,
+        hrReviewStatus: null,
+        formData: null,
+        isEditable: true,
+      },
+      {
+        id: "misconduct-form",
+        name: "Staff Misconduct Statement",
         priority: "Medium",
         type: "Documentation",
         creationDate: new Date().toISOString().split("T")[0],
@@ -2840,8 +2840,16 @@ export const EmployeeTaskManagement = () => {
                                           .length > 0
                                     ));
 
-                                // Edit button is only enabled if form has HR notes
-                                const isEditEnabled = hasHrNotes;
+                                // Forms that don't require HR notes to be edited
+                                const alwaysEditableForms = [
+                                  "training-video",
+                                  "pca-training-questions",
+                                ];
+
+                                // Edit button is only enabled if form has HR notes or is in alwaysEditableForms
+                                const isEditEnabled =
+                                  hasHrNotes ||
+                                  alwaysEditableForms.includes(task.id);
 
                                 return (
                                   <button
