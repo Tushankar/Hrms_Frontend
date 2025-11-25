@@ -215,6 +215,660 @@ const maskSSN = (value) => {
   return "***-**-****";
 };
 
+// Hardcoded location data
+const COUNTRIES_DATA = [
+  { value: "United States", label: "United States" },
+  { value: "Canada", label: "Canada" },
+  { value: "United Kingdom", label: "United Kingdom" },
+  { value: "Australia", label: "Australia" },
+  { value: "India", label: "India" },
+  { value: "Germany", label: "Germany" },
+  { value: "France", label: "France" },
+  { value: "Mexico", label: "Mexico" },
+  { value: "Philippines", label: "Philippines" },
+  { value: "China", label: "China" },
+];
+
+const STATES_DATA = {
+  "United States": [
+    "Alabama",
+    "Alaska",
+    "Arizona",
+    "Arkansas",
+    "California",
+    "Colorado",
+    "Connecticut",
+    "Delaware",
+    "Florida",
+    "Georgia",
+    "Hawaii",
+    "Idaho",
+    "Illinois",
+    "Indiana",
+    "Iowa",
+    "Kansas",
+    "Kentucky",
+    "Louisiana",
+    "Maine",
+    "Maryland",
+    "Massachusetts",
+    "Michigan",
+    "Minnesota",
+    "Mississippi",
+    "Missouri",
+    "Montana",
+    "Nebraska",
+    "Nevada",
+    "New Hampshire",
+    "New Jersey",
+    "New Mexico",
+    "New York",
+    "North Carolina",
+    "North Dakota",
+    "Ohio",
+    "Oklahoma",
+    "Oregon",
+    "Pennsylvania",
+    "Rhode Island",
+    "South Carolina",
+    "South Dakota",
+    "Tennessee",
+    "Texas",
+    "Utah",
+    "Vermont",
+    "Virginia",
+    "Washington",
+    "West Virginia",
+    "Wisconsin",
+    "Wyoming",
+    "District of Columbia",
+  ],
+  Canada: [
+    "Alberta",
+    "British Columbia",
+    "Manitoba",
+    "New Brunswick",
+    "Newfoundland and Labrador",
+    "Nova Scotia",
+    "Ontario",
+    "Prince Edward Island",
+    "Quebec",
+    "Saskatchewan",
+    "Northwest Territories",
+    "Nunavut",
+    "Yukon",
+  ],
+  "United Kingdom": ["England", "Scotland", "Wales", "Northern Ireland"],
+  Australia: [
+    "New South Wales",
+    "Victoria",
+    "Queensland",
+    "Western Australia",
+    "South Australia",
+    "Tasmania",
+    "Australian Capital Territory",
+    "Northern Territory",
+  ],
+  India: [
+    "Andhra Pradesh",
+    "Arunachal Pradesh",
+    "Assam",
+    "Bihar",
+    "Chhattisgarh",
+    "Goa",
+    "Gujarat",
+    "Haryana",
+    "Himachal Pradesh",
+    "Jharkhand",
+    "Karnataka",
+    "Kerala",
+    "Madhya Pradesh",
+    "Maharashtra",
+    "Manipur",
+    "Meghalaya",
+    "Mizoram",
+    "Nagaland",
+    "Odisha",
+    "Punjab",
+    "Rajasthan",
+    "Sikkim",
+    "Tamil Nadu",
+    "Telangana",
+    "Tripura",
+    "Uttar Pradesh",
+    "Uttarakhand",
+    "West Bengal",
+    "Delhi",
+  ],
+  Germany: [
+    "Baden-Württemberg",
+    "Bavaria",
+    "Berlin",
+    "Brandenburg",
+    "Bremen",
+    "Hamburg",
+    "Hesse",
+    "Lower Saxony",
+    "Mecklenburg-Vorpommern",
+    "North Rhine-Westphalia",
+    "Rhineland-Palatinate",
+    "Saarland",
+    "Saxony",
+    "Saxony-Anhalt",
+    "Schleswig-Holstein",
+    "Thuringia",
+  ],
+  France: [
+    "Île-de-France",
+    "Provence-Alpes-Côte d'Azur",
+    "Auvergne-Rhône-Alpes",
+    "Occitanie",
+    "Nouvelle-Aquitaine",
+    "Hauts-de-France",
+    "Grand Est",
+    "Brittany",
+    "Normandy",
+    "Pays de la Loire",
+  ],
+  Mexico: [
+    "Aguascalientes",
+    "Baja California",
+    "Baja California Sur",
+    "Campeche",
+    "Chiapas",
+    "Chihuahua",
+    "Coahuila",
+    "Colima",
+    "Durango",
+    "Guanajuato",
+    "Guerrero",
+    "Hidalgo",
+    "Jalisco",
+    "Mexico City",
+    "Mexico State",
+    "Michoacán",
+    "Morelos",
+    "Nayarit",
+    "Nuevo León",
+    "Oaxaca",
+    "Puebla",
+    "Querétaro",
+    "Quintana Roo",
+    "San Luis Potosí",
+    "Sinaloa",
+    "Sonora",
+    "Tabasco",
+    "Tamaulipas",
+    "Tlaxcala",
+    "Veracruz",
+    "Yucatán",
+    "Zacatecas",
+  ],
+  Philippines: [
+    "Metro Manila",
+    "Cebu",
+    "Davao",
+    "Calabarzon",
+    "Central Luzon",
+    "Western Visayas",
+    "Central Visayas",
+    "Northern Mindanao",
+    "Ilocos Region",
+    "Bicol Region",
+  ],
+  China: [
+    "Beijing",
+    "Shanghai",
+    "Guangdong",
+    "Zhejiang",
+    "Jiangsu",
+    "Shandong",
+    "Henan",
+    "Sichuan",
+    "Hubei",
+    "Hunan",
+    "Fujian",
+    "Anhui",
+    "Hebei",
+    "Liaoning",
+    "Shaanxi",
+  ],
+};
+
+const CITIES_DATA = {
+  "United States": {
+    Alabama: ["Birmingham", "Montgomery", "Huntsville", "Mobile", "Tuscaloosa"],
+    Alaska: ["Anchorage", "Fairbanks", "Juneau", "Sitka", "Ketchikan"],
+    Arizona: [
+      "Phoenix",
+      "Tucson",
+      "Mesa",
+      "Chandler",
+      "Scottsdale",
+      "Glendale",
+      "Tempe",
+    ],
+    Arkansas: [
+      "Little Rock",
+      "Fort Smith",
+      "Fayetteville",
+      "Springdale",
+      "Jonesboro",
+    ],
+    California: [
+      "Los Angeles",
+      "San Francisco",
+      "San Diego",
+      "San Jose",
+      "Sacramento",
+      "Oakland",
+      "Fresno",
+      "Long Beach",
+      "Anaheim",
+      "Bakersfield",
+      "Santa Ana",
+      "Riverside",
+      "Stockton",
+      "Irvine",
+    ],
+    Colorado: [
+      "Denver",
+      "Colorado Springs",
+      "Aurora",
+      "Fort Collins",
+      "Boulder",
+      "Lakewood",
+    ],
+    Connecticut: [
+      "Bridgeport",
+      "New Haven",
+      "Hartford",
+      "Stamford",
+      "Waterbury",
+    ],
+    Delaware: ["Wilmington", "Dover", "Newark", "Middletown", "Smyrna"],
+    Florida: [
+      "Miami",
+      "Orlando",
+      "Tampa",
+      "Jacksonville",
+      "Fort Lauderdale",
+      "St. Petersburg",
+      "Hialeah",
+      "Tallahassee",
+      "Cape Coral",
+      "Fort Myers",
+    ],
+    Georgia: ["Atlanta", "Augusta", "Columbus", "Savannah", "Athens", "Macon"],
+    Hawaii: ["Honolulu", "Pearl City", "Hilo", "Kailua", "Waipahu"],
+    Idaho: ["Boise", "Meridian", "Nampa", "Idaho Falls", "Pocatello"],
+    Illinois: [
+      "Chicago",
+      "Aurora",
+      "Naperville",
+      "Rockford",
+      "Joliet",
+      "Springfield",
+    ],
+    Indiana: [
+      "Indianapolis",
+      "Fort Wayne",
+      "Evansville",
+      "South Bend",
+      "Carmel",
+    ],
+    Iowa: [
+      "Des Moines",
+      "Cedar Rapids",
+      "Davenport",
+      "Sioux City",
+      "Iowa City",
+    ],
+    Kansas: ["Wichita", "Overland Park", "Kansas City", "Olathe", "Topeka"],
+    Kentucky: [
+      "Louisville",
+      "Lexington",
+      "Bowling Green",
+      "Owensboro",
+      "Covington",
+    ],
+    Louisiana: [
+      "New Orleans",
+      "Baton Rouge",
+      "Shreveport",
+      "Lafayette",
+      "Lake Charles",
+    ],
+    Maine: ["Portland", "Lewiston", "Bangor", "South Portland", "Auburn"],
+    Maryland: [
+      "Baltimore",
+      "Columbia",
+      "Germantown",
+      "Silver Spring",
+      "Waldorf",
+      "Frederick",
+    ],
+    Massachusetts: [
+      "Boston",
+      "Worcester",
+      "Springfield",
+      "Cambridge",
+      "Lowell",
+      "Brockton",
+    ],
+    Michigan: [
+      "Detroit",
+      "Grand Rapids",
+      "Warren",
+      "Sterling Heights",
+      "Ann Arbor",
+      "Lansing",
+    ],
+    Minnesota: [
+      "Minneapolis",
+      "Saint Paul",
+      "Rochester",
+      "Duluth",
+      "Bloomington",
+    ],
+    Mississippi: ["Jackson", "Gulfport", "Southaven", "Hattiesburg", "Biloxi"],
+    Missouri: [
+      "Kansas City",
+      "Saint Louis",
+      "Springfield",
+      "Columbia",
+      "Independence",
+    ],
+    Montana: ["Billings", "Missoula", "Great Falls", "Bozeman", "Butte"],
+    Nebraska: ["Omaha", "Lincoln", "Bellevue", "Grand Island", "Kearney"],
+    Nevada: ["Las Vegas", "Henderson", "Reno", "North Las Vegas", "Sparks"],
+    "New Hampshire": ["Manchester", "Nashua", "Concord", "Derry", "Dover"],
+    "New Jersey": [
+      "Newark",
+      "Jersey City",
+      "Paterson",
+      "Elizabeth",
+      "Edison",
+      "Trenton",
+    ],
+    "New Mexico": [
+      "Albuquerque",
+      "Las Cruces",
+      "Rio Rancho",
+      "Santa Fe",
+      "Roswell",
+    ],
+    "New York": [
+      "New York City",
+      "Buffalo",
+      "Rochester",
+      "Yonkers",
+      "Syracuse",
+      "Albany",
+    ],
+    "North Carolina": [
+      "Charlotte",
+      "Raleigh",
+      "Greensboro",
+      "Durham",
+      "Winston-Salem",
+      "Fayetteville",
+    ],
+    "North Dakota": ["Fargo", "Bismarck", "Grand Forks", "Minot", "West Fargo"],
+    Ohio: ["Columbus", "Cleveland", "Cincinnati", "Toledo", "Akron", "Dayton"],
+    Oklahoma: ["Oklahoma City", "Tulsa", "Norman", "Broken Arrow", "Edmond"],
+    Oregon: [
+      "Portland",
+      "Salem",
+      "Eugene",
+      "Gresham",
+      "Hillsboro",
+      "Beaverton",
+    ],
+    Pennsylvania: [
+      "Philadelphia",
+      "Pittsburgh",
+      "Allentown",
+      "Reading",
+      "Erie",
+      "Harrisburg",
+    ],
+    "Rhode Island": [
+      "Providence",
+      "Warwick",
+      "Cranston",
+      "Pawtucket",
+      "East Providence",
+    ],
+    "South Carolina": [
+      "Charleston",
+      "Columbia",
+      "North Charleston",
+      "Mount Pleasant",
+      "Rock Hill",
+    ],
+    "South Dakota": [
+      "Sioux Falls",
+      "Rapid City",
+      "Aberdeen",
+      "Brookings",
+      "Watertown",
+    ],
+    Tennessee: [
+      "Nashville",
+      "Memphis",
+      "Knoxville",
+      "Chattanooga",
+      "Clarksville",
+    ],
+    Texas: [
+      "Houston",
+      "San Antonio",
+      "Dallas",
+      "Austin",
+      "Fort Worth",
+      "El Paso",
+      "Arlington",
+      "Corpus Christi",
+      "Plano",
+      "Laredo",
+    ],
+    Utah: [
+      "Salt Lake City",
+      "West Valley City",
+      "Provo",
+      "West Jordan",
+      "Orem",
+    ],
+    Vermont: [
+      "Burlington",
+      "South Burlington",
+      "Rutland",
+      "Essex Junction",
+      "Bennington",
+    ],
+    Virginia: [
+      "Virginia Beach",
+      "Norfolk",
+      "Chesapeake",
+      "Richmond",
+      "Newport News",
+      "Alexandria",
+    ],
+    Washington: [
+      "Seattle",
+      "Spokane",
+      "Tacoma",
+      "Vancouver",
+      "Bellevue",
+      "Kent",
+    ],
+    "West Virginia": [
+      "Charleston",
+      "Huntington",
+      "Morgantown",
+      "Parkersburg",
+      "Wheeling",
+    ],
+    Wisconsin: ["Milwaukee", "Madison", "Green Bay", "Kenosha", "Racine"],
+    Wyoming: ["Cheyenne", "Casper", "Laramie", "Gillette", "Rock Springs"],
+    "District of Columbia": ["Washington"],
+  },
+  Canada: {
+    Alberta: ["Calgary", "Edmonton", "Red Deer", "Lethbridge", "Medicine Hat"],
+    "British Columbia": [
+      "Vancouver",
+      "Victoria",
+      "Surrey",
+      "Burnaby",
+      "Richmond",
+    ],
+    Manitoba: [
+      "Winnipeg",
+      "Brandon",
+      "Steinbach",
+      "Thompson",
+      "Portage la Prairie",
+    ],
+    "New Brunswick": [
+      "Saint John",
+      "Moncton",
+      "Fredericton",
+      "Dieppe",
+      "Miramichi",
+    ],
+    "Newfoundland and Labrador": [
+      "St. John's",
+      "Mount Pearl",
+      "Corner Brook",
+      "Conception Bay South",
+    ],
+    "Nova Scotia": ["Halifax", "Dartmouth", "Sydney", "Truro", "New Glasgow"],
+    Ontario: [
+      "Toronto",
+      "Ottawa",
+      "Mississauga",
+      "Brampton",
+      "Hamilton",
+      "London",
+      "Markham",
+    ],
+    "Prince Edward Island": [
+      "Charlottetown",
+      "Summerside",
+      "Stratford",
+      "Cornwall",
+    ],
+    Quebec: ["Montreal", "Quebec City", "Laval", "Gatineau", "Longueuil"],
+    Saskatchewan: [
+      "Saskatoon",
+      "Regina",
+      "Prince Albert",
+      "Moose Jaw",
+      "Swift Current",
+    ],
+    "Northwest Territories": [
+      "Yellowknife",
+      "Hay River",
+      "Inuvik",
+      "Fort Smith",
+    ],
+    Nunavut: ["Iqaluit", "Rankin Inlet", "Arviat", "Baker Lake"],
+    Yukon: ["Whitehorse", "Dawson City", "Watson Lake", "Haines Junction"],
+  },
+  "United Kingdom": {
+    England: [
+      "London",
+      "Birmingham",
+      "Manchester",
+      "Liverpool",
+      "Leeds",
+      "Sheffield",
+      "Bristol",
+      "Newcastle",
+    ],
+    Scotland: ["Edinburgh", "Glasgow", "Aberdeen", "Dundee", "Inverness"],
+    Wales: ["Cardiff", "Swansea", "Newport", "Wrexham", "Barry"],
+    "Northern Ireland": ["Belfast", "Derry", "Lisburn", "Newry", "Bangor"],
+  },
+  Australia: {
+    "New South Wales": [
+      "Sydney",
+      "Newcastle",
+      "Wollongong",
+      "Central Coast",
+      "Maitland",
+    ],
+    Victoria: ["Melbourne", "Geelong", "Ballarat", "Bendigo", "Shepparton"],
+    Queensland: [
+      "Brisbane",
+      "Gold Coast",
+      "Sunshine Coast",
+      "Townsville",
+      "Cairns",
+    ],
+    "Western Australia": [
+      "Perth",
+      "Mandurah",
+      "Bunbury",
+      "Geraldton",
+      "Kalgoorlie",
+    ],
+    "South Australia": [
+      "Adelaide",
+      "Mount Gambier",
+      "Whyalla",
+      "Murray Bridge",
+      "Port Augusta",
+    ],
+    Tasmania: ["Hobart", "Launceston", "Devonport", "Burnie", "Kingston"],
+    "Australian Capital Territory": ["Canberra", "Queanbeyan"],
+    "Northern Territory": [
+      "Darwin",
+      "Alice Springs",
+      "Palmerston",
+      "Katherine",
+    ],
+  },
+  India: {
+    "Andhra Pradesh": [
+      "Visakhapatnam",
+      "Vijayawada",
+      "Guntur",
+      "Nellore",
+      "Kurnool",
+    ],
+    Karnataka: ["Bangalore", "Mysore", "Hubli", "Mangalore", "Belgaum"],
+    Kerala: ["Thiruvananthapuram", "Kochi", "Kozhikode", "Thrissur", "Kollam"],
+    Maharashtra: ["Mumbai", "Pune", "Nagpur", "Thane", "Nashik", "Aurangabad"],
+    "Tamil Nadu": [
+      "Chennai",
+      "Coimbatore",
+      "Madurai",
+      "Tiruchirappalli",
+      "Salem",
+    ],
+    Telangana: ["Hyderabad", "Warangal", "Nizamabad", "Karimnagar", "Khammam"],
+    Delhi: ["New Delhi", "Delhi"],
+    Gujarat: ["Ahmedabad", "Surat", "Vadodara", "Rajkot", "Bhavnagar"],
+    Rajasthan: ["Jaipur", "Jodhpur", "Udaipur", "Kota", "Ajmer"],
+    "Uttar Pradesh": [
+      "Lucknow",
+      "Kanpur",
+      "Agra",
+      "Varanasi",
+      "Allahabad",
+      "Noida",
+      "Ghaziabad",
+    ],
+    "West Bengal": ["Kolkata", "Howrah", "Durgapur", "Asansol", "Siliguri"],
+    Punjab: ["Ludhiana", "Amritsar", "Jalandhar", "Patiala", "Bathinda"],
+    Haryana: ["Gurgaon", "Faridabad", "Panipat", "Ambala", "Karnal"],
+    Bihar: ["Patna", "Gaya", "Bhagalpur", "Muzaffarpur", "Darbhanga"],
+    "Madhya Pradesh": ["Bhopal", "Indore", "Jabalpur", "Gwalior", "Ujjain"],
+  },
+};
+
 const PersonalInformation = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
@@ -223,12 +877,9 @@ const PersonalInformation = () => {
   const [applicationStatus, setApplicationStatus] = useState("draft");
   const [overallProgress, setOverallProgress] = useState(0);
   const [completedFormsCount, setCompletedFormsCount] = useState(0);
-  const [countries, setCountries] = useState([]);
+  const [countries, setCountries] = useState(COUNTRIES_DATA);
   const [states, setStates] = useState([]);
   const [cities, setCities] = useState([]);
-  const [loadingCountries, setLoadingCountries] = useState(false);
-  const [loadingStates, setLoadingStates] = useState(false);
-  const [loadingCities, setLoadingCities] = useState(false);
   const [ssnFocused, setSsnFocused] = useState(false);
   const [formData, setFormData] = useState({
     // Full Name
@@ -278,118 +929,39 @@ const PersonalInformation = () => {
 
   useEffect(() => {
     initializeForm();
-    fetchCountries().then(() => {
-      // Fetch states for default country (United States)
-      fetchStates("United States");
-    });
+    // Load states for default country (United States)
+    loadStatesForCountry("United States");
   }, []);
 
-  // Fetch countries from API
-  const fetchCountries = async () => {
-    setLoadingCountries(true);
-    try {
-      const response = await axios.get(
-        "https://countriesnow.space/api/v0.1/countries"
-      );
-      if (response.data && response.data.data) {
-        const countryList = response.data.data.map((country) => ({
-          value: country.country,
-          label: country.country,
-        }));
-
-        // Sort countries with United States first, then alphabetically
-        const sortedCountries = countryList.sort((a, b) => {
-          if (a.value === "United States") return -1;
-          if (b.value === "United States") return 1;
-          return a.label.localeCompare(b.label);
-        });
-
-        setCountries(sortedCountries);
-
-        // Set United States as default if no country is selected
-        if (!formData.country) {
-          handleInputChange("country", "United States");
-        }
-      }
-    } catch (error) {
-      console.error("Error fetching countries:", error);
-      // Fallback to some common countries if API fails
-      setCountries([
-        { value: "United States", label: "United States" },
-        { value: "Canada", label: "Canada" },
-        { value: "United Kingdom", label: "United Kingdom" },
-        { value: "Australia", label: "Australia" },
-        { value: "India", label: "India" },
-      ]);
-    } finally {
-      setLoadingCountries(false);
+  // Load states from hardcoded data
+  const loadStatesForCountry = (countryName) => {
+    if (countryName && STATES_DATA[countryName]) {
+      const statesList = STATES_DATA[countryName].map((state) => ({
+        value: state,
+        label: state,
+      }));
+      setStates(statesList);
+    } else {
+      setStates([]);
     }
+    setCities([]);
   };
 
-  // Fetch states based on selected country
-  const fetchStates = async (countryName) => {
-    if (!countryName) {
-      setStates([]);
-      return;
-    }
-
-    setLoadingStates(true);
-    try {
-      const response = await axios.post(
-        "https://countriesnow.space/api/v0.1/countries/states",
-        {
-          country: countryName,
-        }
-      );
-
-      if (response.data && response.data.data && response.data.data.states) {
-        const stateList = response.data.data.states.map((state) => ({
-          value: state.name,
-          label: state.name,
-        }));
-        setStates(stateList);
-      } else {
-        setStates([]);
-      }
-    } catch (error) {
-      console.error("Error fetching states:", error);
-      setStates([]);
-    } finally {
-      setLoadingStates(false);
-    }
-  };
-
-  // Fetch cities based on selected country and state
-  const fetchCities = async (countryName, stateName) => {
-    if (!countryName || !stateName) {
+  // Load cities from hardcoded data
+  const loadCitiesForState = (countryName, stateName) => {
+    if (
+      countryName &&
+      stateName &&
+      CITIES_DATA[countryName] &&
+      CITIES_DATA[countryName][stateName]
+    ) {
+      const citiesList = CITIES_DATA[countryName][stateName].map((city) => ({
+        value: city,
+        label: city,
+      }));
+      setCities(citiesList);
+    } else {
       setCities([]);
-      return;
-    }
-
-    setLoadingCities(true);
-    try {
-      const response = await axios.post(
-        "https://countriesnow.space/api/v0.1/countries/state/cities",
-        {
-          country: countryName,
-          state: stateName,
-        }
-      );
-
-      if (response.data && response.data.data) {
-        const cityList = response.data.data.map((city) => ({
-          value: city,
-          label: city,
-        }));
-        setCities(cityList);
-      } else {
-        setCities([]);
-      }
-    } catch (error) {
-      console.error("Error fetching cities:", error);
-      setCities([]);
-    } finally {
-      setLoadingCities(false);
     }
   };
 
@@ -570,7 +1142,7 @@ const PersonalInformation = () => {
       [field]: value,
     }));
 
-    // Handle cascading dropdowns
+    // Handle cascading dropdowns using hardcoded data
     if (field === "country") {
       // Reset state and city when country changes
       setFormData((prev) => ({
@@ -578,21 +1150,16 @@ const PersonalInformation = () => {
         state: "",
         city: "",
       }));
-      setStates([]);
-      setCities([]);
-      if (value) {
-        fetchStates(value);
-      }
+      // Load states for the selected country from hardcoded data
+      loadStatesForCountry(value);
     } else if (field === "state") {
       // Reset city when state changes
       setFormData((prev) => ({
         ...prev,
         city: "",
       }));
-      setCities([]);
-      if (value && formData.country) {
-        fetchCities(formData.country, value);
-      }
+      // Load cities for the selected state from hardcoded data
+      loadCitiesForState(formData.country, value);
     } else if (field === "governmentIdType") {
       // Reset government ID fields when type changes
       setFormData((prev) => ({
@@ -1043,7 +1610,7 @@ const PersonalInformation = () => {
                           }
                           options={states}
                           required
-                          disabled={loadingStates || states.length === 0}
+                          disabled={states.length === 0}
                         />
                         <FormSelect
                           label="City"
@@ -1051,7 +1618,7 @@ const PersonalInformation = () => {
                           onChange={(value) => handleInputChange("city", value)}
                           options={cities}
                           required
-                          disabled={loadingCities || cities.length === 0}
+                          disabled={cities.length === 0}
                         />
                         <FormInput
                           label="Street Address"
@@ -1241,7 +1808,7 @@ const PersonalInformation = () => {
                             }
                             options={states}
                             required
-                            disabled={loadingStates || states.length === 0}
+                            disabled={states.length === 0}
                           />
                         )}
                         {formData.governmentIdType === "Passport" && (
