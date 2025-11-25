@@ -87,6 +87,8 @@ const SymptomScreenForm = () => {
   const [applicationStatus, setApplicationStatus] = useState({});
   const [overallProgress, setOverallProgress] = useState(0);
   const [saving, setSaving] = useState(false);
+  const [formStatus, setFormStatus] = useState("draft");
+  const [hrFeedback, setHrFeedback] = useState(null);
 
   useEffect(() => {
     fetchProgressData();
@@ -107,6 +109,13 @@ const SymptomScreenForm = () => {
       if (response.data?.data?.application) {
         const forms = response.data.data.forms;
         setApplicationStatus(forms);
+
+        // Load TB Symptom Screen form status and HR feedback
+        if (forms.tbSymptomScreen) {
+          setFormData(forms.tbSymptomScreen);
+          setFormStatus(forms.tbSymptomScreen.status || "draft");
+          setHrFeedback(forms.tbSymptomScreen.hrFeedback || null);
+        }
 
         const formKeys = [
           "personalInformation",
@@ -204,10 +213,41 @@ const SymptomScreenForm = () => {
           </div>
 
           {/* HR Feedback Section */}
-          <HRFeedback
-            hrFeedback={formData.hrFeedback}
-            formStatus={formData.status}
-          />
+          <HRFeedback hrFeedback={hrFeedback} formStatus={formStatus} />
+
+          {/* Status Banner */}
+          <div
+            className={`mb-6 p-4 rounded-lg border ${
+              formData.assessmentSignature && formData.clientSignature
+                ? "bg-green-50 border-green-200"
+                : "bg-red-50 border-red-200"
+            }`}
+          >
+            <div className="flex items-center justify-center gap-3">
+              {formData.assessmentSignature && formData.clientSignature ? (
+                <CheckCircle className="w-6 h-6 text-green-600 flex-shrink-0" />
+              ) : (
+                <FileText className="w-6 h-6 text-red-600 flex-shrink-0" />
+              )}
+              <div>
+                {formData.assessmentSignature && formData.clientSignature ? (
+                  <>
+                    <p className="text-base font-semibold text-green-800">
+                      ✅ Progress Updated - Form Completed Successfully
+                    </p>
+                    <p className="text-sm text-green-600 mt-1">
+                      You cannot make any changes to the form until HR provides
+                      their feedback.
+                    </p>
+                  </>
+                ) : (
+                  <p className="text-base font-semibold text-red-800">
+                    ⚠️ Not filled yet - Sign the form to complete your progress
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
 
           <div className="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
             {/* Header */}
@@ -943,21 +983,59 @@ const SymptomScreenForm = () => {
                       </button>
                     </div>
 
-                    {/* Right - Save & Next */}
+                    {/* Save & Next Button with HR Feedback Logic */}
                     <div className="w-full sm:w-1/3 flex justify-end">
-                      <button
-                        type="button"
-                        onClick={handleSubmit}
-                        className="inline-flex items-center px-4 py-3 bg-gradient-to-r from-[#1F3A93] to-[#2748B4] text-white font-bold rounded-xl hover:from-[#16306e] hover:to-[#1F3A93] focus:ring-2 focus:ring-[#1F3A93]/30 transition-all duration-300 shadow-lg hover:shadow-xl text-sm sm:text-base"
-                        disabled={saving}
-                      >
-                        {saving ? (
-                          <RotateCcw className="w-4 h-4 mr-2 animate-spin" />
-                        ) : (
-                          <Send className="w-4 h-4 mr-2" />
-                        )}
-                        <span>{saving ? "Submitting..." : "Save & Next"}</span>
-                      </button>
+                      {(() => {
+                        const hasHrNotes =
+                          hrFeedback &&
+                          (hrFeedback.generalNotes ||
+                            hrFeedback.personalInfoNotes ||
+                            hrFeedback.professionalExperienceNotes ||
+                            hrFeedback.emergencyContactNotes ||
+                            hrFeedback.backgroundCheckNotes ||
+                            hrFeedback.cprCertificateNotes ||
+                            hrFeedback.drivingLicenseNotes ||
+                            hrFeedback.professionalCertificatesNotes ||
+                            hrFeedback.tbSymptomScreenNotes ||
+                            hrFeedback.orientationNotes ||
+                            hrFeedback.w4FormNotes ||
+                            hrFeedback.w9FormNotes ||
+                            hrFeedback.i9FormNotes ||
+                            hrFeedback.directDepositNotes ||
+                            hrFeedback.codeOfEthicsNotes ||
+                            hrFeedback.serviceDeliveryPoliciesNotes ||
+                            hrFeedback.nonCompeteAgreementNotes ||
+                            hrFeedback.misconductStatementNotes);
+                        const isSubmitted =
+                          formStatus === "submitted" && !hasHrNotes;
+
+                        return (
+                          <button
+                            type="button"
+                            onClick={handleSubmit}
+                            className={`inline-flex items-center px-4 py-3 text-white font-bold rounded-xl focus:ring-2 transition-all duration-300 shadow-lg text-sm sm:text-base ${
+                              isSubmitted
+                                ? "bg-gray-400 cursor-not-allowed opacity-60"
+                                : "bg-gradient-to-r from-[#1F3A93] to-[#2748B4] hover:from-[#16306e] hover:to-[#1F3A93] focus:ring-[#1F3A93]/30 hover:shadow-xl"
+                            }`}
+                            disabled={saving || isSubmitted}
+                            title={isSubmitted ? "Waiting for HR feedback" : ""}
+                          >
+                            {saving ? (
+                              <RotateCcw className="w-4 h-4 mr-2 animate-spin" />
+                            ) : (
+                              <Send className="w-4 h-4 mr-2" />
+                            )}
+                            <span>
+                              {saving
+                                ? "Submitting..."
+                                : isSubmitted
+                                ? "Awaiting HR Feedback"
+                                : "Save & Next"}
+                            </span>
+                          </button>
+                        );
+                      })()}
                     </div>
                   </div>
                 </div>

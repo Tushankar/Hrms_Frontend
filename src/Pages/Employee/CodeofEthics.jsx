@@ -7,6 +7,7 @@ import axios from "axios";
 import Cookies from "js-cookie";
 import { jwtDecode } from "jwt-decode";
 import toast, { Toaster } from "react-hot-toast";
+import HRFeedback from "../../Components/Common/HRFeedback/HRFeedback";
 
 const FORM_KEYS = [
   "personalInformation",
@@ -41,6 +42,8 @@ export default function CodeOfEthics() {
   const [employeeId, setEmployeeId] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
   const [errors, setErrors] = useState({});
+  const [formStatus, setFormStatus] = useState("draft");
+  const [hrFeedback, setHrFeedback] = useState(null);
   const baseURL = import.meta.env.VITE__BASEURL;
 
   useEffect(() => {
@@ -151,6 +154,12 @@ export default function CodeOfEthics() {
           const formattedDate = dateObj.toISOString().split("T")[0];
           setSignatureDate(formattedDate);
         }
+        if (codeOfEthicsData.status) {
+          setFormStatus(codeOfEthicsData.status);
+        }
+        if (codeOfEthicsData.hrFeedback) {
+          setHrFeedback(codeOfEthicsData.hrFeedback);
+        }
       } else {
         // No saved data, set today's date as default
         const today = new Date();
@@ -209,6 +218,9 @@ export default function CodeOfEthics() {
           <ArrowLeft className="w-4 h-4" />
           Back
         </button>
+
+        {/* HR Feedback Section */}
+        <HRFeedback hrFeedback={hrFeedback} formStatus={formStatus} />
 
         <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-4 sm:p-6 md:p-8">
           <div className="text-center mb-6 sm:mb-8">
@@ -580,67 +592,108 @@ export default function CodeOfEthics() {
                   </button>
                 </div>
 
-                <button
-                  type="button"
-                  onClick={async () => {
-                    // Validate signature and date
-                    const newErrors = {};
-                    if (!employeeSignature || !employeeSignature.trim()) {
-                      newErrors.signature = "Digital signature is required.";
-                    }
-                    if (!signatureDate) {
-                      newErrors.date = "Date is required.";
-                    }
+                {(() => {
+                  // Check if form has HR notes
+                  const hasHrNotes =
+                    hrFeedback &&
+                    Object.keys(hrFeedback).length > 0 &&
+                    (hrFeedback.comment ||
+                      hrFeedback.notes ||
+                      hrFeedback.feedback ||
+                      hrFeedback.note ||
+                      hrFeedback.companyRepSignature ||
+                      hrFeedback.companyRepresentativeSignature ||
+                      hrFeedback.notarySignature ||
+                      hrFeedback.agencySignature ||
+                      hrFeedback.clientSignature ||
+                      Object.keys(hrFeedback).some(
+                        (key) =>
+                          hrFeedback[key] &&
+                          typeof hrFeedback[key] === "string" &&
+                          hrFeedback[key].trim().length > 0
+                      ));
 
-                    setErrors(newErrors);
-                    if (Object.keys(newErrors).length > 0) {
-                      toast.error(
-                        "Please provide your signature and date before proceeding."
-                      );
-                      return;
-                    }
+                  // Check if form is submitted (and no HR notes)
+                  const isSubmitted = formStatus === "submitted" && !hasHrNotes;
 
-                    setIsSaving(true);
-                    try {
-                      const saveData = {
-                        applicationId,
-                        employeeId,
-                        formData: {
-                          signature: employeeSignature,
-                          date: signatureDate,
-                        },
-                        status: "completed",
-                      };
+                  return (
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        // Validate signature and date
+                        const newErrors = {};
+                        if (!employeeSignature || !employeeSignature.trim()) {
+                          newErrors.signature =
+                            "Digital signature is required.";
+                        }
+                        if (!signatureDate) {
+                          newErrors.date = "Date is required.";
+                        }
 
-                      await axios.post(
-                        `${baseURL}/onboarding/save-code-of-ethics`,
-                        saveData,
-                        { withCredentials: true }
-                      );
+                        setErrors(newErrors);
+                        if (Object.keys(newErrors).length > 0) {
+                          toast.error(
+                            "Please provide your signature and date before proceeding."
+                          );
+                          return;
+                        }
 
-                      toast.success("Code of Ethics signed successfully!");
-                      navigate("/employee/service-delivery-policies");
-                    } catch (error) {
-                      console.error("Error saving signature:", error);
-                      toast.error(
-                        "Failed to save signature. Please try again."
-                      );
-                    } finally {
-                      setIsSaving(false);
-                    }
-                  }}
-                  disabled={isSaving}
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-6 py-3 bg-gradient-to-r from-[#1F3A93] to-[#2748B4] text-white font-bold tracking-wide rounded-lg hover:from-[#16306e] hover:to-[#1F3A93] focus:ring-2 focus:ring-[#1F3A93]/30 transition-all duration-200 shadow-md hover:shadow-lg hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {isSaving ? (
-                    <RotateCcw className="w-5 h-5 animate-spin" />
-                  ) : (
-                    <Send className="w-5 h-5" />
-                  )}
-                  <span className="text-sm sm:text-base">
-                    {isSaving ? "Saving..." : "Save & Next"}
-                  </span>
-                </button>
+                        setIsSaving(true);
+                        try {
+                          const saveData = {
+                            applicationId,
+                            employeeId,
+                            formData: {
+                              signature: employeeSignature,
+                              date: signatureDate,
+                            },
+                            status: "completed",
+                          };
+
+                          await axios.post(
+                            `${baseURL}/onboarding/save-code-of-ethics`,
+                            saveData,
+                            { withCredentials: true }
+                          );
+
+                          toast.success("Code of Ethics signed successfully!");
+                          navigate("/employee/service-delivery-policies");
+                        } catch (error) {
+                          console.error("Error saving signature:", error);
+                          toast.error(
+                            "Failed to save signature. Please try again."
+                          );
+                        } finally {
+                          setIsSaving(false);
+                        }
+                      }}
+                      disabled={isSaving || isSubmitted}
+                      className={`w-full sm:w-auto inline-flex items-center justify-center gap-3 px-6 py-3 font-bold tracking-wide rounded-lg focus:ring-2 focus:ring-[#1F3A93]/30 transition-all duration-200 shadow-md hover:shadow-lg hover:-translate-y-0.5 text-sm sm:text-base ${
+                        isSaving || isSubmitted
+                          ? "bg-gray-400 text-gray-600 cursor-not-allowed opacity-60"
+                          : "bg-gradient-to-r from-[#1F3A93] to-[#2748B4] text-white hover:from-[#16306e] hover:to-[#1F3A93] active:from-[#112451] active:to-[#16306e]"
+                      }`}
+                      title={
+                        isSubmitted
+                          ? "Form is submitted. HR notes are required to make changes."
+                          : "Save and proceed to next form"
+                      }
+                    >
+                      {isSaving ? (
+                        <RotateCcw className="w-5 h-5 animate-spin" />
+                      ) : (
+                        <Send className="w-5 h-5" />
+                      )}
+                      <span>
+                        {isSaving
+                          ? "Saving..."
+                          : isSubmitted
+                          ? "Awaiting HR Feedback"
+                          : "Save & Next"}
+                      </span>
+                    </button>
+                  );
+                })()}
               </div>
             </div>
           </div>

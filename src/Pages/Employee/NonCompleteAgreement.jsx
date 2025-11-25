@@ -15,6 +15,7 @@ import Navbar from "../../Components/Common/Navbar/Navbar";
 import axios from "axios";
 import Cookies from "js-cookie";
 import { jwtDecode } from "jwt-decode";
+import HRFeedback from "../../Components/Common/HRFeedback/HRFeedback";
 
 const FORM_KEYS = [
   "personalInformation",
@@ -54,6 +55,8 @@ const NonCompleteAgreement = () => {
   const [savedSignatureUrl, setSavedSignatureUrl] = useState("");
   const [companyRepSignature, setCompanyRepSignature] = useState("");
   const [companyRepName, setCompanyRepName] = useState("");
+  const [formStatus, setFormStatus] = useState("draft");
+  const [hrFeedback, setHrFeedback] = useState(null);
   const baseURL = import.meta.env.VITE__BASEURL;
 
   // Helper to build normalized full URL
@@ -176,6 +179,12 @@ const NonCompleteAgreement = () => {
           setCompanyRepName(agreementData.companyRepName);
         } else {
           setCompanyRepName("");
+        }
+        if (agreementData.status) {
+          setFormStatus(agreementData.status);
+        }
+        if (agreementData.hrFeedback) {
+          setHrFeedback(agreementData.hrFeedback);
         }
       } else {
         // No saved data, set today's date as default
@@ -361,6 +370,9 @@ const NonCompleteAgreement = () => {
           Back
         </button>
 
+        {/* HR Feedback Section */}
+        <HRFeedback hrFeedback={hrFeedback} formStatus={formStatus} />
+
         <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-4 sm:p-6 md:p-8">
           {/* Status Banner */}
           {!loading && (
@@ -379,9 +391,15 @@ const NonCompleteAgreement = () => {
                 )}
                 <div>
                   {employeeSignature ? (
-                    <p className="text-base font-semibold text-green-800">
-                      ✅ Progress Updated - Form Completed Successfully
-                    </p>
+                    <>
+                      <p className="text-base font-semibold text-green-800">
+                        ✅ Progress Updated - Form Completed Successfully
+                      </p>
+                      <p className="text-sm text-green-600 mt-1">
+                        You cannot make any changes to the form until HR
+                        provides their feedback.
+                      </p>
+                    </>
                   ) : (
                     <p className="text-base font-semibold text-red-800">
                       ⚠️ Not filled yet - Sign the document to complete your
@@ -878,160 +896,207 @@ const NonCompleteAgreement = () => {
                   </button>
                 </div>
 
-                <button
-                  type="button"
-                  onClick={async () => {
-                    // Validate signature and date
-                    const newErrors = {};
-                    if (!employeeSignature || !employeeSignature.trim()) {
-                      newErrors.signature = "Digital signature is required.";
-                    }
-                    if (!signatureDate) {
-                      newErrors.date = "Date is required.";
-                    }
+                {(() => {
+                  // Check if form has HR notes
+                  const hasHrNotes =
+                    hrFeedback &&
+                    Object.keys(hrFeedback).length > 0 &&
+                    (hrFeedback.comment ||
+                      hrFeedback.notes ||
+                      hrFeedback.feedback ||
+                      hrFeedback.note ||
+                      hrFeedback.companyRepSignature ||
+                      hrFeedback.companyRepresentativeSignature ||
+                      hrFeedback.notarySignature ||
+                      hrFeedback.agencySignature ||
+                      hrFeedback.clientSignature ||
+                      Object.keys(hrFeedback).some(
+                        (key) =>
+                          hrFeedback[key] &&
+                          typeof hrFeedback[key] === "string" &&
+                          hrFeedback[key].trim().length > 0
+                      ));
 
-                    setErrors(newErrors);
-                    if (Object.keys(newErrors).length > 0) {
-                      toast.error(
-                        "Please provide your signature and date before proceeding."
-                      );
-                      return;
-                    }
+                  // Check if form is submitted (and no HR notes)
+                  const isSubmitted = formStatus === "submitted" && !hasHrNotes;
 
-                    setIsSaving(true);
-                    try {
-                      const userToken = Cookies.get("session");
-                      const decodedToken = userToken && jwtDecode(userToken);
-                      const user = decodedToken?.user;
-
-                      if (!user?._id) {
-                        toast.error("Session expired. Please login again.");
-                        navigate("/login");
-                        return;
-                      }
-
-                      console.log(
-                        "Saving non-compete agreement with signature:",
-                        {
-                          employeeSignature,
+                  return (
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        // Validate signature and date
+                        const newErrors = {};
+                        if (!employeeSignature || !employeeSignature.trim()) {
+                          newErrors.signature =
+                            "Digital signature is required.";
                         }
-                      );
+                        if (!signatureDate) {
+                          newErrors.date = "Date is required.";
+                        }
 
-                      const response = await axios.post(
-                        `${baseURL}/onboarding/save-non-compete-agreement`,
-                        {
-                          applicationId,
-                          employeeId: user._id,
-                          formData: {
-                            day: formData.day
-                              ? parseInt(formData.day) || null
-                              : null,
-                            month: formData.month || "",
-                            year: formData.year
-                              ? parseInt(formData.year) || null
-                              : null,
-                            employeeName: formData.employeeName,
-                            employeeAddress: formData.employeeAddress,
-                            employeePosition: formData.employeePosition,
-                            employeeSignature: employeeSignature || "",
-                            employeeDate: signatureDate || null,
-                            employeeSignatureName:
-                              formData.employeeSignatureName || "",
-                          },
-                          status: "completed",
-                        },
-                        { withCredentials: true }
-                      );
+                        setErrors(newErrors);
+                        if (Object.keys(newErrors).length > 0) {
+                          toast.error(
+                            "Please provide your signature and date before proceeding."
+                          );
+                          return;
+                        }
 
-                      console.log("Save response:", response.data);
-
-                      if (response.data) {
-                        toast.success(
-                          "Non-Compete Agreement completed successfully!"
-                        );
-                        window.dispatchEvent(new Event("formStatusUpdated"));
-
-                        // Re-fetch application data to update progress
+                        setIsSaving(true);
                         try {
-                          // Add a small delay to ensure backend has processed the save
-                          setTimeout(async () => {
-                            const appResponse = await axios.get(
-                              `${baseURL}/onboarding/get-application/${user._id}`,
-                              { withCredentials: true }
+                          const userToken = Cookies.get("session");
+                          const decodedToken =
+                            userToken && jwtDecode(userToken);
+                          const user = decodedToken?.user;
+
+                          if (!user?._id) {
+                            toast.error("Session expired. Please login again.");
+                            navigate("/login");
+                            return;
+                          }
+
+                          console.log(
+                            "Saving non-compete agreement with signature:",
+                            {
+                              employeeSignature,
+                            }
+                          );
+
+                          const response = await axios.post(
+                            `${baseURL}/onboarding/save-non-compete-agreement`,
+                            {
+                              applicationId,
+                              employeeId: user._id,
+                              formData: {
+                                day: formData.day
+                                  ? parseInt(formData.day) || null
+                                  : null,
+                                month: formData.month || "",
+                                year: formData.year
+                                  ? parseInt(formData.year) || null
+                                  : null,
+                                employeeName: formData.employeeName,
+                                employeeAddress: formData.employeeAddress,
+                                employeePosition: formData.employeePosition,
+                                employeeSignature: employeeSignature || "",
+                                employeeDate: signatureDate || null,
+                                employeeSignatureName:
+                                  formData.employeeSignatureName || "",
+                              },
+                              status: "completed",
+                            },
+                            { withCredentials: true }
+                          );
+
+                          console.log("Save response:", response.data);
+
+                          if (response.data) {
+                            toast.success(
+                              "Non-Compete Agreement completed successfully!"
+                            );
+                            window.dispatchEvent(
+                              new Event("formStatusUpdated")
                             );
 
-                            if (appResponse.data?.data?.application) {
-                              const backendData = appResponse.data.data;
-                              const forms = backendData.forms || {};
-                              const completedFormsArray =
-                                backendData.application?.completedForms || [];
-                              const completedSet = new Set(completedFormsArray);
+                            // Re-fetch application data to update progress
+                            try {
+                              // Add a small delay to ensure backend has processed the save
+                              setTimeout(async () => {
+                                const appResponse = await axios.get(
+                                  `${baseURL}/onboarding/get-application/${user._id}`,
+                                  { withCredentials: true }
+                                );
 
-                              const updatedCompletedForms = FORM_KEYS.filter(
-                                (key) => {
-                                  let form = forms[key];
+                                if (appResponse.data?.data?.application) {
+                                  const backendData = appResponse.data.data;
+                                  const forms = backendData.forms || {};
+                                  const completedFormsArray =
+                                    backendData.application?.completedForms ||
+                                    [];
+                                  const completedSet = new Set(
+                                    completedFormsArray
+                                  );
 
-                                  // Handle job description - check all variants
-                                  if (key === "jobDescriptionPCA") {
-                                    form =
-                                      forms.jobDescriptionPCA ||
-                                      forms.jobDescriptionCNA ||
-                                      forms.jobDescriptionLPN ||
-                                      forms.jobDescriptionRN;
-                                  }
+                                  const updatedCompletedForms =
+                                    FORM_KEYS.filter((key) => {
+                                      let form = forms[key];
 
-                                  const isCompleted =
-                                    form?.status === "submitted" ||
-                                    form?.status === "completed" ||
-                                    form?.status === "under_review" ||
-                                    form?.status === "approved" ||
-                                    completedSet.has(key);
+                                      // Handle job description - check all variants
+                                      if (key === "jobDescriptionPCA") {
+                                        form =
+                                          forms.jobDescriptionPCA ||
+                                          forms.jobDescriptionCNA ||
+                                          forms.jobDescriptionLPN ||
+                                          forms.jobDescriptionRN;
+                                      }
 
-                                  return isCompleted;
+                                      const isCompleted =
+                                        form?.status === "submitted" ||
+                                        form?.status === "completed" ||
+                                        form?.status === "under_review" ||
+                                        form?.status === "approved" ||
+                                        completedSet.has(key);
+
+                                      return isCompleted;
+                                    }).length;
+
+                                  const updatedPercentage = Math.round(
+                                    (updatedCompletedForms / FORM_KEYS.length) *
+                                      100
+                                  );
+
+                                  setOverallProgress(updatedPercentage);
+                                  setCompletedFormsCount(updatedCompletedForms);
                                 }
-                              ).length;
-
-                              const updatedPercentage = Math.round(
-                                (updatedCompletedForms / FORM_KEYS.length) * 100
+                              }, 500); // 500ms delay to ensure backend processing is complete
+                            } catch (progressError) {
+                              console.warn(
+                                "Could not update progress:",
+                                progressError
                               );
-
-                              setOverallProgress(updatedPercentage);
-                              setCompletedFormsCount(updatedCompletedForms);
                             }
-                          }, 500); // 500ms delay to ensure backend processing is complete
-                        } catch (progressError) {
-                          console.warn(
-                            "Could not update progress:",
-                            progressError
-                          );
-                        }
 
-                        setTimeout(() => {
-                          navigate("/employee/emergency-contact");
-                        }, 1500);
+                            setTimeout(() => {
+                              navigate("/employee/emergency-contact");
+                            }, 1500);
+                          }
+                        } catch (error) {
+                          console.error(
+                            "Error saving non-compete agreement:",
+                            error
+                          );
+                          toast.error("Failed to save form");
+                        } finally {
+                          setIsSaving(false);
+                        }
+                      }}
+                      disabled={isSaving || isSubmitted}
+                      className={`w-full sm:w-auto inline-flex items-center justify-center gap-3 px-6 py-3 font-bold tracking-wide rounded-lg focus:ring-2 focus:ring-[#1F3A93]/30 transition-all duration-200 shadow-md hover:shadow-lg hover:-translate-y-0.5 text-sm sm:text-base ${
+                        isSaving || isSubmitted
+                          ? "bg-gray-400 text-gray-600 cursor-not-allowed opacity-60"
+                          : "bg-gradient-to-r from-[#1F3A93] to-[#2748B4] text-white hover:from-[#16306e] hover:to-[#1F3A93] active:from-[#112451] active:to-[#16306e]"
+                      }`}
+                      title={
+                        isSubmitted
+                          ? "Form is submitted. HR notes are required to make changes."
+                          : "Save and proceed to next form"
                       }
-                    } catch (error) {
-                      console.error(
-                        "Error saving non-compete agreement:",
-                        error
-                      );
-                      toast.error("Failed to save form");
-                    } finally {
-                      setIsSaving(false);
-                    }
-                  }}
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-6 py-3 bg-gradient-to-r from-[#1F3A93] to-[#2748B4] text-white font-bold tracking-wide rounded-lg hover:from-[#16306e] hover:to-[#1F3A93] focus:ring-2 focus:ring-[#1F3A93]/30 transition-all duration-200 shadow-md hover:shadow-lg hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
-                  disabled={isSaving}
-                >
-                  {isSaving ? (
-                    <RotateCcw className="w-5 h-5 animate-spin" />
-                  ) : (
-                    <Send className="w-5 h-5" />
-                  )}
-                  <span className="text-sm sm:text-base">
-                    {isSaving ? "Saving..." : "Save & Next"}
-                  </span>
-                </button>
+                    >
+                      {isSaving ? (
+                        <RotateCcw className="w-5 h-5 animate-spin" />
+                      ) : (
+                        <Send className="w-5 h-5" />
+                      )}
+                      <span>
+                        {isSaving
+                          ? "Saving..."
+                          : isSubmitted
+                          ? "Awaiting HR Feedback"
+                          : "Save & Next"}
+                      </span>
+                    </button>
+                  );
+                })()}
               </div>
             </div>
           </div>

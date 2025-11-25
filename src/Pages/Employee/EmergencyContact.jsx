@@ -14,6 +14,7 @@ import { Layout } from "../../Components/Common/layout/Layout";
 import Navbar from "../../Components/Common/Navbar/Navbar";
 import axios from "axios";
 import Cookies from "js-cookie";
+import HRFeedback from "../../Components/Common/HRFeedback/HRFeedback";
 
 // FORM_KEYS should be defined outside the component to prevent re-creation on every render.
 const FORM_KEYS = [
@@ -50,6 +51,8 @@ const EmergencyContact = () => {
   // Consolidate loading and uploading states for simpler logic
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [formStatus, setFormStatus] = useState("draft");
+  const [hrFeedback, setHrFeedback] = useState(null);
 
   // Form data for emergency contacts
   const [formData, setFormData] = useState({
@@ -135,6 +138,13 @@ const EmergencyContact = () => {
             contactAddress3: emergencyContactForm.contactAddress3 || "",
             phoneNumber3: emergencyContactForm.phoneNumber3 || "",
           });
+          // Load status and HR feedback
+          if (emergencyContactForm.status) {
+            setFormStatus(emergencyContactForm.status);
+          }
+          if (emergencyContactForm.hrFeedback) {
+            setHrFeedback(emergencyContactForm.hrFeedback);
+          }
         }
 
         // Calculate overall progress dynamically
@@ -313,6 +323,9 @@ const EmergencyContact = () => {
                 </button>
               </div>
 
+              {/* HR Feedback Section */}
+              <HRFeedback hrFeedback={hrFeedback} formStatus={formStatus} />
+
               {/* Main Form Container */}
               <div className="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
                 {/* Status Banner */}
@@ -336,9 +349,15 @@ const EmergencyContact = () => {
                       )}
                       <div>
                         {submission ? (
-                          <p className="text-base font-semibold text-green-800">
-                            ✅ Progress Updated - Form Completed Successfully
-                          </p>
+                          <>
+                            <p className="text-base font-semibold text-green-800">
+                              ✅ Progress Updated - Form Completed Successfully
+                            </p>
+                            <p className="text-sm text-green-600 mt-1">
+                              You cannot make any changes to the form until HR
+                              provides their feedback.
+                            </p>
+                          </>
                         ) : applicationStatus === "approved" ? (
                           <p className="text-base font-semibold text-green-800">
                             ✅ Form Approved
@@ -677,24 +696,65 @@ const EmergencyContact = () => {
                         <span>Exit Application</span>
                       </button>
 
-                      <button
-                        type="submit"
-                        disabled={isSaving}
-                        onClick={handleSaveForm}
-                        className="flex items-center justify-center gap-3 py-4 px-6 bg-gradient-to-r from-[#1F3A93] to-[#2748B4] disabled:from-gray-400 disabled:to-gray-500 text-white font-bold rounded-xl hover:from-[#16306e] hover:to-[#1F3A93] disabled:hover:from-gray-400 disabled:hover:to-gray-500 focus:ring-2 focus:ring-[#1F3A93]/30 transition-all duration-300 shadow-lg hover:shadow-xl"
-                      >
-                        {isSaving ? (
-                          <>
-                            <RotateCcw className="w-5 h-5 animate-spin" />
-                            <span>Saving...</span>
-                          </>
-                        ) : (
-                          <>
-                            <span>Save & Next</span>
-                            <CheckCircle className="w-5 h-5" />
-                          </>
-                        )}
-                      </button>
+                      {(() => {
+                        // Check if form has HR notes
+                        const hasHrNotes =
+                          hrFeedback &&
+                          Object.keys(hrFeedback).length > 0 &&
+                          (hrFeedback.comment ||
+                            hrFeedback.notes ||
+                            hrFeedback.feedback ||
+                            hrFeedback.note ||
+                            hrFeedback.companyRepSignature ||
+                            hrFeedback.companyRepresentativeSignature ||
+                            hrFeedback.notarySignature ||
+                            hrFeedback.agencySignature ||
+                            hrFeedback.clientSignature ||
+                            Object.keys(hrFeedback).some(
+                              (key) =>
+                                hrFeedback[key] &&
+                                typeof hrFeedback[key] === "string" &&
+                                hrFeedback[key].trim().length > 0
+                            ));
+
+                        // Check if form is submitted (and no HR notes)
+                        const isSubmitted =
+                          formStatus === "submitted" && !hasHrNotes;
+
+                        return (
+                          <button
+                            type="submit"
+                            disabled={isSaving || isSubmitted}
+                            onClick={handleSaveForm}
+                            className={`flex items-center justify-center gap-3 py-4 px-6 font-bold rounded-xl focus:ring-2 focus:ring-[#1F3A93]/30 transition-all duration-300 shadow-lg hover:shadow-xl ${
+                              isSaving || isSubmitted
+                                ? "bg-gray-400 text-gray-600 cursor-not-allowed opacity-60"
+                                : "bg-gradient-to-r from-[#1F3A93] to-[#2748B4] text-white hover:from-[#16306e] hover:to-[#1F3A93] active:from-[#112451] active:to-[#16306e]"
+                            }`}
+                            title={
+                              isSubmitted
+                                ? "Form is submitted. HR notes are required to make changes."
+                                : "Save and proceed to next form"
+                            }
+                          >
+                            {isSaving ? (
+                              <>
+                                <RotateCcw className="w-5 h-5 animate-spin" />
+                                <span>Saving...</span>
+                              </>
+                            ) : (
+                              <>
+                                <span>
+                                  {isSubmitted
+                                    ? "Awaiting HR Feedback"
+                                    : "Save & Next"}
+                                </span>
+                                <CheckCircle className="w-5 h-5" />
+                              </>
+                            )}
+                          </button>
+                        );
+                      })()}
                     </div>
                   </div>
                 </div>

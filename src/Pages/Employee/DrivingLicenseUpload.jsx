@@ -14,6 +14,7 @@ import toast, { Toaster } from "react-hot-toast";
 import { Layout } from "../../Components/Common/layout/Layout";
 import Navbar from "../../Components/Common/Navbar/Navbar";
 import HRNotesIndicator from "../../Components/Common/HRNotesIndicator/HRNotesIndicator";
+import HRFeedback from "../../Components/Common/HRFeedback/HRFeedback";
 import axios from "axios";
 import Cookies from "js-cookie";
 
@@ -27,6 +28,7 @@ const DrivingLicenseUpload = () => {
   const [employeeId, setEmployeeId] = useState(null);
   const [governmentIdType, setGovernmentIdType] = useState("");
   const [hrFeedback, setHrFeedback] = useState(null);
+  const [formStatus, setFormStatus] = useState("draft");
   const baseURL = import.meta.env.VITE__BASEURL;
 
   useEffect(() => {
@@ -84,6 +86,11 @@ const DrivingLicenseUpload = () => {
             // Fetch HR feedback if available
             if (licenseResponse.data?.drivingLicense?.hrFeedback) {
               setHrFeedback(licenseResponse.data.drivingLicense.hrFeedback);
+            }
+
+            // Load form status
+            if (licenseResponse.data?.drivingLicense?.status) {
+              setFormStatus(licenseResponse.data.drivingLicense.status);
             }
           } catch (error) {
             console.log("Driving license not yet created:", error.message);
@@ -254,6 +261,9 @@ const DrivingLicenseUpload = () => {
           Back
         </button>
 
+        {/* HR Feedback Section */}
+        <HRFeedback hrFeedback={hrFeedback} formStatus={formStatus} />
+
         <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-8">
           {/* Status Banner */}
           {!loading && (
@@ -272,10 +282,16 @@ const DrivingLicenseUpload = () => {
                 )}
                 <div>
                   {submission ? (
-                    <p className="text-base font-semibold text-green-800">
-                      ✅ Progress Updated - Uploaded Successfully on{" "}
-                      {new Date(submission.uploadedAt).toLocaleDateString()}
-                    </p>
+                    <>
+                      <p className="text-base font-semibold text-green-800">
+                        ✅ Progress Updated - Uploaded Successfully on{" "}
+                        {new Date(submission.uploadedAt).toLocaleDateString()}
+                      </p>
+                      <p className="text-sm text-green-600 mt-1">
+                        You cannot make any changes to the form until HR
+                        provides their feedback.
+                      </p>
+                    </>
                   ) : (
                     <p className="text-base font-semibold text-red-800">
                       ⚠️ Not filled yet - Upload your document to complete your
@@ -544,14 +560,54 @@ const DrivingLicenseUpload = () => {
                     </button>
                   </div>
 
-                  <button
-                    type="button"
-                    onClick={handleSaveAndNext}
-                    className="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-6 py-3 bg-gradient-to-r from-[#1F3A93] to-[#2748B4] text-white font-bold tracking-wide rounded-lg hover:from-[#16306e] hover:to-[#1F3A93] focus:ring-2 focus:ring-[#1F3A93]/30 transition-all duration-200 shadow-md hover:shadow-lg hover:-translate-y-0.5"
-                  >
-                    <Send className="w-5 h-5" />
-                    <span className="text-sm sm:text-base">Save & Next</span>
-                  </button>
+                  {(() => {
+                    // Check if form has HR notes
+                    const hasHrNotes =
+                      hrFeedback &&
+                      Object.keys(hrFeedback).length > 0 &&
+                      (hrFeedback.comment ||
+                        hrFeedback.notes ||
+                        hrFeedback.feedback ||
+                        hrFeedback.note ||
+                        hrFeedback.companyRepSignature ||
+                        hrFeedback.companyRepresentativeSignature ||
+                        hrFeedback.notarySignature ||
+                        hrFeedback.agencySignature ||
+                        hrFeedback.clientSignature ||
+                        Object.keys(hrFeedback).some(
+                          (key) =>
+                            hrFeedback[key] &&
+                            typeof hrFeedback[key] === "string" &&
+                            hrFeedback[key].trim().length > 0
+                        ));
+
+                    // Check if form is submitted (and no HR notes)
+                    const isSubmitted =
+                      formStatus === "submitted" && !hasHrNotes;
+
+                    return (
+                      <button
+                        type="button"
+                        onClick={handleSaveAndNext}
+                        disabled={isSubmitted}
+                        className={`w-full sm:w-auto inline-flex items-center justify-center gap-3 px-6 py-3 font-bold tracking-wide rounded-lg focus:ring-2 focus:ring-[#1F3A93]/30 transition-all duration-200 shadow-md hover:shadow-lg hover:-translate-y-0.5 ${
+                          isSubmitted
+                            ? "bg-gray-400 text-gray-600 cursor-not-allowed opacity-60"
+                            : "bg-gradient-to-r from-[#1F3A93] to-[#2748B4] text-white hover:from-[#16306e] hover:to-[#1F3A93] active:from-[#112451] active:to-[#16306e]"
+                        }`}
+                        title={
+                          isSubmitted
+                            ? "Form is submitted. HR notes are required to make changes."
+                            : "Save and proceed to next form"
+                        }
+                      >
+                        <Send className="w-5 h-5" />
+                        <span className="text-sm sm:text-base">
+                          {isSubmitted ? "Awaiting HR Feedback" : "Save & Next"}
+                        </span>
+                      </button>
+                    );
+                  })()}
                 </div>
               </div>
             </div>

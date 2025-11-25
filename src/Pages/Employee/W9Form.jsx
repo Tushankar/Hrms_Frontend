@@ -4,6 +4,7 @@ import { ArrowLeft, Target, CheckCircle, FileText } from "lucide-react";
 import toast, { Toaster } from "react-hot-toast";
 import { Layout } from "../../Components/Common/layout/Layout";
 import Navbar from "../../Components/Common/Navbar/Navbar";
+import HRFeedback from "../../Components/Common/HRFeedback/HRFeedback";
 import axios from "axios";
 import Cookies from "js-cookie";
 import { jwtDecode } from "jwt-decode";
@@ -1509,6 +1510,7 @@ export default function W9Form() {
   });
   const [isFormCompleted, setIsFormCompleted] = useState(false);
   const [formStatus, setFormStatus] = useState("draft");
+  const [hrFeedback, setHrFeedback] = useState(null);
 
   // Refs for TIN inputs
   const ssnInputs = useRef([]);
@@ -1555,6 +1557,7 @@ export default function W9Form() {
         });
         // Set form status
         setFormStatus(data.status || "draft");
+        setHrFeedback(data.hrFeedback || null);
         // Check if form has meaningful data
         const hasData =
           data.name ||
@@ -1644,7 +1647,7 @@ export default function W9Form() {
         formData.ssn.some((d) => d) ||
         formData.ein.some((d) => d);
 
-      const status = hasData ? "completed" : "draft";
+      const status = hasData ? "submitted" : "draft";
 
       await axios.post(
         `${baseURL}/onboarding/save-w9-form`,
@@ -1826,6 +1829,9 @@ export default function W9Form() {
           Back
         </button>
 
+        {/* HR Feedback Section */}
+        <HRFeedback hrFeedback={hrFeedback} formStatus={formStatus} />
+
         <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-4 sm:p-6 md:p-8">
           {/* Status Banner */}
           {!loading && (
@@ -1848,9 +1854,15 @@ export default function W9Form() {
                 )}
                 <div>
                   {isFormCompleted ? (
-                    <p className="text-base font-semibold text-green-800">
-                      ✅ Progress Updated - Form Completed Successfully
-                    </p>
+                    <>
+                      <p className="text-base font-semibold text-green-800">
+                        ✅ Progress Updated - Form Completed Successfully
+                      </p>
+                      <p className="text-sm text-green-700 mt-1">
+                        You cannot make any changes to the form until HR
+                        provides their feedback.
+                      </p>
+                    </>
                   ) : formStatus === "approved" ? (
                     <p className="text-base font-semibold text-green-800">
                       ✅ Form Approved
@@ -3087,13 +3099,45 @@ export default function W9Form() {
                 Exit Application
               </button>
             </div>
-            <button
-              type="button"
-              onClick={handleSaveAndNext}
-              className="flex-1 px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-[#1F3A93] to-[#2748B4] text-white rounded-lg hover:from-[#16306e] hover:to-[#1F3A93] transition-all duration-200 shadow-md text-sm sm:text-base font-medium"
-            >
-              Save & Next
-            </button>
+            {(() => {
+              const hasHrNotes =
+                hrFeedback &&
+                (hrFeedback.generalNotes ||
+                  hrFeedback.personalInfoNotes ||
+                  hrFeedback.professionalExperienceNotes ||
+                  hrFeedback.emergencyContactNotes ||
+                  hrFeedback.backgroundCheckNotes ||
+                  hrFeedback.cprCertificateNotes ||
+                  hrFeedback.drivingLicenseNotes ||
+                  hrFeedback.professionalCertificatesNotes ||
+                  hrFeedback.tbSymptomScreenNotes ||
+                  hrFeedback.orientationNotes ||
+                  hrFeedback.w4FormNotes ||
+                  hrFeedback.w9FormNotes ||
+                  hrFeedback.i9FormNotes ||
+                  hrFeedback.directDepositNotes ||
+                  hrFeedback.codeOfEthicsNotes ||
+                  hrFeedback.serviceDeliveryPoliciesNotes ||
+                  hrFeedback.nonCompeteAgreementNotes ||
+                  hrFeedback.misconductStatementNotes);
+              const isSubmitted = formStatus === "submitted" && !hasHrNotes;
+
+              return (
+                <button
+                  type="button"
+                  onClick={handleSaveAndNext}
+                  className={`flex-1 px-4 sm:px-6 py-2 sm:py-3 text-white rounded-lg transition-all duration-200 shadow-md text-sm sm:text-base font-medium ${
+                    isSubmitted
+                      ? "bg-gray-400 cursor-not-allowed opacity-60"
+                      : "bg-gradient-to-r from-[#1F3A93] to-[#2748B4] hover:from-[#16306e] hover:to-[#1F3A93]"
+                  }`}
+                  disabled={isSubmitted}
+                  title={isSubmitted ? "Waiting for HR feedback" : ""}
+                >
+                  {isSubmitted ? "Awaiting HR Feedback" : "Save & Next"}
+                </button>
+              );
+            })()}
           </div>
         </div>
       </div>

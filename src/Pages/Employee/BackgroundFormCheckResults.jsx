@@ -12,6 +12,7 @@ import {
 import toast, { Toaster } from "react-hot-toast";
 import { Layout } from "../../Components/Common/layout/Layout";
 import Navbar from "../../Components/Common/Navbar/Navbar";
+import HRFeedback from "../../Components/Common/HRFeedback/HRFeedback";
 import axios from "axios";
 import Cookies from "js-cookie";
 
@@ -602,6 +603,7 @@ const BackgroundFormCheckResults = () => {
   const [applicationStatus, setApplicationStatus] = useState("draft");
   const [formStatus, setFormStatus] = useState("draft");
   const [backgroundFormData, setBackgroundFormData] = useState({});
+  const [hrFeedback, setHrFeedback] = useState(null);
   const baseURL = import.meta.env.VITE__BASEURL;
 
   useEffect(() => {
@@ -725,6 +727,11 @@ const BackgroundFormCheckResults = () => {
           console.log("Flattened data:", flattened);
           setBackgroundFormData(flattened);
           setFormStatus(backendData.forms.backgroundCheck.status || "draft");
+
+          // Load HR feedback if available
+          if (backendData.forms.backgroundCheck.hrFeedback) {
+            setHrFeedback(backendData.forms.backgroundCheck.hrFeedback);
+          }
         }
       }
     } catch (error) {
@@ -759,6 +766,9 @@ const BackgroundFormCheckResults = () => {
           Back
         </button>
 
+        {/* HR Feedback Section */}
+        <HRFeedback hrFeedback={hrFeedback} formStatus={formStatus} />
+
         <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-4 sm:p-8">
           {/* Status Banner */}
           {!loading && (
@@ -785,9 +795,15 @@ const BackgroundFormCheckResults = () => {
                 <div>
                   {backgroundFormData &&
                   Object.keys(backgroundFormData).length > 0 ? (
-                    <p className="text-base font-semibold text-green-800">
-                      ✅ Progress Updated - Form Completed Successfully
-                    </p>
+                    <>
+                      <p className="text-base font-semibold text-green-800">
+                        ✅ Progress Updated - Form Completed Successfully
+                      </p>
+                      <p className="text-sm text-green-600 mt-1">
+                        You cannot make any changes to the form until HR
+                        provides their feedback.
+                      </p>
+                    </>
                   ) : formStatus === "approved" ? (
                     <p className="text-base font-semibold text-green-800">
                       ✅ Form Approved
@@ -936,142 +952,197 @@ const BackgroundFormCheckResults = () => {
                   </button>
                 </div>
 
-                <button
-                  type="button"
-                  onClick={async () => {
-                    // Validate signature and date
-                    const newErrors = {};
-                    if (!backgroundFormData.signature) {
-                      newErrors.signature = "Signature is required";
-                    }
-                    if (!backgroundFormData.date) {
-                      newErrors.date = "Date is required";
-                    }
+                {(() => {
+                  // Check if form has HR notes
+                  const hasHrNotes =
+                    hrFeedback &&
+                    Object.keys(hrFeedback).length > 0 &&
+                    (hrFeedback.comment ||
+                      hrFeedback.notes ||
+                      hrFeedback.feedback ||
+                      hrFeedback.note ||
+                      hrFeedback.companyRepSignature ||
+                      hrFeedback.companyRepresentativeSignature ||
+                      hrFeedback.notarySignature ||
+                      hrFeedback.agencySignature ||
+                      hrFeedback.clientSignature ||
+                      Object.keys(hrFeedback).some(
+                        (key) =>
+                          hrFeedback[key] &&
+                          typeof hrFeedback[key] === "string" &&
+                          hrFeedback[key].trim().length > 0
+                      ));
 
-                    if (Object.keys(newErrors).length > 0) {
-                      toast.error("Please fill in signature and date fields");
-                      return;
-                    }
+                  // Check if form is submitted (and no HR notes)
+                  const isSubmitted = formStatus === "submitted" && !hasHrNotes;
 
-                    setIsSaving(true);
-                    try {
-                      const userCookie = Cookies.get("user");
-                      let user;
+                  return (
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        // Validate signature and date
+                        const newErrors = {};
+                        if (!backgroundFormData.signature) {
+                          newErrors.signature = "Signature is required";
+                        }
+                        if (!backgroundFormData.date) {
+                          newErrors.date = "Date is required";
+                        }
 
-                      try {
-                        user = userCookie ? JSON.parse(userCookie) : null;
-                      } catch (e) {
-                        console.error("Error parsing user cookie:", e);
-                        user = null;
+                        if (Object.keys(newErrors).length > 0) {
+                          toast.error(
+                            "Please fill in signature and date fields"
+                          );
+                          return;
+                        }
+
+                        setIsSaving(true);
+                        try {
+                          const userCookie = Cookies.get("user");
+                          let user;
+
+                          try {
+                            user = userCookie ? JSON.parse(userCookie) : null;
+                          } catch (e) {
+                            console.error("Error parsing user cookie:", e);
+                            user = null;
+                          }
+
+                          if (!user || !user._id) {
+                            console.error("No user found in cookies");
+                            toast.error(
+                              "User session not found. Please log in again."
+                            );
+                            navigate("/login");
+                            return;
+                          }
+
+                          // Status is submitted (will become completed after HR reviews)
+                          const status = "submitted";
+
+                          // Structure form data according to backend expectations
+                          const structuredFormData = {
+                            applicantInfo: {
+                              lastName: backgroundFormData.lastName || "",
+                              firstName: backgroundFormData.firstName || "",
+                              middleInitial:
+                                backgroundFormData.middleInitial || "",
+                              socialSecurityNumber:
+                                backgroundFormData.ssn || "",
+                              dateOfBirth: backgroundFormData.dob
+                                ? new Date(backgroundFormData.dob)
+                                : null,
+                              height: backgroundFormData.height || "",
+                              weight: backgroundFormData.weight || "",
+                              sex: backgroundFormData.sex || "",
+                              eyeColor: backgroundFormData.eyeColor || "",
+                              hairColor: backgroundFormData.hairColor || "",
+                              race: backgroundFormData.race || "",
+                              address: {
+                                street: backgroundFormData.streetAddress || "",
+                                city: backgroundFormData.city || "",
+                                state: backgroundFormData.state || "",
+                                zipCode: backgroundFormData.zip || "",
+                              },
+                            },
+                            employmentInfo: {
+                              provider: backgroundFormData.provider || "",
+                              positionAppliedFor:
+                                backgroundFormData.position || "",
+                            },
+                            consentAcknowledgment: {
+                              awareOfFingerprintCheck: true, // Assuming consent since they're filling the form
+                              acceptedPrivacyRights: true,
+                              understoodApprovalProcess: true,
+                            },
+                            notification: {
+                              providerName:
+                                backgroundFormData.providerName || "",
+                              applicantName:
+                                backgroundFormData.applicantName || "",
+                              directContactName:
+                                backgroundFormData.directContact || "",
+                              contactPhone:
+                                backgroundFormData.contactPhone || "",
+                              contactEmail:
+                                backgroundFormData.emailAddress || "",
+                            },
+                            applicantSignature:
+                              backgroundFormData.signature || "",
+                            applicantSignatureDate: backgroundFormData.date
+                              ? new Date(backgroundFormData.date)
+                              : null,
+                          };
+
+                          console.log(
+                            "Saving background check with structured data:",
+                            structuredFormData
+                          );
+
+                          const response = await axios.post(
+                            `${baseURL}/onboarding/save-background-check`,
+                            {
+                              applicationId,
+                              employeeId: user._id,
+                              formData: structuredFormData,
+                              status,
+                            },
+                            { withCredentials: true }
+                          );
+
+                          console.log("Save response:", response.data);
+
+                          if (response.data) {
+                            toast.success(
+                              "Background Check completed successfully!"
+                            );
+                            // Refresh progress data
+                            await fetchProgressData(user._id);
+                            window.dispatchEvent(
+                              new Event("formStatusUpdated")
+                            );
+
+                            setTimeout(() => {
+                              navigate("/employee/misconduct-form");
+                            }, 1500);
+                          }
+                        } catch (error) {
+                          console.error(
+                            "Error saving background check:",
+                            error
+                          );
+                          toast.error("Failed to save form");
+                        } finally {
+                          setIsSaving(false);
+                        }
+                      }}
+                      disabled={isSaving || isSubmitted}
+                      className={`w-full sm:w-auto inline-flex items-center justify-center gap-3 px-6 py-3 font-bold tracking-wide rounded-lg focus:ring-2 focus:ring-[#1F3A93]/30 transition-all duration-200 shadow-md hover:shadow-lg hover:-translate-y-0.5 ${
+                        isSaving || isSubmitted
+                          ? "bg-gray-400 text-gray-600 cursor-not-allowed opacity-60"
+                          : "bg-gradient-to-r from-[#1F3A93] to-[#2748B4] text-white hover:from-[#16306e] hover:to-[#1F3A93] active:from-[#112451] active:to-[#16306e]"
+                      }`}
+                      title={
+                        isSubmitted
+                          ? "Form is submitted. HR notes are required to make changes."
+                          : "Save and proceed to next form"
                       }
-
-                      if (!user || !user._id) {
-                        console.error("No user found in cookies");
-                        toast.error(
-                          "User session not found. Please log in again."
-                        );
-                        navigate("/login");
-                        return;
-                      }
-
-                      // Status is completed since form is viewed
-                      const status = "completed";
-
-                      // Structure form data according to backend expectations
-                      const structuredFormData = {
-                        applicantInfo: {
-                          lastName: backgroundFormData.lastName || "",
-                          firstName: backgroundFormData.firstName || "",
-                          middleInitial: backgroundFormData.middleInitial || "",
-                          socialSecurityNumber: backgroundFormData.ssn || "",
-                          dateOfBirth: backgroundFormData.dob
-                            ? new Date(backgroundFormData.dob)
-                            : null,
-                          height: backgroundFormData.height || "",
-                          weight: backgroundFormData.weight || "",
-                          sex: backgroundFormData.sex || "",
-                          eyeColor: backgroundFormData.eyeColor || "",
-                          hairColor: backgroundFormData.hairColor || "",
-                          race: backgroundFormData.race || "",
-                          address: {
-                            street: backgroundFormData.streetAddress || "",
-                            city: backgroundFormData.city || "",
-                            state: backgroundFormData.state || "",
-                            zipCode: backgroundFormData.zip || "",
-                          },
-                        },
-                        employmentInfo: {
-                          provider: backgroundFormData.provider || "",
-                          positionAppliedFor: backgroundFormData.position || "",
-                        },
-                        consentAcknowledgment: {
-                          awareOfFingerprintCheck: true, // Assuming consent since they're filling the form
-                          acceptedPrivacyRights: true,
-                          understoodApprovalProcess: true,
-                        },
-                        notification: {
-                          providerName: backgroundFormData.providerName || "",
-                          applicantName: backgroundFormData.applicantName || "",
-                          directContactName:
-                            backgroundFormData.directContact || "",
-                          contactPhone: backgroundFormData.contactPhone || "",
-                          contactEmail: backgroundFormData.emailAddress || "",
-                        },
-                        applicantSignature: backgroundFormData.signature || "",
-                        applicantSignatureDate: backgroundFormData.date
-                          ? new Date(backgroundFormData.date)
-                          : null,
-                      };
-
-                      console.log(
-                        "Saving background check with structured data:",
-                        structuredFormData
-                      );
-
-                      const response = await axios.post(
-                        `${baseURL}/onboarding/save-background-check`,
-                        {
-                          applicationId,
-                          employeeId: user._id,
-                          formData: structuredFormData,
-                          status,
-                        },
-                        { withCredentials: true }
-                      );
-
-                      console.log("Save response:", response.data);
-
-                      if (response.data) {
-                        toast.success(
-                          "Background Check completed successfully!"
-                        );
-                        // Refresh progress data
-                        await fetchProgressData(user._id);
-                        window.dispatchEvent(new Event("formStatusUpdated"));
-
-                        setTimeout(() => {
-                          navigate("/employee/misconduct-form");
-                        }, 1500);
-                      }
-                    } catch (error) {
-                      console.error("Error saving background check:", error);
-                      toast.error("Failed to save form");
-                    } finally {
-                      setIsSaving(false);
-                    }
-                  }}
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-6 py-3 bg-gradient-to-r from-[#1F3A93] to-[#2748B4] text-white font-bold tracking-wide rounded-lg hover:from-[#16306e] hover:to-[#1F3A93] focus:ring-2 focus:ring-[#1F3A93]/30 transition-all duration-200 shadow-md hover:shadow-lg hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
-                  disabled={isSaving}
-                >
-                  {isSaving ? (
-                    <RotateCcw className="w-5 h-5 animate-spin" />
-                  ) : (
-                    <Send className="w-5 h-5" />
-                  )}
-                  <span className="text-sm sm:text-base">
-                    {isSaving ? "Saving..." : "Save & Next"}
-                  </span>
-                </button>
+                    >
+                      {isSaving ? (
+                        <RotateCcw className="w-5 h-5 animate-spin" />
+                      ) : (
+                        <Send className="w-5 h-5" />
+                      )}
+                      <span className="text-sm sm:text-base">
+                        {isSaving
+                          ? "Saving..."
+                          : isSubmitted
+                          ? "Awaiting HR Feedback"
+                          : "Save & Next"}
+                      </span>
+                    </button>
+                  );
+                })()}
               </div>
             </div>
           </div>

@@ -15,6 +15,7 @@ import {
 import toast, { Toaster } from "react-hot-toast";
 import { Layout } from "../../Components/Common/layout/Layout";
 import Navbar from "../../Components/Common/Navbar/Navbar";
+import HRFeedback from "../../Components/Common/HRFeedback/HRFeedback";
 import axios from "axios";
 import Cookies from "js-cookie";
 
@@ -1656,6 +1657,7 @@ const I9Form = () => {
   const [workAuthSubmission, setWorkAuthSubmission] = useState(null);
   const [formData, setFormData] = useState({});
   const [formStatus, setFormStatus] = useState("draft");
+  const [hrFeedback, setHrFeedback] = useState(null);
   const baseURL = import.meta.env.VITE__BASEURL;
 
   // useCallback to memoize the function and avoid re-creating it on each render.
@@ -1820,6 +1822,7 @@ const I9Form = () => {
 
             setFormData(loadedFormData);
             setFormStatus(i9FormData.status || "draft");
+            setHrFeedback(i9FormData.hrFeedback || null);
 
             // Load work authorization data
             if (i9FormData.workAuthorization) {
@@ -1993,6 +1996,9 @@ const I9Form = () => {
           Back
         </button>
 
+        {/* HR Feedback Section */}
+        <HRFeedback hrFeedback={hrFeedback} formStatus={formStatus} />
+
         <div className="bg-white rounded-none sm:rounded-xl shadow-none sm:shadow-lg border-none sm:border sm:border-gray-200 p-2 sm:p-4 md:p-6 lg:p-8">
           {/* Status Banner */}
           {!isLoading && (
@@ -2016,9 +2022,15 @@ const I9Form = () => {
                 )}
                 <div>
                   {formData && Object.keys(formData).length > 0 ? (
-                    <p className="text-base font-semibold text-green-800">
-                      ✅ Progress Updated - Form Completed Successfully
-                    </p>
+                    <>
+                      <p className="text-base font-semibold text-green-800">
+                        ✅ Progress Updated - Form Completed Successfully
+                      </p>
+                      <p className="text-sm text-green-600 mt-1">
+                        You cannot make any changes to the form until HR
+                        provides their feedback.
+                      </p>
+                    </>
                   ) : formStatus === "approved" ? (
                     <p className="text-base font-semibold text-green-800">
                       ✅ Form Approved
@@ -2251,53 +2263,85 @@ const I9Form = () => {
                 Exit Application
               </button>
             </div>
-            <button
-              type="button"
-              onClick={async () => {
-                try {
-                  const userCookie = Cookies.get("user");
-                  const user = userCookie ? JSON.parse(userCookie) : null;
-                  if (user?._id) {
-                    const appResponse = await axios.get(
-                      `${baseURL}/onboarding/get-application/${user._id}`,
-                      { withCredentials: true }
-                    );
-                    const applicationId =
-                      appResponse.data?.data?.application?._id;
-                    if (applicationId) {
-                      await axios.post(
-                        `${baseURL}/onboarding/save-i9-form`,
-                        {
-                          applicationId,
-                          employeeId: user._id,
-                          formData: {
-                            ...formData,
-                            workAuthorization: {
-                              isNonCitizen,
-                              hasWorkAuthorization,
+            {(() => {
+              const hasHrNotes =
+                hrFeedback &&
+                (hrFeedback.generalNotes ||
+                  hrFeedback.personalInfoNotes ||
+                  hrFeedback.professionalExperienceNotes ||
+                  hrFeedback.emergencyContactNotes ||
+                  hrFeedback.backgroundCheckNotes ||
+                  hrFeedback.cprCertificateNotes ||
+                  hrFeedback.drivingLicenseNotes ||
+                  hrFeedback.professionalCertificatesNotes ||
+                  hrFeedback.tbSymptomScreenNotes ||
+                  hrFeedback.orientationNotes ||
+                  hrFeedback.w4FormNotes ||
+                  hrFeedback.w9FormNotes ||
+                  hrFeedback.i9FormNotes ||
+                  hrFeedback.directDepositNotes ||
+                  hrFeedback.codeOfEthicsNotes ||
+                  hrFeedback.serviceDeliveryPoliciesNotes ||
+                  hrFeedback.nonCompeteAgreementNotes ||
+                  hrFeedback.misconductStatementNotes);
+              const isSubmitted = formStatus === "submitted" && !hasHrNotes;
+
+              return (
+                <button
+                  type="button"
+                  onClick={async () => {
+                    try {
+                      const userCookie = Cookies.get("user");
+                      const user = userCookie ? JSON.parse(userCookie) : null;
+                      if (user?._id) {
+                        const appResponse = await axios.get(
+                          `${baseURL}/onboarding/get-application/${user._id}`,
+                          { withCredentials: true }
+                        );
+                        const applicationId =
+                          appResponse.data?.data?.application?._id;
+                        if (applicationId) {
+                          await axios.post(
+                            `${baseURL}/onboarding/save-i9-form`,
+                            {
+                              applicationId,
+                              employeeId: user._id,
+                              formData: {
+                                ...formData,
+                                workAuthorization: {
+                                  isNonCitizen,
+                                  hasWorkAuthorization,
+                                },
+                              },
+                              status: "submitted",
                             },
-                          },
-                          status: "completed",
-                        },
-                        { withCredentials: true }
-                      );
-                      toast.success("I-9 Form saved successfully!");
+                            { withCredentials: true }
+                          );
+                          toast.success("I-9 Form saved successfully!");
+                        }
+                      }
+                    } catch (error) {
+                      console.error("Error saving status:", error);
+                      toast.error("Failed to save I-9 Form");
+                      return;
                     }
-                  }
-                } catch (error) {
-                  console.error("Error saving status:", error);
-                  toast.error("Failed to save I-9 Form");
-                  return;
-                }
-                window.dispatchEvent(new Event("formStatusUpdated"));
-                setTimeout(() => {
-                  navigate("/employee/w4-form");
-                }, 1500);
-              }}
-              className="flex-1 px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-[#1F3A93] to-[#2748B4] text-white rounded-lg hover:from-[#16306e] hover:to-[#1F3A93] transition-all duration-200 shadow-md text-sm sm:text-base font-medium"
-            >
-              Save & Next
-            </button>
+                    window.dispatchEvent(new Event("formStatusUpdated"));
+                    setTimeout(() => {
+                      navigate("/employee/w4-form");
+                    }, 1500);
+                  }}
+                  className={`flex-1 px-4 sm:px-6 py-2 sm:py-3 text-white rounded-lg transition-all duration-200 shadow-md text-sm sm:text-base font-medium ${
+                    isSubmitted
+                      ? "bg-gray-400 cursor-not-allowed opacity-60"
+                      : "bg-gradient-to-r from-[#1F3A93] to-[#2748B4] hover:from-[#16306e] hover:to-[#1F3A93]"
+                  }`}
+                  disabled={isSubmitted}
+                  title={isSubmitted ? "Waiting for HR feedback" : ""}
+                >
+                  {isSubmitted ? "Awaiting HR Feedback" : "Save & Next"}
+                </button>
+              );
+            })()}
           </div>
         </div>
       </div>

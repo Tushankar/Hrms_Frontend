@@ -4,6 +4,7 @@ import { ArrowLeft, Send, CheckCircle, FileText, Target } from "lucide-react";
 import toast, { Toaster } from "react-hot-toast";
 import { Layout } from "../../Components/Common/layout/Layout";
 import Navbar from "../../Components/Common/Navbar/Navbar";
+import HRFeedback from "../../Components/Common/HRFeedback/HRFeedback";
 import axios from "axios";
 import Cookies from "js-cookie";
 import { jwtDecode } from "jwt-decode";
@@ -39,6 +40,7 @@ const DirectDepositForm = () => {
   const [isFormCompleted, setIsFormCompleted] = useState(false);
   const [applicationStatus, setApplicationStatus] = useState("draft");
   const [formStatus, setFormStatus] = useState("draft");
+  const [hrFeedback, setHrFeedback] = useState(null);
   const [overallProgress, setOverallProgress] = useState(0);
   const [completedFormsCount, setCompletedFormsCount] = useState(0);
   const baseURL = import.meta.env.VITE__BASEURL;
@@ -231,6 +233,7 @@ const DirectDepositForm = () => {
 
         setFormData(reconstructedFormData);
         setFormStatus(depositData.status || "draft");
+        setHrFeedback(depositData.hrFeedback || null);
 
         // Check if form has meaningful data
         const hasData =
@@ -277,7 +280,7 @@ const DirectDepositForm = () => {
           applicationId,
           employeeId,
           formData: formData,
-          status: "completed",
+          status: "submitted",
         },
         { withCredentials: true }
       );
@@ -345,6 +348,8 @@ const DirectDepositForm = () => {
   return (
     <Layout>
       <Navbar />
+      {/* HR Feedback Section */}
+      <HRFeedback hrFeedback={hrFeedback} formStatus={formStatus} />
       {/* Status Banner */}
       {!loading && (
         <div
@@ -366,9 +371,15 @@ const DirectDepositForm = () => {
             )}
             <div>
               {isFormCompleted ? (
-                <p className="text-base font-semibold text-green-800">
-                  ✅ Progress Updated - Form Completed Successfully
-                </p>
+                <>
+                  <p className="text-base font-semibold text-green-800">
+                    ✅ Progress Updated - Form Completed Successfully
+                  </p>
+                  <p className="text-sm text-green-700 mt-1">
+                    You cannot make any changes to the form until HR provides
+                    their feedback.
+                  </p>
+                </>
               ) : formStatus === "approved" ? (
                 <p className="text-base font-semibold text-green-800">
                   ✅ Form Approved
@@ -1433,14 +1444,48 @@ const DirectDepositForm = () => {
             </button>
           </div>
 
-          <button
-            type="button"
-            onClick={saveDirectDepositForm}
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-6 py-3 bg-gradient-to-r from-[#1F3A93] to-[#2748B4] text-white font-bold tracking-wide rounded-lg hover:from-[#16306e] hover:to-[#1F3A93] focus:ring-2 focus:ring-[#1F3A93]/30 transition-all duration-200 shadow-md hover:shadow-lg hover:-translate-y-0.5"
-          >
-            <Send className="w-5 h-5" />
-            <span className="text-sm sm:text-base">Save & Next</span>
-          </button>
+          {(() => {
+            const hasHrNotes =
+              hrFeedback &&
+              (hrFeedback.generalNotes ||
+                hrFeedback.personalInfoNotes ||
+                hrFeedback.professionalExperienceNotes ||
+                hrFeedback.emergencyContactNotes ||
+                hrFeedback.backgroundCheckNotes ||
+                hrFeedback.cprCertificateNotes ||
+                hrFeedback.drivingLicenseNotes ||
+                hrFeedback.professionalCertificatesNotes ||
+                hrFeedback.tbSymptomScreenNotes ||
+                hrFeedback.orientationNotes ||
+                hrFeedback.w4FormNotes ||
+                hrFeedback.w9FormNotes ||
+                hrFeedback.i9FormNotes ||
+                hrFeedback.directDepositNotes ||
+                hrFeedback.codeOfEthicsNotes ||
+                hrFeedback.serviceDeliveryPoliciesNotes ||
+                hrFeedback.nonCompeteAgreementNotes ||
+                hrFeedback.misconductStatementNotes);
+            const isSubmitted = formStatus === "submitted" && !hasHrNotes;
+
+            return (
+              <button
+                type="button"
+                onClick={saveDirectDepositForm}
+                className={`w-full sm:w-auto inline-flex items-center justify-center gap-3 px-6 py-3 text-white font-bold tracking-wide rounded-lg focus:ring-2 transition-all duration-200 shadow-md hover:shadow-lg hover:-translate-y-0.5 ${
+                  isSubmitted
+                    ? "bg-gray-400 cursor-not-allowed opacity-60"
+                    : "bg-gradient-to-r from-[#1F3A93] to-[#2748B4] hover:from-[#16306e] hover:to-[#1F3A93] focus:ring-[#1F3A93]/30"
+                }`}
+                disabled={isSubmitted}
+                title={isSubmitted ? "Waiting for HR feedback" : ""}
+              >
+                <Send className="w-5 h-5" />
+                <span className="text-sm sm:text-base">
+                  {isSubmitted ? "Awaiting HR Feedback" : "Save & Next"}
+                </span>
+              </button>
+            );
+          })()}
         </div>
       </div>
 

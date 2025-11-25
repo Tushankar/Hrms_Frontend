@@ -171,6 +171,10 @@ const ProfessionalExperience = () => {
     resumePath: "",
     coverLetterPath: "",
     portfolioPath: "",
+
+    // Status and HR Feedback
+    status: "draft",
+    hrFeedback: null,
   });
 
   const baseURL = import.meta.env.VITE__BASEURL;
@@ -318,6 +322,7 @@ const ProfessionalExperience = () => {
             resumePath: data.resumePath || "",
             coverLetterPath: data.coverLetterPath || "",
             portfolioPath: data.portfolioPath || "",
+            status: data.status || "draft",
             hrFeedback: data.hrFeedback,
           });
         }
@@ -519,9 +524,15 @@ const ProfessionalExperience = () => {
                     <div>
                       {applicationStatus === "completed" ||
                       applicationStatus === "submitted" ? (
-                        <p className="text-base font-semibold text-green-800">
-                          ✅ Progress Updated - Form Completed Successfully
-                        </p>
+                        <div>
+                          <p className="text-base font-semibold text-green-800">
+                            ✅ Progress Updated - Form Completed Successfully
+                          </p>
+                          <p className="text-sm text-green-700 mt-1">
+                            You cannot make any changes to the form until HR
+                            provides their feedback.
+                          </p>
+                        </div>
                       ) : applicationStatus === "approved" ? (
                         <p className="text-base font-semibold text-green-800">
                           ✅ Form Approved
@@ -806,21 +817,64 @@ const ProfessionalExperience = () => {
 
                       {/* Right: Save & Next */}
                       <div className="w-full lg:w-auto flex items-center justify-end gap-3 order-1 lg:order-3">
-                        <button
-                          type="button"
-                          onClick={handleSubmit}
-                          disabled={saving}
-                          className="inline-flex items-center justify-center gap-2 md:gap-3 w-full max-w-xs py-2.5 md:py-3 px-3 md:px-5 bg-gradient-to-r from-[#1F3A93] to-[#2748B4] text-white font-bold tracking-wide rounded-lg hover:from-[#16306e] hover:to-[#1F3A93] focus:ring-2 focus:ring-[#1F3A93]/30 active:from-[#112451] active:to-[#16306e] transition-all duration-200 shadow-md hover:shadow-lg hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                          {saving ? (
-                            <RotateCcw className="w-4 h-4 md:w-5 md:h-5 animate-spin mr-1 md:mr-2" />
-                          ) : (
-                            <Send className="w-4 h-4 md:w-5 md:h-5 mr-1 md:mr-2" />
-                          )}
-                          <span className="text-sm md:text-base">
-                            {saving ? "Submitting..." : "Save & Next"}
-                          </span>
-                        </button>
+                        {(() => {
+                          // Check if form has HR notes
+                          const hasHrNotes =
+                            formData.hrFeedback &&
+                            Object.keys(formData.hrFeedback).length > 0 &&
+                            (formData.hrFeedback.comment ||
+                              formData.hrFeedback.notes ||
+                              formData.hrFeedback.feedback ||
+                              formData.hrFeedback.note ||
+                              formData.hrFeedback.companyRepSignature ||
+                              formData.hrFeedback
+                                .companyRepresentativeSignature ||
+                              formData.hrFeedback.notarySignature ||
+                              formData.hrFeedback.agencySignature ||
+                              formData.hrFeedback.clientSignature ||
+                              Object.keys(formData.hrFeedback).some(
+                                (key) =>
+                                  formData.hrFeedback[key] &&
+                                  typeof formData.hrFeedback[key] ===
+                                    "string" &&
+                                  formData.hrFeedback[key].trim().length > 0
+                              ));
+
+                          // Check if form is submitted (and no HR notes)
+                          const isSubmitted =
+                            formData.status === "submitted" && !hasHrNotes;
+
+                          return (
+                            <button
+                              type="button"
+                              onClick={handleSubmit}
+                              disabled={saving || isSubmitted}
+                              className={`inline-flex items-center justify-center gap-2 md:gap-3 w-full max-w-xs py-2.5 md:py-3 px-3 md:px-5 font-bold tracking-wide rounded-lg focus:ring-2 focus:ring-[#1F3A93]/30 transition-all duration-200 shadow-md hover:shadow-lg hover:-translate-y-0.5 text-sm md:text-base ${
+                                saving || isSubmitted
+                                  ? "bg-gray-400 text-gray-600 cursor-not-allowed opacity-60"
+                                  : "bg-gradient-to-r from-[#1F3A93] to-[#2748B4] text-white hover:from-[#16306e] hover:to-[#1F3A93] active:from-[#112451] active:to-[#16306e]"
+                              }`}
+                              title={
+                                isSubmitted
+                                  ? "Form is submitted. HR notes are required to make changes."
+                                  : "Save and proceed to next form"
+                              }
+                            >
+                              {saving ? (
+                                <RotateCcw className="w-4 h-4 md:w-5 md:h-5 animate-spin mr-1 md:mr-2" />
+                              ) : (
+                                <Send className="w-4 h-4 md:w-5 md:h-5 mr-1 md:mr-2" />
+                              )}
+                              <span>
+                                {saving
+                                  ? "Submitting..."
+                                  : isSubmitted
+                                  ? "Awaiting HR Feedback"
+                                  : "Save & Next"}
+                              </span>
+                            </button>
+                          );
+                        })()}
                       </div>
                     </div>
                   </div>

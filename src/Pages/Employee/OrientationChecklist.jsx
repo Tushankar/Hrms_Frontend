@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Send, FileText, Target, RotateCcw } from "lucide-react";
 import { Layout } from "../../Components/Common/layout/Layout";
 import Navbar from "../../Components/Common/Navbar/Navbar";
+import HRFeedback from "../../Components/Common/HRFeedback/HRFeedback";
 import toast, { Toaster } from "react-hot-toast";
 import axios from "axios";
 import Cookies from "js-cookie";
@@ -29,6 +30,8 @@ const OrientationChecklist = () => {
   const [saving, setSaving] = useState(false);
   const [applicationStatus, setApplicationStatus] = useState({});
   const [overallProgress, setOverallProgress] = useState(0);
+  const [hrFeedback, setHrFeedback] = useState(null);
+  const [formStatus, setFormStatus] = useState("draft");
 
   const baseURL =
     import.meta.env.VITE__BASEURL || "https://api-hrms-backend.kyptronix.us";
@@ -157,6 +160,8 @@ const OrientationChecklist = () => {
               ? new Date(existingData.signatureDate).toISOString().slice(0, 10)
               : "",
           });
+          setFormStatus(existingData.status || "draft");
+          setHrFeedback(existingData.hrFeedback || null);
         } else {
           // No saved data, set today's date
           const today = new Date();
@@ -315,7 +320,7 @@ const OrientationChecklist = () => {
       formData.handbook,
     ].every(Boolean);
 
-    const status = hasSignature && allChecked ? "completed" : "draft";
+    const status = hasSignature && allChecked ? "submitted" : "draft";
     saveForm(status);
   };
 
@@ -375,6 +380,9 @@ const OrientationChecklist = () => {
   return (
     <Layout>
       <Navbar />
+
+      {/* HR Feedback Section */}
+      <HRFeedback hrFeedback={hrFeedback} formStatus={formStatus} />
 
       {/* Add Southampton Script font */}
       <link
@@ -684,24 +692,62 @@ const OrientationChecklist = () => {
                           <span>Exit Application</span>
                         </button>
 
-                        <button
-                          type="button"
-                          onClick={handleSubmit}
-                          disabled={saving}
-                          className="flex items-center justify-center gap-2 sm:gap-3 w-full sm:w-auto py-3 sm:py-4 px-4 sm:px-6 bg-gradient-to-r from-[#1F3A93] to-[#2748B4] disabled:from-gray-400 disabled:to-gray-500 text-white font-bold tracking-wide rounded-xl hover:from-[#16306e] hover:to-[#1F3A93] disabled:hover:from-gray-400 disabled:hover:to-gray-500 focus:ring-2 focus:ring-[#1F3A93]/30 active:from-[#112451] active:to-[#16306e] transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 text-sm sm:text-base md:text-lg"
-                        >
-                          {saving ? (
-                            <>
-                              <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
-                              <span>Submitting...</span>
-                            </>
-                          ) : (
-                            <>
-                              <Send className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" />
-                              <span>Save & Next</span>
-                            </>
-                          )}
-                        </button>
+                        {(() => {
+                          const hasHrNotes =
+                            hrFeedback &&
+                            (hrFeedback.generalNotes ||
+                              hrFeedback.personalInfoNotes ||
+                              hrFeedback.professionalExperienceNotes ||
+                              hrFeedback.emergencyContactNotes ||
+                              hrFeedback.backgroundCheckNotes ||
+                              hrFeedback.cprCertificateNotes ||
+                              hrFeedback.drivingLicenseNotes ||
+                              hrFeedback.professionalCertificatesNotes ||
+                              hrFeedback.tbSymptomScreenNotes ||
+                              hrFeedback.orientationNotes ||
+                              hrFeedback.w4FormNotes ||
+                              hrFeedback.w9FormNotes ||
+                              hrFeedback.i9FormNotes ||
+                              hrFeedback.directDepositNotes ||
+                              hrFeedback.codeOfEthicsNotes ||
+                              hrFeedback.serviceDeliveryPoliciesNotes ||
+                              hrFeedback.nonCompeteAgreementNotes ||
+                              hrFeedback.misconductStatementNotes);
+                          const isSubmitted =
+                            formStatus === "submitted" && !hasHrNotes;
+
+                          return (
+                            <button
+                              type="button"
+                              onClick={handleSubmit}
+                              disabled={saving || isSubmitted}
+                              className={`flex items-center justify-center gap-2 sm:gap-3 w-full sm:w-auto py-3 sm:py-4 px-4 sm:px-6 text-white font-bold tracking-wide rounded-xl focus:ring-2 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 text-sm sm:text-base md:text-lg ${
+                                isSubmitted
+                                  ? "bg-gray-400 cursor-not-allowed opacity-60"
+                                  : "bg-gradient-to-r from-[#1F3A93] to-[#2748B4] hover:from-[#16306e] hover:to-[#1F3A93] focus:ring-[#1F3A93]/30 active:from-[#112451] active:to-[#16306e] disabled:from-gray-400 disabled:to-gray-500"
+                              }`}
+                              title={
+                                isSubmitted ? "Waiting for HR feedback" : ""
+                              }
+                            >
+                              {saving ? (
+                                <>
+                                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                                  <span>Submitting...</span>
+                                </>
+                              ) : (
+                                <>
+                                  <Send className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" />
+                                  <span>
+                                    {isSubmitted
+                                      ? "Awaiting HR Feedback"
+                                      : "Save & Next"}
+                                  </span>
+                                </>
+                              )}
+                            </button>
+                          );
+                        })()}
                       </div>
                     </div>
                   </div>

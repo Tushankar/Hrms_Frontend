@@ -381,9 +381,15 @@ const LegalDisclosures = () => {
                     <div>
                       {formStatus === "completed" ||
                       formStatus === "submitted" ? (
-                        <p className="text-base font-semibold text-green-800">
-                          ✅ Progress Updated - Form Completed Successfully
-                        </p>
+                        <div>
+                          <p className="text-base font-semibold text-green-800">
+                            ✅ Progress Updated - Form Completed Successfully
+                          </p>
+                          <p className="text-sm text-green-700 mt-1">
+                            You cannot make any changes to the form until HR
+                            provides their feedback.
+                          </p>
+                        </div>
                       ) : formStatus === "approved" ? (
                         <p className="text-base font-semibold text-green-800">
                           ✅ Form Approved

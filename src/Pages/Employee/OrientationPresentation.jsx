@@ -243,8 +243,8 @@ const OrientationPresentation = () => {
     setScale((prev) => Math.max(prev - 0.2, 0.5));
   };
 
-  const handleSave = async (status = "draft") => {
-    if (status === "completed" && !viewed) {
+  const handleSave = async (status = "submitted") => {
+    if (status === "submitted" && !viewed) {
       toast.error(
         "Please view the orientation presentation before submitting."
       );
@@ -508,24 +508,62 @@ const OrientationPresentation = () => {
                       Exit Application
                     </button>
 
-                    <button
-                      type="button"
-                      onClick={() => handleSave(viewed ? "completed" : "draft")}
-                      disabled={isSubmitting}
-                      className="inline-flex items-center justify-center gap-2 w-full sm:w-auto py-2.5 sm:py-3 px-4 sm:px-6 bg-gradient-to-r from-[#1F3A93] to-[#2748B4] text-white font-bold rounded-lg hover:from-[#16306e] hover:to-[#1F3A93] focus:ring-2 focus:ring-[#1F3A93]/30 transition-all duration-200 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
-                    >
-                      {isSubmitting ? (
-                        <>
-                          <RotateCcw className="w-4 h-4 animate-spin" />
-                          <span>Submitting...</span>
-                        </>
-                      ) : (
-                        <>
-                          <Send className="w-4 h-4" />
-                          <span>Save & Next</span>
-                        </>
-                      )}
-                    </button>
+                    {(() => {
+                      const hasHrNotes =
+                        hrFeedback &&
+                        (hrFeedback.generalNotes ||
+                          hrFeedback.personalInfoNotes ||
+                          hrFeedback.professionalExperienceNotes ||
+                          hrFeedback.emergencyContactNotes ||
+                          hrFeedback.backgroundCheckNotes ||
+                          hrFeedback.cprCertificateNotes ||
+                          hrFeedback.drivingLicenseNotes ||
+                          hrFeedback.professionalCertificatesNotes ||
+                          hrFeedback.tbSymptomScreenNotes ||
+                          hrFeedback.orientationNotes ||
+                          hrFeedback.w4FormNotes ||
+                          hrFeedback.w9FormNotes ||
+                          hrFeedback.i9FormNotes ||
+                          hrFeedback.directDepositNotes ||
+                          hrFeedback.codeOfEthicsNotes ||
+                          hrFeedback.serviceDeliveryPoliciesNotes ||
+                          hrFeedback.nonCompeteAgreementNotes ||
+                          hrFeedback.misconductStatementNotes);
+                      const isSubmitted =
+                        formStatus === "submitted" && !hasHrNotes;
+
+                      return (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            handleSave(viewed ? "submitted" : "draft")
+                          }
+                          disabled={isSubmitting || isSubmitted}
+                          className={`inline-flex items-center justify-center gap-2 w-full sm:w-auto py-2.5 sm:py-3 px-4 sm:px-6 text-white font-bold rounded-lg focus:ring-2 transition-all duration-200 shadow-md hover:shadow-lg text-sm sm:text-base ${
+                            isSubmitted
+                              ? "bg-gray-400 cursor-not-allowed opacity-60"
+                              : "bg-gradient-to-r from-[#1F3A93] to-[#2748B4] hover:from-[#16306e] hover:to-[#1F3A93] focus:ring-[#1F3A93]/30 disabled:opacity-50 disabled:cursor-not-allowed"
+                          }`}
+                          title={isSubmitted ? "Waiting for HR feedback" : ""}
+                        >
+                          {isSubmitting ? (
+                            <>
+                              <RotateCcw className="w-4 h-4 animate-spin" />
+                              <span>Submitting...</span>
+                            </>
+                          ) : (
+                            <>
+                              <Send className="w-4 h-4" />
+                              <span>
+                                {isSubmitted
+                                  ? "Awaiting HR Feedback"
+                                  : "Save & Next"}
+                              </span>
+                            </>
+                          )}
+                        </button>
+                      );
+                    })()}
                   </div>
                 </div>
               </div>

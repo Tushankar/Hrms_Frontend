@@ -681,7 +681,7 @@ export const EmployeeTaskManagement = () => {
           },
           {
             id: "driving-license",
-            name: "Driver's License",
+            name: "Government ID",
             priority: "Medium",
             type: "Documentation",
             creationDate: backendData.application?.createdAt
@@ -2971,6 +2971,12 @@ export const EmployeeTaskManagement = () => {
                                       ) {
                                         navigate(
                                           "/employee/pca-training-questions"
+                                        );
+                                      } else if (
+                                        task.id === "driving-license"
+                                      ) {
+                                        navigate(
+                                          "/employee/driving-license-upload"
                                         );
                                       } else {
                                         toast.error("Form not available yet");
