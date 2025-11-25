@@ -618,22 +618,24 @@ const LegalDisclosures = () => {
                                 hrFeedback[key].trim().length > 0
                             ));
 
-                        // Check if form is submitted (and no HR notes)
-                        const isSubmitted =
-                          formStatus === "submitted" && !hasHrNotes;
+                        // Check if form is locked (submitted or completed, and no HR notes)
+                        const isLocked =
+                          (formStatus === "submitted" ||
+                            formStatus === "completed") &&
+                          !hasHrNotes;
 
                         return (
                           <button
                             type="button"
                             onClick={() => handleSave()}
-                            disabled={isSubmitting || isSubmitted}
+                            disabled={isSubmitting || isLocked}
                             className={`inline-flex items-center justify-center gap-3 w-full max-w-xs py-3 px-5 font-bold tracking-wide rounded-lg focus:ring-2 focus:ring-[#1F3A93]/30 transition-all duration-200 shadow-md hover:shadow-lg hover:-translate-y-0.5 text-sm sm:text-base ${
-                              isSubmitting || isSubmitted
+                              isSubmitting || isLocked
                                 ? "bg-gray-400 text-gray-600 cursor-not-allowed opacity-60"
                                 : "bg-gradient-to-r from-[#1F3A93] to-[#2748B4] text-white hover:from-[#16306e] hover:to-[#1F3A93] active:from-[#112451] active:to-[#16306e]"
                             }`}
                             title={
-                              isSubmitted
+                              isLocked
                                 ? "Form is submitted. HR notes are required to make changes."
                                 : "Save and proceed to next form"
                             }
@@ -646,7 +648,7 @@ const LegalDisclosures = () => {
                             <span>
                               {isSubmitting
                                 ? "Submitting..."
-                                : isSubmitted
+                                : isLocked
                                 ? "Awaiting HR Feedback"
                                 : "Save & Next"}
                             </span>
