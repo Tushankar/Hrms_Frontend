@@ -1688,8 +1688,18 @@ export const EmployeeTaskManagement = () => {
 
   // Calculate overall progress
   const calculateOverallProgress = () => {
-    // Count completed forms from tasks
+    if (!tasks || tasks.length === 0) {
+      return {
+        completed: 0,
+        total: 20,
+        percentage: 0,
+        isComplete: false,
+      };
+    }
+
+    // Count completed forms from tasks (excluding employment-type as it's counted separately)
     const completedTasksCount = tasks.filter((task) => {
+      if (task.id === "employment-type") return false; // Don't count employment-type here
       const submissionStatus = task.submissionStatus;
       return (
         submissionStatus === "Submitted" ||
@@ -1698,9 +1708,25 @@ export const EmployeeTaskManagement = () => {
       );
     }).length;
 
-    // Count employmentType as completed if selected
-    const employmentTypeCompleted = employmentType ? 1 : 0;
-    const completedCount = completedTasksCount + employmentTypeCompleted;
+    // Count employmentType separately if selected
+    const employmentTypeTask = tasks.find(
+      (task) => task.id === "employment-type"
+    );
+    const employmentTypeCompleted =
+      employmentTypeTask?.submissionStatus === "Submitted" ? 1 : 0;
+
+    const completedCount = Math.min(
+      completedTasksCount + employmentTypeCompleted,
+      20
+    );
+
+    console.log("📊 Task Management Progress Calculation:", {
+      completedTasksCount,
+      employmentTypeCompleted,
+      employmentTypeStatus: employmentTypeTask?.submissionStatus,
+      completedCount,
+      totalForms: 20,
+    });
 
     // Total forms is always 20
     const totalForms = 20;
