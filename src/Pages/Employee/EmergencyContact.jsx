@@ -18,6 +18,7 @@ import HRFeedback from "../../Components/Common/HRFeedback/HRFeedback";
 
 // FORM_KEYS should be defined outside the component to prevent re-creation on every render.
 const FORM_KEYS = [
+  "employmentType",
   "personalInformation",
   "professionalExperience",
   "workExperience",
@@ -54,6 +55,9 @@ const EmergencyContact = () => {
   const [formStatus, setFormStatus] = useState("draft");
   const [hrFeedback, setHrFeedback] = useState(null);
 
+  const [employmentType, setEmploymentType] = useState(null);
+  const [totalForms, setTotalForms] = useState(20); // default to 20
+
   // Form data for emergency contacts
   const [formData, setFormData] = useState({
     staffName: "",
@@ -68,6 +72,15 @@ const EmergencyContact = () => {
     contactAddress3: "",
     phoneNumber3: "",
   });
+
+  const shouldCountForm = (formKey) => {
+    if (employmentType === "W-2 Employee") {
+      return formKey !== "w9Form";
+    } else if (employmentType === "1099 Contractor") {
+      return formKey !== "w4Form";
+    }
+    return formKey !== "w9Form"; // default to W-2 if not set
+  };
 
   const baseURL = import.meta.env.VITE__BASEURL;
 
@@ -119,6 +132,7 @@ const EmergencyContact = () => {
         setApplicationStatus(
           applicationData.application.applicationStatus || "draft"
         );
+        setEmploymentType(applicationData.application.employmentType);
 
         // Set existing submission data for this form
         const emergencyContactForm = applicationData.forms?.emergencyContact;
@@ -149,7 +163,9 @@ const EmergencyContact = () => {
 
         // Calculate overall progress dynamically
         const { forms } = applicationData;
-        const completedCount = FORM_KEYS.filter((key) => {
+        const filteredKeys = FORM_KEYS.filter(shouldCountForm);
+        setTotalForms(filteredKeys.length);
+        const completedCount = filteredKeys.filter((key) => {
           let form = forms[key];
           if (key === "jobDescriptionPCA") {
             form =
@@ -158,15 +174,20 @@ const EmergencyContact = () => {
               forms.jobDescriptionLPN ||
               forms.jobDescriptionRN;
           }
-          return [
-            "submitted",
-            "completed",
-            "under_review",
-            "approved",
-          ].includes(form?.status);
+          return (
+            [
+              "submitted",
+              "completed",
+              "under_review",
+              "approved",
+            ].includes(form?.status) ||
+            (key === "employmentType" && applicationData.application.employmentType)
+          );
         }).length;
 
-        const progress = Math.round((completedCount / FORM_KEYS.length) * 100);
+        const progress = Math.round(
+          (completedCount / filteredKeys.length) * 100
+        );
         setOverallProgress(progress);
       }
     } catch (error) {
@@ -634,7 +655,8 @@ const EmergencyContact = () => {
                     </div>
                     <div className="text-right">
                       <div className="text-lg font-bold text-blue-600">
-                        {Math.round((overallProgress / 100) * 20)}/20
+                        {Math.round((overallProgress / 100) * totalForms)}/
+                        {totalForms}
                       </div>
                       <div className="text-xs text-gray-600">
                         Forms Completed

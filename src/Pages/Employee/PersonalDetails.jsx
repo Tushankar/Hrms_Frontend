@@ -38,11 +38,6 @@ export const PersonalDetails = () => {
     fullName: userData?.userName || "Roger Steven",
     email: userData?.email || "example@gmail.com",
     phoneNumber: userData?.phoneNumber || "+1 923-494-2358",
-    address:
-      userData?.address ||
-      "Lorem ipsum, consectetur eli dolor sit, New york, USA.",
-    country: userData?.country || "USA",
-    dateOfBirth: userData?.dateOfBirth || "",
   });
   const [otpEnabled, setOtpEnabled] = useState(userData?.otpEnabled || false);
   const [isTogglingOtp, setIsTogglingOtp] = useState(false);
@@ -204,7 +199,7 @@ export const PersonalDetails = () => {
               </div>
 
               {/* Work Info Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 flex-1">
+              <div className="grid grid-cols-1 gap-8 flex-1">
                 <div className="space-y-6">
                   <div className="flex gap-4">
                     <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -242,99 +237,6 @@ export const PersonalDetails = () => {
                       </p>
                       <p className="font-semibold text-gray-900 text-base mt-2">
                         {userData?.phoneNumber}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="space-y-6">
-                  <div className="flex gap-4">
-                    <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <MapPin size={24} className="text-purple-600" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">
-                        Address Line
-                      </p>
-                      <p className="font-semibold text-gray-900 text-base mt-2">
-                        {userData?.addressLine1 || userData?.address || "N/A"}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex gap-4">
-                    <div className="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <MapPin size={24} className="text-indigo-600" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">
-                        Country
-                      </p>
-                      <p className="font-semibold text-gray-900 text-base mt-2">
-                        {userData?.country || "N/A"}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex gap-4">
-                    <div className="w-12 h-12 bg-teal-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <MapPin size={24} className="text-teal-600" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">
-                        State
-                      </p>
-                      <p className="font-semibold text-gray-900 text-base mt-2">
-                        {userData?.state || "N/A"}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="space-y-6">
-                  <div className="flex gap-4">
-                    <div className="w-12 h-12 bg-cyan-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <MapPin size={24} className="text-cyan-600" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">
-                        City
-                      </p>
-                      <p className="font-semibold text-gray-900 text-base mt-2">
-                        {userData?.city || "N/A"}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex gap-4">
-                    <div className="w-12 h-12 bg-pink-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <Award size={24} className="text-pink-600" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">
-                        Zip Code
-                      </p>
-                      <p className="font-semibold text-gray-900 text-base mt-2">
-                        {userData?.zip || "N/A"}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex gap-4">
-                    <div className="w-12 h-12 bg-rose-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <Calendar size={24} className="text-rose-600" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">
-                        Date of Birth
-                      </p>
-                      <p className="font-semibold text-gray-900 text-base mt-2">
-                        {userData?.dateOfBirth
-                          ? new Date(userData.dateOfBirth).toLocaleDateString(
-                              "en-US",
-                              {
-                                year: "numeric",
-                                month: "short",
-                                day: "numeric",
-                              }
-                            )
-                          : "N/A"}
                       </p>
                     </div>
                   </div>
@@ -397,7 +299,7 @@ export const PersonalDetails = () => {
                   />
                 </div>
 
-                <div className="group">
+                <div className="md:col-span-2 lg:col-span-1 group">
                   <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-3">
                     <Phone size={18} className="text-orange-600" />
                     Phone Number
@@ -407,53 +309,6 @@ export const PersonalDetails = () => {
                     type="tel"
                     name="phoneNumber"
                     value={personalInfo.phoneNumber}
-                    onChange={handleInputChange}
-                  />
-                </div>
-
-                <div className="md:col-span-2 lg:col-span-1 group">
-                  <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-3">
-                    <Home size={18} className="text-purple-600" />
-                    Address
-                  </label>
-                  <input
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-100 focus:border-purple-500 transition-all duration-300"
-                    type="text"
-                    name="address"
-                    value={personalInfo.address}
-                    onChange={handleInputChange}
-                  />
-                </div>
-
-                <div className="group">
-                  <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-3">
-                    <Flag size={18} className="text-red-600" />
-                    Country
-                  </label>
-                  <select
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-red-100 focus:border-red-500 transition-all duration-300 cursor-pointer"
-                    name="country"
-                    value={personalInfo.country}
-                    onChange={handleInputChange}
-                  >
-                    <option>USA</option>
-                    <option>India</option>
-                    <option>UK</option>
-                    <option>China</option>
-                    <option>Japan</option>
-                  </select>
-                </div>
-
-                <div className="group">
-                  <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-3">
-                    <Calendar size={18} className="text-indigo-600" />
-                    Date of Birth
-                  </label>
-                  <input
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-100 focus:border-indigo-500 transition-all duration-300 cursor-pointer"
-                    type="date"
-                    name="dateOfBirth"
-                    value={personalInfo.dateOfBirth}
                     onChange={handleInputChange}
                   />
                 </div>

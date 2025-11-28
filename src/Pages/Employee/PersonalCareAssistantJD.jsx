@@ -22,6 +22,7 @@ import "react-pdf/dist/Page/AnnotationLayer.css";
 import "react-pdf/dist/Page/TextLayer.css";
 
 const FORM_KEYS = [
+  "employmentType",
   "personalInformation",
   "professionalExperience",
   "workExperience",
@@ -323,6 +324,8 @@ const PersonalCareAssistantJD = () => {
   const [loading, setLoading] = useState(true);
   const [overallProgress, setOverallProgress] = useState(0);
   const [completedFormsCount, setCompletedFormsCount] = useState(0);
+  const [totalForms, setTotalForms] = useState(20);
+  const [employmentType, setEmploymentType] = useState(null);
   const [positionType, setPositionType] = useState("");
   const [applicationId, setApplicationId] = useState(null);
   const [employeeId, setEmployeeId] = useState(null);
@@ -361,6 +364,12 @@ const PersonalCareAssistantJD = () => {
   const [isPlacingText, setIsPlacingText] = useState(false);
   const [isDraggingText, setIsDraggingText] = useState(false);
   const [textDragOffset, setTextDragOffset] = useState({ x: 0, y: 0 });
+
+  const shouldCountForm = (key, empType) => {
+    if (key === "w4Form") return empType === "W-2";
+    if (key === "w9Form") return empType === "1099";
+    return true;
+  };
 
   // Configure pdfjs worker
   useEffect(() => {
@@ -484,22 +493,32 @@ const PersonalCareAssistantJD = () => {
             backendData.application?.completedForms || [];
           const completedSet = new Set(completedFormsArray);
 
-          const completedForms = FORM_KEYS.filter((key) => {
+          const currentEmploymentType =
+            backendData.application.employmentType || "";
+          setEmploymentType(currentEmploymentType);
+          const filteredKeys = FORM_KEYS.filter((key) =>
+            shouldCountForm(key, currentEmploymentType)
+          );
+
+          const completedForms = filteredKeys.filter((key) => {
             const form = forms[key];
             return (
               form?.status === "submitted" ||
               form?.status === "completed" ||
               form?.status === "under_review" ||
               form?.status === "approved" ||
-              completedSet.has(key)
+              completedSet.has(key) ||
+              (key === "employmentType" && currentEmploymentType)
             );
           }).length;
 
+          const totalFormsCount = filteredKeys.length;
           const percentage = Math.round(
-            (completedForms / FORM_KEYS.length) * 100
+            (completedForms / totalFormsCount) * 100
           );
           setOverallProgress(percentage);
           setCompletedFormsCount(completedForms);
+          setTotalForms(totalFormsCount);
         }
       }
     } catch (error) {
@@ -1195,7 +1214,7 @@ const PersonalCareAssistantJD = () => {
                   </div>
                   <div className="text-right">
                     <div className="text-lg font-bold text-blue-600">
-                      {completedFormsCount}/20
+                      {completedFormsCount}/{totalForms}
                     </div>
                     <div className="text-xs text-gray-600">Forms Completed</div>
                   </div>
@@ -1289,7 +1308,7 @@ const PersonalCareAssistantJD = () => {
                         );
 
                         // Also save the status
-                        await axios.post(
+                        const statusResponse = await axios.post(
                           `${baseURL}/onboarding/job-description/save-status`,
                           {
                             applicationId,
@@ -1300,8 +1319,11 @@ const PersonalCareAssistantJD = () => {
                           { withCredentials: true }
                         );
 
-                        console.log("Status saved successfully");
+                        console.log("Status saved successfully:", statusResponse.data);
+                        
+                        // Dispatch event to update sidebar
                         window.dispatchEvent(new Event("formStatusUpdated"));
+                        window.dispatchEvent(new CustomEvent("positionTypeSaved"));
                         toast.success(
                           `Job Description signed successfully for ${positionType} position`
                         );

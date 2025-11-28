@@ -16,6 +16,7 @@ import Cookies from "js-cookie";
 import HRFeedback from "../../Components/Common/HRFeedback/HRFeedback";
 
 const FORM_KEYS = [
+  "employmentType",
   "personalInformation",
   "professionalExperience",
   "workExperience",
@@ -49,7 +50,19 @@ const CPRFirstAidCertificate = () => {
   const [overallProgress, setOverallProgress] = useState(0);
   const [formStatus, setFormStatus] = useState("draft");
   const [hrFeedback, setHrFeedback] = useState(null);
+
+  const [employmentType, setEmploymentType] = useState(null);
+  const [totalForms, setTotalForms] = useState(20); // default to 20
   const baseURL = import.meta.env.VITE__BASEURL;
+
+  const shouldCountForm = (formKey) => {
+    if (employmentType === "W-2 Employee") {
+      return formKey !== "w9Form";
+    } else if (employmentType === "1099 Contractor") {
+      return formKey !== "w4Form";
+    }
+    return formKey !== "w9Form"; // default to W-2 if not set
+  };
 
   useEffect(() => {
     initializeForm();
@@ -72,6 +85,7 @@ const CPRFirstAidCertificate = () => {
 
       if (appResponse.data?.data?.application) {
         setApplicationId(appResponse.data.data.application._id);
+        setEmploymentType(appResponse.data.data.application.employmentType);
         if (
           appResponse.data.data.forms.backgroundCheck?.cprFirstAidCertificate
         ) {
@@ -93,7 +107,10 @@ const CPRFirstAidCertificate = () => {
           appResponse.data.data.application?.completedForms || [];
         const completedSet = new Set(completedFormsArray);
 
-        const completed = FORM_KEYS.filter((key) => {
+        const filteredKeys = FORM_KEYS.filter(shouldCountForm);
+        setTotalForms(filteredKeys.length);
+
+        const completed = filteredKeys.filter((key) => {
           let form = forms[key];
           if (key === "jobDescriptionPCA") {
             form =
@@ -102,18 +119,21 @@ const CPRFirstAidCertificate = () => {
               forms.jobDescriptionLPN ||
               forms.jobDescriptionRN;
           }
-          return [
-            "submitted",
-            "completed",
-            "under_review",
-            "approved",
-          ].includes(form?.status);
+          return (
+            [
+              "submitted",
+              "completed",
+              "under_review",
+              "approved",
+            ].includes(form?.status) ||
+            (key === "employmentType" && appResponse.data.data.application.employmentType)
+          );
         });
 
         setCompletedForms(completed);
 
         const progressPercentage = Math.round(
-          (completed.length / FORM_KEYS.length) * 100
+          (completed.length / filteredKeys.length) * 100
         );
         setOverallProgress(progressPercentage);
       }
@@ -333,8 +353,7 @@ const CPRFirstAidCertificate = () => {
                   Upload your CPR/First Aid certificate (Optional)
                 </p>
                 <div className="mt-4 text-sm text-gray-500">
-                  Progress: {completedForms.length}/{FORM_KEYS.length} forms
-                  completed
+                  Progress: {completedForms.length}/{totalForms} forms completed
                 </div>
               </div>
 
@@ -465,7 +484,7 @@ const CPRFirstAidCertificate = () => {
                     </div>
                     <div className="text-right">
                       <div className="text-lg font-bold text-blue-600">
-                        {completedForms.length}/{FORM_KEYS.length}
+                        {completedForms.length}/{totalForms}
                       </div>
                       <div className="text-xs text-gray-600">
                         Forms Completed

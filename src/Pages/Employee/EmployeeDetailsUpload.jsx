@@ -17,6 +17,7 @@ import Cookies from "js-cookie";
 import HRFeedback from "../../Components/Common/HRFeedback/HRFeedback";
 
 const FORM_KEYS = [
+  "employmentType",
   "personalInformation",
   "professionalExperience",
   "workExperience",
@@ -52,8 +53,20 @@ const EmployeeDetailsUpload = () => {
   const [applicationId, setApplicationId] = useState(null);
   const [formStatus, setFormStatus] = useState("draft");
   const [hrFeedback, setHrFeedback] = useState(null);
+
+  const [employmentType, setEmploymentType] = useState(null);
+  const [totalForms, setTotalForms] = useState(20); // default to 20
   const fileInputRef = useRef(null);
   const baseURL = import.meta.env.VITE__BASEURL;
+
+  const shouldCountForm = (formKey) => {
+    if (employmentType === "W-2 Employee") {
+      return formKey !== "w9Form";
+    } else if (employmentType === "1099 Contractor") {
+      return formKey !== "w4Form";
+    }
+    return formKey !== "w9Form"; // default to W-2 if not set
+  };
 
   const getPositionDisplayName = (position) => {
     const positionMap = {
@@ -109,6 +122,7 @@ const EmployeeDetailsUpload = () => {
       if (appResponse.data?.data?.application) {
         const appId = appResponse.data.data.application._id;
         setApplicationId(appId);
+        setEmploymentType(appResponse.data.data.application.employmentType);
 
         // Get position type
         const savedPosition =
@@ -142,6 +156,9 @@ const EmployeeDetailsUpload = () => {
           backendData.application?.completedForms || [];
         const completedSet = new Set(completedFormsArray);
 
+        const filteredKeys = FORM_KEYS.filter(shouldCountForm);
+        setTotalForms(filteredKeys.length);
+
         // Check if professional certificate is completed for this position
         const hasProfessionalCertificate =
           backendData.professionalCertificateCompleted ||
@@ -149,20 +166,21 @@ const EmployeeDetailsUpload = () => {
             backendData.application?.professionalCertificates?.[savedPosition]
               ?.length > 0);
 
-        const completedForms = FORM_KEYS.filter((key) => {
+        const completedForms = filteredKeys.filter((key) => {
           const form = forms[key];
           return (
             form?.status === "submitted" ||
             form?.status === "completed" ||
             form?.status === "under_review" ||
             form?.status === "approved" ||
-            completedSet.has(key)
+            completedSet.has(key) ||
+            (key === "employmentType" && appResponse.data.data.application.employmentType)
           );
         }).length;
 
         // Use only FORM_KEYS.length (20 forms), not adding +1 for professional certificate
         const totalCompletedForms = completedForms;
-        const totalForms = FORM_KEYS.length;
+        const totalForms = filteredKeys.length;
 
         const percentage = Math.round((totalCompletedForms / totalForms) * 100);
         setOverallProgress(percentage);
@@ -789,7 +807,7 @@ const EmployeeDetailsUpload = () => {
                   </div>
                   <div className="text-right">
                     <div className="text-lg font-bold text-blue-600">
-                      {completedFormsCount}/{FORM_KEYS.length}
+                      {completedFormsCount}/{totalForms}
                     </div>
                     <div className="text-xs text-gray-600">Forms Completed</div>
                   </div>

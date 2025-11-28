@@ -79,6 +79,9 @@ const WorkExperience = () => {
   const [completedFormsCount, setCompletedFormsCount] = useState(0);
   const [hasWorkedBefore, setHasWorkedBefore] = useState(null); // null, true, or false
 
+  const [totalForms, setTotalForms] = useState(20);
+  const [employmentType, setEmploymentType] = useState(null);
+
   const getUserFromToken = () => {
     try {
       const session = Cookies.get("session");
@@ -133,6 +136,12 @@ const WorkExperience = () => {
     initializeForm();
   }, []);
 
+  const shouldCountForm = (key, empType) => {
+    if (key === "w4Form") return empType === "W-2";
+    if (key === "w9Form") return empType === "1099";
+    return true;
+  };
+
   const fetchProgressData = async (userId) => {
     try {
       const response = await axios.get(
@@ -152,6 +161,7 @@ const WorkExperience = () => {
         );
 
         const formKeys = [
+          "employmentType",
           "personalInformation",
           "professionalExperience",
           "workExperience",
@@ -174,22 +184,31 @@ const WorkExperience = () => {
           "directDeposit",
         ];
 
-        const completedForms = formKeys.filter((key) => {
+        const currentEmploymentType =
+          backendData.application.employmentType || "";
+        setEmploymentType(currentEmploymentType);
+        const filteredKeys = formKeys.filter((key) =>
+          shouldCountForm(key, currentEmploymentType)
+        );
+
+        const completedForms = filteredKeys.filter((key) => {
           const form = forms[key];
           return (
             form?.status === "submitted" ||
             form?.status === "completed" ||
             form?.status === "under_review" ||
             form?.status === "approved" ||
-            completedSet.has(key)
+            completedSet.has(key) ||
+            (key === "employmentType" && currentEmploymentType)
           );
         }).length;
 
-        const totalForms = formKeys.length;
-        const percentage = Math.round((completedForms / totalForms) * 100);
+        const totalFormsCount = filteredKeys.length;
+        const percentage = Math.round((completedForms / totalFormsCount) * 100);
 
         setCompletedFormsCount(completedForms);
         setOverallProgress(percentage);
+        setTotalForms(totalFormsCount);
       }
     } catch (error) {
       console.error("Error fetching progress:", error);
@@ -1223,7 +1242,7 @@ const WorkExperience = () => {
                       </div>
                       <div className="text-left sm:text-right">
                         <div className="text-base md:text-lg font-bold text-blue-600">
-                          {completedFormsCount}/20
+                          {completedFormsCount}/{totalForms}
                         </div>
                         <div className="text-xs text-gray-600">
                           Forms Completed

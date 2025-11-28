@@ -36,6 +36,9 @@ const EditBackgroundFormCheckResults = () => {
   const [applicationStatus, setApplicationStatus] = useState({});
   const [overallProgress, setOverallProgress] = useState(0);
 
+  const [employmentType, setEmploymentType] = useState(null);
+  const [totalForms, setTotalForms] = useState(25); // default to 25
+
   const [formData, setFormData] = useState({
     lastName: "",
     firstName: "",
@@ -81,6 +84,15 @@ const EditBackgroundFormCheckResults = () => {
     },
   });
 
+  const shouldCountForm = (formKey) => {
+    if (employmentType === "W-2 Employee") {
+      return formKey !== "w9Form";
+    } else if (employmentType === "1099 Contractor") {
+      return formKey !== "w4Form";
+    }
+    return formKey !== "w9Form"; // default to W-2 if not set
+  };
+
   const fetchProgressData = async () => {
     try {
       const userCookie = Cookies.get("user");
@@ -96,8 +108,10 @@ const EditBackgroundFormCheckResults = () => {
       if (response.data?.data?.application) {
         const forms = response.data.data.forms;
         setApplicationStatus(forms);
+        setEmploymentType(response.data.data.application.employmentType);
 
         const formKeys = [
+          "employmentType",
           "personalInformation",
           "professionalExperience",
           "workExperience",
@@ -129,20 +143,25 @@ const EditBackgroundFormCheckResults = () => {
           response.data.data.application?.completedForms || [];
         const completedSet = new Set(completedFormsArray);
 
-        const completedForms = formKeys.filter((key) => {
+        const filteredKeys = formKeys.filter(shouldCountForm);
+        setTotalForms(filteredKeys.length);
+
+        const completedForms = filteredKeys.filter((key) => {
           const form = forms[key];
           return (
             form?.status === "submitted" ||
             form?.status === "completed" ||
             form?.status === "under_review" ||
             form?.status === "approved" ||
-            completedSet.has(key)
+            completedSet.has(key) ||
+            (key === "employmentType" &&
+              response.data.data.application.employmentType)
           );
         }).length;
 
-        const totalForms = 25;
+        // const totalForms = 25; // using state now
         const progressPercentage = Math.round(
-          (completedForms / totalForms) * 100
+          (completedForms / filteredKeys.length) * 100
         );
         setOverallProgress(progressPercentage);
       }
@@ -1125,7 +1144,10 @@ const EditBackgroundFormCheckResults = () => {
                             </div>
                             <div className="text-right">
                               <div className="text-lg font-bold text-blue-600">
-                                {Math.round((overallProgress / 100) * 25)}/25
+                                {Math.round(
+                                  (overallProgress / 100) * totalForms
+                                )}
+                                /{totalForms}
                               </div>
                               <div className="text-xs text-gray-600">
                                 Forms Completed

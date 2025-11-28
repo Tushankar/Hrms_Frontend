@@ -103,11 +103,6 @@ export const EmployeeDashboard = () => {
     userName: user?.userName || "",
     email: user?.email || "",
     phone: user?.phoneNumber || "",
-    addressLine1: user?.addressLine1 || "",
-    state: user?.state || "",
-    city: user?.city || "",
-    zip: user?.zip || "",
-    country: user?.country || "",
   });
   const [selectedProfileImage, setSelectedProfileImage] = useState(null);
   const [profileImagePreview, setProfileImagePreview] = useState(null);
@@ -1222,11 +1217,6 @@ export const EmployeeDashboard = () => {
       formData.append("userName", profileData.userName);
       formData.append("email", profileData.email);
       formData.append("phone", phoneDigitsOnly);
-      formData.append("country", profileData.country);
-      formData.append("addressLine1", profileData.addressLine1);
-      formData.append("state", profileData.state);
-      formData.append("city", profileData.city);
-      formData.append("zip", profileData.zip);
 
       // Add profile image if selected
       if (selectedProfileImage) {
@@ -1291,11 +1281,6 @@ export const EmployeeDashboard = () => {
       userName: user?.userName || "",
       email: user?.email || "",
       phone: user?.phoneNumber || "",
-      addressLine1: user?.addressLine1 || "",
-      state: user?.state || "",
-      city: user?.city || "",
-      zip: user?.zip || "",
-      country: user?.country || "",
     });
     setSelectedProfileImage(null);
     setProfileImagePreview(null);
@@ -1484,10 +1469,6 @@ export const EmployeeDashboard = () => {
                   <h2 className="text-2xl font-bold text-gray-900 mb-1">
                     {user?.userName}
                   </h2>
-                  <p className="text-gray-600 mb-2 flex items-center justify-center sm:justify-start gap-2">
-                    <MapPin size={16} />
-                    {user?.country}
-                  </p>
                   <button
                     onClick={openEditProfile}
                     className="inline-flex items-center gap-2 bg-[#1F3A93] text-white px-6 py-2 rounded-lg hover:bg-[#16307E] transition-colors"
@@ -1537,99 +1518,6 @@ export const EmployeeDashboard = () => {
                       </p>
                       <p className="font-semibold text-gray-900 text-base mt-2">
                         {formatPhone(user?.phoneNumber)}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="space-y-6">
-                  <div className="flex gap-4">
-                    <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <MapPin size={24} className="text-purple-600" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">
-                        Address Line
-                      </p>
-                      <p className="font-semibold text-gray-900 text-base mt-2">
-                        {user?.addressLine1 || "N/A"}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex gap-4">
-                    <div className="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <MapPin size={24} className="text-indigo-600" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">
-                        Country
-                      </p>
-                      <p className="font-semibold text-gray-900 text-base mt-2">
-                        {user?.country || "N/A"}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex gap-4">
-                    <div className="w-12 h-12 bg-teal-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <MapPin size={24} className="text-teal-600" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">
-                        State
-                      </p>
-                      <p className="font-semibold text-gray-900 text-base mt-2">
-                        {user?.state || "N/A"}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="space-y-6">
-                  <div className="flex gap-4">
-                    <div className="w-12 h-12 bg-cyan-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <MapPin size={24} className="text-cyan-600" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">
-                        City
-                      </p>
-                      <p className="font-semibold text-gray-900 text-base mt-2">
-                        {user?.city || "N/A"}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex gap-4">
-                    <div className="w-12 h-12 bg-pink-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <Award size={24} className="text-pink-600" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">
-                        Zip Code
-                      </p>
-                      <p className="font-semibold text-gray-900 text-base mt-2">
-                        {user?.zip || "N/A"}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex gap-4">
-                    <div className="w-12 h-12 bg-rose-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <Calendar size={24} className="text-rose-600" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">
-                        Date of Birth
-                      </p>
-                      <p className="font-semibold text-gray-900 text-base mt-2">
-                        {user?.dateOfBirth
-                          ? new Date(user.dateOfBirth).toLocaleDateString(
-                              "en-US",
-                              {
-                                year: "numeric",
-                                month: "short",
-                                day: "numeric",
-                              }
-                            )
-                          : "N/A"}
                       </p>
                     </div>
                   </div>
@@ -2081,66 +1969,6 @@ export const EmployeeDashboard = () => {
                       }
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1F3A93] focus:border-transparent"
                       placeholder="Enter your phone number"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Country
-                    </label>
-                    <input
-                      type="text"
-                      value={profileData.country}
-                      onChange={(e) =>
-                        handleProfileInputChange("country", e.target.value)
-                      }
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1F3A93] focus:border-transparent"
-                      placeholder="Enter your country"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Address Line 1
-                    </label>
-                    <input
-                      type="text"
-                      value={profileData.addressLine1}
-                      onChange={(e) =>
-                        handleProfileInputChange("addressLine1", e.target.value)
-                      }
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1F3A93] focus:border-transparent"
-                      placeholder="Enter your address line 1"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      State
-                    </label>
-                    <input
-                      type="text"
-                      value={profileData.state}
-                      onChange={(e) =>
-                        handleProfileInputChange("state", e.target.value)
-                      }
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1F3A93] focus:border-transparent"
-                      placeholder="Enter your state"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      City
-                    </label>
-                    <input
-                      type="text"
-                      value={profileData.city}
-                      onChange={(e) =>
-                        handleProfileInputChange("city", e.target.value)
-                      }
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1F3A93] focus:border-transparent"
-                      placeholder="Enter your city"
                     />
                   </div>
 

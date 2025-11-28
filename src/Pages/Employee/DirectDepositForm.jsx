@@ -10,6 +10,7 @@ import Cookies from "js-cookie";
 import { jwtDecode } from "jwt-decode";
 
 const FORM_KEYS = [
+  "employmentType",
   "personalInformation",
   "professionalExperience",
   "workExperience",
@@ -43,7 +44,18 @@ const DirectDepositForm = () => {
   const [hrFeedback, setHrFeedback] = useState(null);
   const [overallProgress, setOverallProgress] = useState(0);
   const [completedFormsCount, setCompletedFormsCount] = useState(0);
+  const [employmentType, setEmploymentType] = useState(null);
+  const [totalForms, setTotalForms] = useState(20); // default to 20
   const baseURL = import.meta.env.VITE__BASEURL;
+
+  const shouldCountForm = (formKey) => {
+    if (employmentType === "W-2 Employee") {
+      return formKey !== "w9Form";
+    } else if (employmentType === "1099 Contractor") {
+      return formKey !== "w4Form";
+    }
+    return formKey !== "w9Form"; // default to W-2 if not set
+  };
 
   const [formData, setFormData] = useState({
     companyName: "Care Smart LLC / 39 18167860",
@@ -101,6 +113,16 @@ const DirectDepositForm = () => {
     initializeForm();
   }, []);
 
+  useEffect(() => {
+    const handleFormStatusUpdate = () => {
+      initializeForm();
+    };
+    window.addEventListener("formStatusUpdated", handleFormStatusUpdate);
+    return () => {
+      window.removeEventListener("formStatusUpdated", handleFormStatusUpdate);
+    };
+  }, []);
+
   const initializeForm = async () => {
     try {
       const userToken = Cookies.get("session");
@@ -124,6 +146,8 @@ const DirectDepositForm = () => {
 
       if (appResponse.data?.data?.application) {
         setApplicationId(appResponse.data.data.application._id);
+        const empType = appResponse.data.data.application.employmentType;
+        setEmploymentType(empType);
 
         // Calculate progress
         const backendData = appResponse.data.data;
@@ -132,19 +156,30 @@ const DirectDepositForm = () => {
           backendData.application?.completedForms || [];
         const completedSet = new Set(completedFormsArray);
 
-        const completedForms = FORM_KEYS.filter((key) => {
+        const filteredKeys = FORM_KEYS.filter((key) => {
+          if (empType === "W-2 Employee") {
+            return key !== "w9Form";
+          } else if (empType === "1099 Contractor") {
+            return key !== "w4Form";
+          }
+          return key !== "w9Form";
+        });
+        setTotalForms(filteredKeys.length);
+
+        const completedForms = filteredKeys.filter((key) => {
           const form = forms[key];
           return (
             form?.status === "submitted" ||
             form?.status === "completed" ||
             form?.status === "under_review" ||
             form?.status === "approved" ||
-            completedSet.has(key)
+            completedSet.has(key) ||
+            (key === "employmentType" && empType)
           );
         }).length;
 
         const percentage = Math.round(
-          (completedForms / FORM_KEYS.length) * 100
+          (completedForms / filteredKeys.length) * 100
         );
         setOverallProgress(percentage);
         setCompletedFormsCount(completedForms);
@@ -1397,7 +1432,7 @@ const DirectDepositForm = () => {
             </div>
             <div className="text-right">
               <div className="text-lg font-bold text-blue-600">
-                {completedFormsCount}/20
+                {completedFormsCount}/{totalForms}
               </div>
               <div className="text-xs text-gray-900">Forms Completed</div>
             </div>

@@ -156,7 +156,9 @@ const SymptomScreenForm = () => {
             (form.status === "completed" ||
               form.status === "submitted" ||
               form.employeeUploadedForm ||
-              completedSet.has(key))
+              completedSet.has(key) ||
+              (key === "employmentType" &&
+                response.data.data.application.employmentType))
           );
         }).length;
 

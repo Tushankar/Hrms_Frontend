@@ -81,16 +81,19 @@ export const Sidebar = ({
   const [isPCAEligible, setIsPCAEligible] = useState(false);
   const [pcaEligibilityChecked, setPcaEligibilityChecked] = useState(false);
   const [applicationStatus, setApplicationStatus] = useState("draft");
+  const [employmentType, setEmploymentType] = useState(null);
 
   const baseURL = import.meta.env.VITE__BASEURL;
 
-  // Forms data organized by parts - memoized to update when isPCAEligible changes
+  // Forms data organized by parts - memoized to update when isPCAEligible and employmentType changes
   const formsByParts = useMemo(() => {
     console.log(
       "[Sidebar useMemo] isPCAEligible:",
       isPCAEligible,
       "applicationStatus:",
-      applicationStatus
+      applicationStatus,
+      "employmentType:",
+      employmentType
     );
 
     const part4Forms = [];
@@ -216,15 +219,28 @@ export const Sidebar = ({
             path: "/employee/i9-form",
           },
           {
-            id: "w4-form",
-            name: "W-4 Tax Form",
-            path: "/employee/w4-form",
+            id: "employment-type",
+            name: "Employment Type Selection",
+            path: "/employee/employment-type",
           },
-          {
-            id: "w9-form",
-            name: "W-9 Tax Form",
-            path: "/employee/w9-form",
-          },
+          ...(employmentType === "W-2"
+            ? [
+                {
+                  id: "w4-form",
+                  name: "W-4 Tax Form",
+                  path: "/employee/w4-form",
+                },
+              ]
+            : []),
+          ...(employmentType === "1099"
+            ? [
+                {
+                  id: "w9-form",
+                  name: "W-9 Tax Form",
+                  path: "/employee/w9-form",
+                },
+              ]
+            : []),
           {
             id: "direct-deposit",
             name: "Direct Deposit Form",
@@ -252,7 +268,7 @@ export const Sidebar = ({
         forms: part4Forms,
       },
     };
-  }, [isPCAEligible, applicationStatus]);
+  }, [isPCAEligible, applicationStatus, employmentType]);
 
   // Flatten all forms for status checking
   const applicationForms = useMemo(
@@ -403,33 +419,37 @@ export const Sidebar = ({
           "job-description-lpn": getFormStatus(forms.jobDescriptionLPN),
           "job-description-rn": getFormStatus(forms.jobDescriptionRN),
           "employee-details-upload": getFormStatus(forms.employeeDetailsUpload),
+          "employment-type": !!backendData.application?.employmentType,
         };
 
         console.log("[Fetch] Completion map:", completionMap);
 
-        // Map all job description variants to the single sidebar ID
-        const jobDescStatus =
-          getFormStatus(forms.jobDescriptionPCA) ||
-          getFormStatus(forms.jobDescriptionCNA) ||
-          getFormStatus(forms.jobDescriptionLPN) ||
-          getFormStatus(forms.jobDescriptionRN);
-
+        // Get position type to check the correct job description field
+        const positionType = forms.positionType?.positionAppliedFor;
+        let jobDescStatus = undefined;
+        
+        if (positionType === "PCA") {
+          jobDescStatus = getFormStatus(forms.jobDescriptionPCA);
+        } else if (positionType === "CNA") {
+          jobDescStatus = getFormStatus(forms.jobDescriptionCNA);
+        } else if (positionType === "LPN") {
+          jobDescStatus = getFormStatus(forms.jobDescriptionLPN);
+        } else if (positionType === "RN") {
+          jobDescStatus = getFormStatus(forms.jobDescriptionRN);
+        }
+        
+        console.log("[Fetch] Position:", positionType, "Job Desc Status:", jobDescStatus);
         completionMap["job-description-pca"] = jobDescStatus;
 
-        // Check for employee details upload (employeeUploadedForms array in job description)
-        const employeeDetailsStatus =
-          (forms.jobDescriptionPCA?.employeeUploadedForms &&
-            forms.jobDescriptionPCA.employeeUploadedForms.length > 0) ||
-          (forms.jobDescriptionCNA?.employeeUploadedForms &&
-            forms.jobDescriptionCNA.employeeUploadedForms.length > 0) ||
-          (forms.jobDescriptionLPN?.employeeUploadedForms &&
-            forms.jobDescriptionLPN.employeeUploadedForms.length > 0) ||
-          (forms.jobDescriptionRN?.employeeUploadedForms &&
-            forms.jobDescriptionRN.employeeUploadedForms.length > 0);
+        // Check for employee details upload (professional certificates)
+        const professionalCertificatesStatus =
+          backendData.application?.professionalCertificates &&
+          Object.values(backendData.application.professionalCertificates).some(
+            (arr) => arr && arr.length > 0
+          );
 
-        completionMap["employee-details-upload"] = employeeDetailsStatus
-          ? true
-          : undefined;
+        completionMap["employee-details-upload"] =
+          professionalCertificatesStatus ? true : undefined;
 
         // Log summary
         const completedCount = Object.values(completionMap).filter(
@@ -441,6 +461,7 @@ export const Sidebar = ({
         setApplicationStatus(
           backendData.application?.applicationStatus || "draft"
         );
+        setEmploymentType(backendData.application?.employmentType || null);
       } else {
         console.log("[Fetch] No data in response");
       }

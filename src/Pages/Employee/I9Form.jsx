@@ -20,6 +20,7 @@ import axios from "axios";
 import Cookies from "js-cookie";
 
 const FORM_KEYS = [
+  "employmentType",
   "personalInformation",
   "professionalExperience",
   "workExperience",
@@ -55,17 +56,12 @@ function FormI9({ initialFormData = {}, onFormDataChange }) {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
-  const handleSSNInput = (e, index) => {
-    const value = e.target.value;
-    if (value && index < 8) {
-      const nextInput = e.target.parentElement.children[index + 1];
-      if (nextInput) nextInput.focus();
-    }
-    // Update SSN in formData
-    const currentSSN = formData.socialSecurityNumber || "";
-    const newSSN = currentSSN.split("");
-    newSSN[index] = value;
-    setFormData((prev) => ({ ...prev, socialSecurityNumber: newSSN.join("") }));
+  const handleSSNChange = (digitIndex, value) => {
+    const currentDigits = formData.socialSecurityNumber || "";
+    const digitsArray = currentDigits.padEnd(9, " ").split("");
+    digitsArray[digitIndex] = value.replace(/\D/g, "") || " ";
+    const newDigits = digitsArray.join("").trim();
+    setFormData((prev) => ({ ...prev, socialSecurityNumber: newDigits }));
   };
 
   const handleSSNKeyDown = (e, index) => {
@@ -181,7 +177,7 @@ function FormI9({ initialFormData = {}, onFormDataChange }) {
                       className="w-full border-0 p-0 focus:outline-none"
                     />
                   </td>
-                  <td className="border border-black p-[2px]">
+                  <td className="border border-black p-[2px] w-[80px]">
                     <div className="text-[7pt] whitespace-nowrap">
                       Apt. Number (if any)
                     </div>
@@ -301,14 +297,9 @@ function FormI9({ initialFormData = {}, onFormDataChange }) {
                           type="text"
                           maxLength="1"
                           value={(formData.socialSecurityNumber || "")[i] || ""}
-                          onInput={(e) => handleSSNInput(e, i)}
+                          onChange={(e) => handleSSNChange(i, e.target.value)}
                           onKeyDown={(e) => handleSSNKeyDown(e, i)}
-                          className="w-4 h-4 border-r border-black text-center focus:outline-none"
-                          style={{
-                            borderLeft: i === 0 ? "1px solid black" : "none",
-                            borderTop: "1px solid black",
-                            borderBottom: "1px solid black",
-                          }}
+                          className="w-6 h-6 text-center border border-black px-0 py-0 outline-none bg-white text-[13px] font-bold text-black"
                         />
                       ))}
                     </div>
@@ -1658,7 +1649,19 @@ const I9Form = () => {
   const [formData, setFormData] = useState({});
   const [formStatus, setFormStatus] = useState("draft");
   const [hrFeedback, setHrFeedback] = useState(null);
+
+  const [employmentType, setEmploymentType] = useState(null);
+  const [totalForms, setTotalForms] = useState(20); // default to 20
   const baseURL = import.meta.env.VITE__BASEURL;
+
+  const shouldCountForm = (formKey) => {
+    if (employmentType === "W-2 Employee") {
+      return formKey !== "w9Form";
+    } else if (employmentType === "1099 Contractor") {
+      return formKey !== "w4Form";
+    }
+    return formKey !== "w9Form"; // default to W-2 if not set
+  };
 
   // useCallback to memoize the function and avoid re-creating it on each render.
   const fetchPageData = useCallback(async () => {
@@ -1681,6 +1684,7 @@ const I9Form = () => {
       if (applicationData?.application) {
         const appId = applicationData.application._id;
         setApplicationId(appId);
+        setEmploymentType(applicationData.application.employmentType);
 
         // Load I9 form data using dedicated endpoint
         try {
@@ -1846,7 +1850,9 @@ const I9Form = () => {
 
         // Calculate overall progress dynamically
         const { forms } = applicationData;
-        const completedCount = FORM_KEYS.filter((key) => {
+        const filteredKeys = FORM_KEYS.filter(shouldCountForm);
+        setTotalForms(filteredKeys.length);
+        const completedCount = filteredKeys.filter((key) => {
           let form = forms[key];
           if (key === "jobDescriptionPCA") {
             form =
@@ -1855,18 +1861,17 @@ const I9Form = () => {
               forms.jobDescriptionLPN ||
               forms.jobDescriptionRN;
           }
-          return [
-            "submitted",
-            "completed",
-            "under_review",
-            "approved",
-          ].includes(form?.status);
+          return (
+            ["submitted", "completed", "under_review", "approved"].includes(
+              form?.status
+            ) || (key === "employmentType" && applicationData.application.employmentType)
+          );
         }).length;
 
         // Avoid division by zero and use dynamic length
         const progress =
-          FORM_KEYS.length > 0
-            ? Math.round((completedCount / FORM_KEYS.length) * 100)
+          filteredKeys.length > 0
+            ? Math.round((completedCount / filteredKeys.length) * 100)
             : 0;
         setOverallProgress(progress);
       }
@@ -1979,9 +1984,7 @@ const I9Form = () => {
     }
   };
 
-  const completedFormsCount = Math.round(
-    (overallProgress / 100) * FORM_KEYS.length
-  );
+  const completedFormsCount = Math.round((overallProgress / 100) * totalForms);
 
   return (
     <Layout>
@@ -2052,7 +2055,7 @@ const I9Form = () => {
 
           <div className="text-center mb-6 sm:mb-8">
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">
-              I9 Form
+              I-9 Form
             </h1>
             <p className="text-sm sm:text-base text-gray-600">
               Employment Eligibility Verification - Department of Homeland
@@ -2224,7 +2227,7 @@ const I9Form = () => {
               </div>
               <div className="text-right">
                 <div className="text-lg font-bold text-blue-600">
-                  {completedFormsCount}/{FORM_KEYS.length}
+                  {completedFormsCount}/{totalForms}
                 </div>
                 <div className="text-xs text-gray-600">Forms Completed</div>
               </div>
@@ -2327,7 +2330,7 @@ const I9Form = () => {
                     }
                     window.dispatchEvent(new Event("formStatusUpdated"));
                     setTimeout(() => {
-                      navigate("/employee/w4-form");
+                      navigate("/employee/employment-type");
                     }, 1500);
                   }}
                   className={`flex-1 px-4 sm:px-6 py-2 sm:py-3 text-white rounded-lg transition-all duration-200 shadow-md text-sm sm:text-base font-medium ${

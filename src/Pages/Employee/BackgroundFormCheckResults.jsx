@@ -535,6 +535,7 @@ const GemaltoRegistrationForm = ({ onFormDataChange, initialData }) => {
 };
 
 const FORM_KEYS = [
+   "employmentType",
   "personalInformation",
   "professionalExperience",
   "workExperience",
@@ -556,6 +557,12 @@ const FORM_KEYS = [
   "w9Form",
   "directDeposit",
 ];
+
+const shouldCountForm = (key, employmentType) => {
+  if (key === "w4Form") return employmentType === "W-2";
+  if (key === "w9Form") return employmentType === "1099";
+  return true;
+};
 
 const flattenBackgroundData = (data) => {
   const formatDate = (date) => {
@@ -598,6 +605,7 @@ const BackgroundFormCheckResults = () => {
   const [applicationId, setApplicationId] = useState(null);
   const [overallProgress, setOverallProgress] = useState(0);
   const [completedFormsCount, setCompletedFormsCount] = useState(0);
+  const [totalForms, setTotalForms] = useState(20);
   const [employeeId, setEmployeeId] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
   const [applicationStatus, setApplicationStatus] = useState("draft");
@@ -666,17 +674,24 @@ const BackgroundFormCheckResults = () => {
           backendData.application?.applicationStatus || "draft"
         );
 
-        // Calculate progress with 20 total forms
+        // Calculate progress with filtered forms based on employment type
         const forms = backendData.forms || {};
         const completedSet = new Set(
           backendData.application?.completedForms || []
         );
 
+        const currentEmploymentType =
+          backendData.application.employmentType || "";
+        const filteredKeys = FORM_KEYS.filter((key) =>
+          shouldCountForm(key, currentEmploymentType)
+        );
+
         console.log("📋 All Forms Data:", forms);
         console.log("📋 Available Form Keys in DB:", Object.keys(forms));
         console.log("📋 Completed Forms Array:", Array.from(completedSet));
+        console.log("📋 Filtered Keys based on employment type:", filteredKeys);
 
-        const completedForms = FORM_KEYS.filter((key) => {
+        const completedForms = filteredKeys.filter((key) => {
           const form = forms[key];
 
           if (form) {
@@ -701,11 +716,17 @@ const BackgroundFormCheckResults = () => {
             return true;
           }
 
+          // Special case for employmentType
+          if (key === "employmentType" && currentEmploymentType) {
+            console.log(`ℹ️ ${key}: employment type selected — COMPLETED ✓`);
+            return true;
+          }
+
           console.log(`❌ ${key}: NOT FOUND`);
           return false;
         }).length;
 
-        const totalForms = FORM_KEYS.length;
+        const totalForms = filteredKeys.length;
         const percentage = Math.round((completedForms / totalForms) * 100);
 
         console.log(
@@ -713,6 +734,7 @@ const BackgroundFormCheckResults = () => {
         );
 
         setCompletedFormsCount(completedForms);
+        setTotalForms(totalForms);
         setOverallProgress(percentage);
 
         // Populate background check data if exists
@@ -904,7 +926,7 @@ const BackgroundFormCheckResults = () => {
                 </div>
                 <div className="text-right">
                   <div className="text-lg font-bold text-blue-600">
-                    {completedFormsCount}/20
+                    {completedFormsCount}/{totalForms}
                   </div>
                   <div className="text-xs text-gray-600">Forms Completed</div>
                 </div>

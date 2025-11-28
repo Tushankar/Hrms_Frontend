@@ -32,6 +32,7 @@ pdfjs.GlobalWorkerOptions.workerSrc = new URL(
 ).href;
 
 const FORM_KEYS = [
+  "employmentType",
   "personalInformation",
   "professionalExperience",
   "workExperience",
@@ -66,8 +67,11 @@ const OrientationPresentation = () => {
   const [pageLoading, setPageLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [overallProgress, setOverallProgress] = useState(0);
+  const [completedFormsCount, setCompletedFormsCount] = useState(0);
   const [hrFeedback, setHrFeedback] = useState(null);
   const [formStatus, setFormStatus] = useState(null);
+  const [employmentType, setEmploymentType] = useState(null);
+  const [totalForms, setTotalForms] = useState(20); // default to 20
   const [document, setDocument] = useState(null);
   const [viewed, setViewed] = useState(false);
   const [positionType, setPositionType] = useState("");
@@ -79,6 +83,15 @@ const OrientationPresentation = () => {
   const [scale, setScale] = useState(1);
   const [showFullscreenPdf, setShowFullscreenPdf] = useState(false);
   const [pdfError, setPdfError] = useState(null);
+
+  const shouldCountForm = (formKey) => {
+    if (employmentType === "W-2 Employee") {
+      return formKey !== "w9Form";
+    } else if (employmentType === "1099 Contractor") {
+      return formKey !== "w4Form";
+    }
+    return formKey !== "w9Form"; // default to W-2 if not set
+  };
 
   const getDecodedUser = () => {
     try {
@@ -124,6 +137,8 @@ const OrientationPresentation = () => {
         if (backendData.application?._id) {
           setApplicationId(backendData.application._id);
         }
+        const empType = backendData.application.employmentType;
+        setEmploymentType(empType);
 
         const presentationData = backendData.forms?.orientationPresentation;
         if (presentationData) {
@@ -137,7 +152,17 @@ const OrientationPresentation = () => {
           backendData.forms?.positionType?.positionAppliedFor || "";
         setPositionType(position);
 
-        const completedForms = FORM_KEYS.filter((key) => {
+        const filteredKeys = FORM_KEYS.filter((key) => {
+          if (empType === "W-2 Employee") {
+            return key !== "w9Form";
+          } else if (empType === "1099 Contractor") {
+            return key !== "w4Form";
+          }
+          return key !== "w9Form";
+        });
+        setTotalForms(filteredKeys.length);
+
+        const completedForms = filteredKeys.filter((key) => {
           let form = forms[key];
           if (key === "jobDescriptionPCA") {
             form =
@@ -146,18 +171,22 @@ const OrientationPresentation = () => {
               forms.jobDescriptionLPN ||
               forms.jobDescriptionRN;
           }
-          return [
-            "submitted",
-            "completed",
-            "under_review",
-            "approved",
-          ].includes(form?.status);
+          return (
+            [
+              "submitted",
+              "completed",
+              "under_review",
+              "approved",
+            ].includes(form?.status) ||
+            (key === "employmentType" && empType)
+          );
         }).length;
 
         const percentage = Math.round(
-          (completedForms / FORM_KEYS.length) * 100
+          (completedForms / filteredKeys.length) * 100
         );
         setOverallProgress(percentage);
+        setCompletedFormsCount(completedForms);
       }
 
       if (docResponse.data?.success && docResponse.data?.data) {
@@ -188,6 +217,20 @@ const OrientationPresentation = () => {
       setPageLoading(false);
       toast.error("Could not identify employee. Please log in again.");
     }
+  }, []);
+
+  useEffect(() => {
+    const handleFormStatusUpdate = () => {
+      const user = getDecodedUser();
+      const currentEmployeeId = user?._id || user?.id;
+      if (currentEmployeeId) {
+        initializeForm(currentEmployeeId);
+      }
+    };
+    window.addEventListener("formStatusUpdated", handleFormStatusUpdate);
+    return () => {
+      window.removeEventListener("formStatusUpdated", handleFormStatusUpdate);
+    };
   }, []);
 
   const handleViewDocument = () => {
@@ -458,10 +501,7 @@ const OrientationPresentation = () => {
                           </div>
                           <div className="text-right">
                             <div className="text-lg font-bold text-blue-600">
-                              {Math.round(
-                                (overallProgress / 100) * FORM_KEYS.length
-                              )}
-                              /20
+                              {completedFormsCount}/{totalForms}
                             </div>
                             <div className="text-xs text-gray-600">
                               Forms Completed

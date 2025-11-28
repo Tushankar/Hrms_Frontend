@@ -19,6 +19,7 @@ import HRFeedback from "../../Components/Common/HRFeedback/HRFeedback";
 
 // It's good practice to define constants that are used in calculations.
 const FORM_KEYS = [
+  "employmentType",
   "personalInformation",
   "professionalExperience",
   "workExperience",
@@ -56,6 +57,10 @@ const LegalDisclosures = () => {
   const [isSubmitting, setIsSubmitting] = useState(false); // Renamed for clarity
   const [errors, setErrors] = useState({});
   const [overallProgress, setOverallProgress] = useState(0);
+
+  const [totalForms, setTotalForms] = useState(20);
+  const [employmentType, setEmploymentType] = useState(null);
+  const [completedFormsCount, setCompletedFormsCount] = useState(0);
 
   // FIX: Dedicated state for HRFeedback component props
   const [hrFeedback, setHrFeedback] = useState(null);
@@ -104,6 +109,12 @@ const LegalDisclosures = () => {
       navigate("/login"); // Redirect if token is bad
       return null;
     }
+  };
+
+  const shouldCountForm = (key, empType) => {
+    if (key === "w4Form") return empType === "W-2";
+    if (key === "w9Form") return empType === "1099";
+    return true;
   };
 
   // REFACTORED & CONSOLIDATED INITIALIZATION LOGIC
@@ -173,20 +184,34 @@ const LegalDisclosures = () => {
 
         // Calculate Overall Progress
         const forms = backendData.forms || {};
-        const completedForms = FORM_KEYS.filter((key) => {
+        const currentEmploymentType =
+          backendData.application.employmentType || "";
+        setEmploymentType(currentEmploymentType);
+        const filteredKeys = FORM_KEYS.filter((key) =>
+          shouldCountForm(key, currentEmploymentType)
+        );
+
+        const completedForms = filteredKeys.filter((key) => {
           const form = forms[key];
-          return [
-            "submitted",
-            "completed",
-            "under_review",
-            "approved",
-          ].includes(form?.status);
+          return (
+            [
+              "submitted",
+              "completed",
+              "under_review",
+              "approved",
+            ].includes(form?.status) ||
+            (key === "employmentType" && currentEmploymentType)
+          );
         }).length;
 
-        const totalForms = FORM_KEYS.length;
+        const totalFormsCount = filteredKeys.length;
         const percentage =
-          totalForms > 0 ? Math.round((completedForms / totalForms) * 100) : 0;
+          totalFormsCount > 0
+            ? Math.round((completedForms / totalFormsCount) * 100)
+            : 0;
         setOverallProgress(percentage);
+        setCompletedFormsCount(completedForms);
+        setTotalForms(totalFormsCount);
       }
     } catch (error) {
       console.error("Error initializing form:", error);
@@ -542,10 +567,7 @@ const LegalDisclosures = () => {
                       <div className="text-right">
                         {/* FIX: Removed hardcoded '23' */}
                         <div className="text-lg font-bold text-blue-600">
-                          {Math.round(
-                            (overallProgress / 100) * FORM_KEYS.length
-                          )}
-                          /{FORM_KEYS.length}
+                          {completedFormsCount}/{totalForms}
                         </div>
                         <div className="text-xs text-gray-600">
                           Forms Completed

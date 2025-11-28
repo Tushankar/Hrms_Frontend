@@ -10,6 +10,7 @@ import toast, { Toaster } from "react-hot-toast";
 import HRFeedback from "../../Components/Common/HRFeedback/HRFeedback";
 
 const FORM_KEYS = [
+  "employmentType",
   "personalInformation",
   "professionalExperience",
   "workExperience",
@@ -36,6 +37,8 @@ export default function CodeOfEthics() {
   const navigate = useNavigate();
   const [overallProgress, setOverallProgress] = useState(0);
   const [completedFormsCount, setCompletedFormsCount] = useState(0);
+  const [totalForms, setTotalForms] = useState(20);
+  const [employmentType, setEmploymentType] = useState(null);
   const [employeeSignature, setEmployeeSignature] = useState("");
   const [signatureDate, setSignatureDate] = useState("");
   const [applicationId, setApplicationId] = useState(null);
@@ -45,6 +48,12 @@ export default function CodeOfEthics() {
   const [formStatus, setFormStatus] = useState("draft");
   const [hrFeedback, setHrFeedback] = useState(null);
   const baseURL = import.meta.env.VITE__BASEURL;
+
+  const shouldCountForm = (key, empType) => {
+    if (key === "w4Form") return empType === "W-2";
+    if (key === "w9Form") return empType === "1099";
+    return true;
+  };
 
   useEffect(() => {
     fetchProgressData();
@@ -70,7 +79,14 @@ export default function CodeOfEthics() {
         const backendData = response.data.data;
         const forms = backendData.forms || {};
 
-        const completedForms = FORM_KEYS.filter((key) => {
+        const currentEmploymentType =
+          backendData.application.employmentType || "";
+        setEmploymentType(currentEmploymentType);
+        const filteredKeys = FORM_KEYS.filter((key) =>
+          shouldCountForm(key, currentEmploymentType)
+        );
+
+        const completedForms = filteredKeys.filter((key) => {
           let form = forms[key];
 
           // Handle job description - check all variants
@@ -86,15 +102,16 @@ export default function CodeOfEthics() {
             form?.status === "submitted" ||
             form?.status === "completed" ||
             form?.status === "under_review" ||
-            form?.status === "approved"
+            form?.status === "approved" ||
+            (key === "employmentType" && currentEmploymentType)
           );
         }).length;
 
-        const percentage = Math.round(
-          (completedForms / FORM_KEYS.length) * 100
-        );
+        const totalFormsCount = filteredKeys.length;
+        const percentage = Math.round((completedForms / totalFormsCount) * 100);
         setOverallProgress(percentage);
         setCompletedFormsCount(completedForms);
+        setTotalForms(totalFormsCount);
       }
     } catch (error) {
       console.error("Error fetching progress:", error);
@@ -544,7 +561,7 @@ export default function CodeOfEthics() {
                 </div>
                 <div className="text-right">
                   <div className="text-lg font-bold text-blue-600">
-                    {completedFormsCount}/20
+                    {completedFormsCount}/{totalForms}
                   </div>
                   <div className="text-xs text-gray-600">Forms Completed</div>
                 </div>

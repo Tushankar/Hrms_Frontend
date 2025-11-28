@@ -17,6 +17,7 @@ import Cookies from "js-cookie";
 import { jwtDecode } from "jwt-decode";
 
 const FORM_KEYS = [
+  "employmentType",
   "personalInformation",
   "professionalExperience",
   "workExperience",
@@ -52,7 +53,19 @@ const StaffOfMisconductForm = () => {
   const [errors, setErrors] = useState({});
   const [formStatus, setFormStatus] = useState("draft");
   const [hrFeedback, setHrFeedback] = useState(null);
+
+  const [employmentType, setEmploymentType] = useState(null);
+  const [totalForms, setTotalForms] = useState(20); // default to 20
   const baseURL = import.meta.env.VITE__BASEURL;
+
+  const shouldCountForm = (formKey) => {
+    if (employmentType === "W-2 Employee") {
+      return formKey !== "w9Form";
+    } else if (employmentType === "1099 Contractor") {
+      return formKey !== "w4Form";
+    }
+    return formKey !== "w9Form"; // default to W-2 if not set
+  };
 
   // Form data for the misconduct statement fields
   const [formData, setFormData] = useState({
@@ -159,6 +172,7 @@ const StaffOfMisconductForm = () => {
       if (appResponse.data?.data?.application) {
         const appId = appResponse.data.data.application._id;
         setApplicationId(appId);
+        setEmploymentType(appResponse.data.data.application.employmentType);
 
         // Calculate progress
         const backendData = appResponse.data.data;
@@ -167,19 +181,23 @@ const StaffOfMisconductForm = () => {
           backendData.application?.completedForms || [];
         const completedSet = new Set(completedFormsArray);
 
-        const completedForms = FORM_KEYS.filter((key) => {
+        const filteredKeys = FORM_KEYS.filter(shouldCountForm);
+        setTotalForms(filteredKeys.length);
+
+        const completedForms = filteredKeys.filter((key) => {
           const form = forms[key];
           return (
             form?.status === "submitted" ||
             form?.status === "completed" ||
             form?.status === "under_review" ||
             form?.status === "approved" ||
-            completedSet.has(key)
+            completedSet.has(key) ||
+            (key === "employmentType" && appResponse.data.data.application.employmentType)
           );
         }).length;
 
         const percentage = Math.round(
-          (completedForms / FORM_KEYS.length) * 100
+          (completedForms / filteredKeys.length) * 100
         );
 
         setOverallProgress(percentage);
@@ -486,22 +504,8 @@ const StaffOfMisconductForm = () => {
                   <div className="space-y-3 mt-6">
                     <p>
                       I <u>understand and acknowledge</u> that I must comply
-                      with Pacific Health Systems LLC{" "}
-                      <span
-                        className="inline-block border-b border-black"
-                        style={{ minHeight: "1.2em", minWidth: "50px" }}
-                      >
-                        <input
-                          type="text"
-                          value={formData.companyName}
-                          onChange={(e) =>
-                            handleChange("companyName", e.target.value)
-                          }
-                          className="border-0 bg-transparent w-full px-1 focus:outline-none text-xs sm:text-sm"
-                          placeholder=""
-                        />
-                      </span>
-                      , Code of Conduct and Abuse & Misconduct program.
+                      with my employer's Code of Conduct and Abuse & Misconduct
+                      program.
                     </p>
 
                     <p>
@@ -533,26 +537,11 @@ const StaffOfMisconductForm = () => {
                             )
                           }
                           className="border-0 bg-transparent w-full px-1 focus:outline-none text-xs sm:text-sm"
-                          placeholder="Employee Name"
                         />
                       </span>
-                      , as an employee of Pacific Health Systems LLC{" "}
-                      <span
-                        className="inline-block border-b border-black"
-                        style={{ minHeight: "1.2em", minWidth: "30px" }}
-                      >
-                        <input
-                          type="text"
-                          value={formData.companyName}
-                          onChange={(e) =>
-                            handleChange("companyName", e.target.value)
-                          }
-                          className="border-0 bg-transparent w-full px-1 focus:outline-none text-xs sm:text-sm"
-                          placeholder=""
-                        />
-                      </span>
-                      , I hereby state that, I have never shown any misconduct
-                      nor have a history of abuse and neglect of others.
+                      , as an employee, hereby state that I have never shown any
+                      misconduct nor have a history of abuse and neglect of
+                      others.
                     </p>
 
                     <p>
@@ -666,7 +655,6 @@ const StaffOfMisconductForm = () => {
                             )
                           }
                           className="border-0 bg-transparent w-full px-1 focus:outline-none text-xs sm:text-sm"
-                          placeholder="Employee Name"
                         />
                       </span>{" "}
                       has never been shown to have exhibited any violent or
@@ -674,13 +662,10 @@ const StaffOfMisconductForm = () => {
                       misconduct.
                     </p>
                     <p>
-                      Also have never been accused or convicted to have been
-                      abused, neglected, sexually assaulted, exploited, or
-                      deprived any person or to have subjected any person to
-                      serious injury as a result of intentional or grossly
-                      negligent misconduct as evidenced by an out-of written
-                      statement to this affect obtained at the time of
-                      application.
+                      I have never been accused or convicted of having abused,
+                      neglected, sexually assaulted, exploited, or deprived any
+                      person or subjected any person to serious injury as a
+                      result of intentional or grossly negligent misconduct.
                     </p>
                   </div>
 
@@ -747,7 +732,32 @@ const StaffOfMisconductForm = () => {
                     </div>
                   </div>
 
-                  {/* Notary Section */}
+                  {/* Notary Signature Section */}
+                  <div className="space-y-3 mt-6">
+                    <div className="flex items-baseline gap-4">
+                      <div className="flex items-baseline gap-1 flex-1">
+                        <span className="text-xs sm:text-sm font-semibold">
+                          Notary Signature:
+                        </span>
+                        <span
+                          className="flex-1 border-b border-black"
+                          style={{ minHeight: "1.2em" }}
+                        >
+                          <input
+                            type="text"
+                            className="border-0 bg-transparent w-full px-1 focus:outline-none"
+                            style={{
+                              fontFamily: "'Great Vibes', cursive",
+                              fontSize: "20px",
+                              letterSpacing: "0.5px",
+                            }}
+                          />
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Notary Affidavit Section */}
                   <div className="space-y-3 mt-6">
                     <p className="font-bold italic text-xs sm:text-sm">
                       Notary Affidavit
@@ -777,7 +787,6 @@ const StaffOfMisconductForm = () => {
                           className="border-0 bg-transparent w-full px-1 focus:outline-none text-xs sm:text-sm"
                         />
                       </span>{" "}
-                      Year{" "}
                       <span className="border-b border-black inline-block w-20 text-center">
                         <input
                           type="text"
@@ -786,6 +795,7 @@ const StaffOfMisconductForm = () => {
                             handleChange("notaryYear", e.target.value)
                           }
                           className="border-0 bg-transparent w-full text-center px-1 focus:outline-none text-xs sm:text-sm"
+                          placeholder="Year"
                         />
                       </span>
                     </p>
@@ -805,7 +815,7 @@ const StaffOfMisconductForm = () => {
                 </div>
                 <div className="text-right">
                   <div className="text-lg font-bold text-blue-600">
-                    {completedFormsCount}/20
+                    {completedFormsCount}/{totalForms}
                   </div>
                   <div className="text-xs text-gray-600">Forms Completed</div>
                 </div>
@@ -981,20 +991,26 @@ const StaffOfMisconductForm = () => {
                                     completedFormsArray
                                   );
 
+                                  const filteredKeys =
+                                    FORM_KEYS.filter(shouldCountForm);
+                                  setTotalForms(filteredKeys.length);
+
                                   const updatedCompletedForms =
-                                    FORM_KEYS.filter((key) => {
+                                    filteredKeys.filter((key) => {
                                       const form = forms[key];
                                       return (
                                         form?.status === "submitted" ||
                                         form?.status === "completed" ||
                                         form?.status === "under_review" ||
                                         form?.status === "approved" ||
-                                        completedSet.has(key)
+                                        completedSet.has(key) ||
+                                        (key === "employmentType" && appResponse.data.data.application.employmentType)
                                       );
                                     }).length;
 
                                   const updatedPercentage = Math.round(
-                                    (updatedCompletedForms / FORM_KEYS.length) *
+                                    (updatedCompletedForms /
+                                      filteredKeys.length) *
                                       100
                                   );
 

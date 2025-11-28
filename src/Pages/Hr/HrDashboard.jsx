@@ -176,8 +176,20 @@ export const HrDashboard = () => {
 
   // Handle view application details
   const handleViewApplication = async (application) => {
-    setSelectedApplication(application);
-    // Fetch application forms data
+    // Fetch application forms data first to get employment type
+    const response = await axios.get(
+      `${baseURL}/onboarding/get-application/${application.employeeId}`,
+      {
+        withCredentials: true,
+      }
+    );
+    
+    // Set application with employment type
+    setSelectedApplication({
+      ...application,
+      employmentType: response.data?.data?.application?.employmentType
+    });
+    
     const formsData = await fetchApplicationDetails(
       application.applicationId,
       application.employeeId
@@ -1979,50 +1991,68 @@ export const HrDashboard = () => {
                             </div>
                           </div>
 
-                          {/* 13. W-4 Tax Form */}
+                          {/* 13. Employment Type Selection */}
                           <div className="p-4 mb-3 rounded-lg border border-gray-200 bg-white">
                             <div className="flex items-center justify-between">
                               <div>
                                 <h5 className="font-medium">
-                                  13. W-4 Tax Form
+                                  13. Employment Type Selection
                                 </h5>
                                 <p className="text-sm text-gray-600">
-                                  Employee's Withholding Certificate
+                                  Selected: {selectedApplication?.employmentType || "Not Selected"}
                                 </p>
                               </div>
-                              <button
-                                onClick={() =>
-                                  handleViewFormDetail("w4Form", "W-4 Tax Form")
-                                }
-                                className="text-blue-600 hover:text-blue-800 text-sm font-medium px-4 py-2 rounded-lg hover:bg-blue-50 transition-colors"
-                              >
-                                View Details
-                              </button>
                             </div>
                           </div>
 
-                          {/* 14. W-9 Tax Form */}
-                          <div className="p-4 mb-3 rounded-lg border border-gray-200 bg-white">
-                            <div className="flex items-center justify-between">
-                              <div>
-                                <h5 className="font-medium">
-                                  14. W-9 Tax Form
-                                </h5>
-                                <p className="text-sm text-gray-600">
-                                  Taxpayer Identification Number and
-                                  Certification
-                                </p>
+                          {/* 14. W-4 Tax Form - Only show if W-2 */}
+                          {selectedApplication?.employmentType === "W-2" && (
+                            <div className="p-4 mb-3 rounded-lg border border-gray-200 bg-white">
+                              <div className="flex items-center justify-between">
+                                <div>
+                                  <h5 className="font-medium">
+                                    14. W-4 Tax Form
+                                  </h5>
+                                  <p className="text-sm text-gray-600">
+                                    Employee's Withholding Certificate
+                                  </p>
+                                </div>
+                                <button
+                                  onClick={() =>
+                                    handleViewFormDetail("w4Form", "W-4 Tax Form")
+                                  }
+                                  className="text-blue-600 hover:text-blue-800 text-sm font-medium px-4 py-2 rounded-lg hover:bg-blue-50 transition-colors"
+                                >
+                                  View Details
+                                </button>
                               </div>
-                              <button
-                                onClick={() =>
-                                  handleViewFormDetail("w9Form", "W-9 Tax Form")
-                                }
-                                className="text-blue-600 hover:text-blue-800 text-sm font-medium px-4 py-2 rounded-lg hover:bg-blue-50 transition-colors"
-                              >
-                                View Details
-                              </button>
                             </div>
-                          </div>
+                          )}
+
+                          {/* 14. W-9 Tax Form - Only show if 1099 */}
+                          {selectedApplication?.employmentType === "1099" && (
+                            <div className="p-4 mb-3 rounded-lg border border-gray-200 bg-white">
+                              <div className="flex items-center justify-between">
+                                <div>
+                                  <h5 className="font-medium">
+                                    14. W-9 Tax Form
+                                  </h5>
+                                  <p className="text-sm text-gray-600">
+                                    Taxpayer Identification Number and
+                                    Certification
+                                  </p>
+                                </div>
+                                <button
+                                  onClick={() =>
+                                    handleViewFormDetail("w9Form", "W-9 Tax Form")
+                                  }
+                                  className="text-blue-600 hover:text-blue-800 text-sm font-medium px-4 py-2 rounded-lg hover:bg-blue-50 transition-colors"
+                                >
+                                  View Details
+                                </button>
+                              </div>
+                            </div>
+                          )}
 
                           {/* 15. Direct Deposit Form */}
                           <div className="p-4 mb-3 rounded-lg border border-gray-200 bg-white">

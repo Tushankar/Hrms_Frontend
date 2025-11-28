@@ -877,6 +877,8 @@ const PersonalInformation = () => {
   const [applicationStatus, setApplicationStatus] = useState("draft");
   const [overallProgress, setOverallProgress] = useState(0);
   const [completedFormsCount, setCompletedFormsCount] = useState(0);
+  const [totalForms, setTotalForms] = useState(21);
+  const [employmentType, setEmploymentType] = useState(null);
   const [countries, setCountries] = useState(COUNTRIES_DATA);
   const [states, setStates] = useState([]);
   const [cities, setCities] = useState([]);
@@ -965,6 +967,12 @@ const PersonalInformation = () => {
     }
   };
 
+  const shouldCountForm = (key, empType) => {
+    if (key === "w4Form") return empType === "W-2";
+    if (key === "w9Form") return empType === "1099";
+    return true;
+  };
+
   const fetchProgressData = async (userId) => {
     try {
       const response = await axios.get(
@@ -972,25 +980,19 @@ const PersonalInformation = () => {
         { withCredentials: true }
       );
 
-      console.log("🔍 Progress Data Response:", response.data);
-
       if (response.data?.data) {
         const backendData = response.data.data;
         setApplicationStatus(
           backendData.application?.applicationStatus || "draft"
         );
 
-        // Calculate progress with 23 total forms
         const forms = backendData.forms || {};
         const completedSet = new Set(
           backendData.application?.completedForms || []
         );
 
-        console.log("📋 All Forms Data:", forms);
-        console.log("📋 Available Form Keys in DB:", Object.keys(forms));
-        console.log("📋 Completed Forms Array:", Array.from(completedSet));
-
         const formKeys = [
+          "employmentType",
           "personalInformation",
           "professionalExperience",
           "workExperience",
@@ -1013,43 +1015,30 @@ const PersonalInformation = () => {
           "directDeposit",
         ];
 
-        const completedForms = formKeys.filter((key) => {
-          const form = forms[key];
-
-          if (form) {
-            const isCompleted =
-              form?.status === "submitted" ||
-              form?.status === "completed" ||
-              form?.status === "under_review" ||
-              form?.status === "approved";
-
-            console.log(
-              `✅ ${key}: status='${form?.status}' - ${
-                isCompleted ? "COMPLETED ✓" : "NOT COMPLETED ✗"
-              }`
-            );
-            return isCompleted;
-          }
-
-          if (completedSet.has(key)) {
-            console.log(
-              `ℹ️ ${key}: not in forms but in completedForms array — COMPLETED ✓`
-            );
-            return true;
-          }
-
-          console.log(`❌ ${key}: NOT FOUND`);
-          return false;
-        }).length;
-
-        const totalForms = formKeys.length;
-        const percentage = Math.round((completedForms / totalForms) * 100);
-
-        console.log(
-          `📊 Completed: ${completedForms}/${totalForms} (${percentage}%)`
+        const currentEmploymentType =
+          backendData.application.employmentType || "";
+        setEmploymentType(currentEmploymentType);
+        const filteredKeys = formKeys.filter((key) =>
+          shouldCountForm(key, currentEmploymentType)
         );
 
+        const completedForms = filteredKeys.filter((key) => {
+          const form = forms[key];
+          return (
+            form?.status === "submitted" ||
+            form?.status === "completed" ||
+            form?.status === "under_review" ||
+            form?.status === "approved" ||
+            completedSet.has(key) ||
+            (key === "employmentType" && currentEmploymentType)
+          );
+        }).length;
+
+        const totalFormsCount = filteredKeys.length;
+        const percentage = Math.round((completedForms / totalFormsCount) * 100);
+
         setCompletedFormsCount(completedForms);
+        setTotalForms(totalFormsCount);
         setOverallProgress(percentage);
       }
     } catch (error) {
@@ -1077,9 +1066,6 @@ const PersonalInformation = () => {
       }
 
       const token = sessionToken || accessToken;
-
-      // Fetch progress data
-      await fetchProgressData(user._id);
 
       // Get or create onboarding application
       const headers = {};
@@ -1127,6 +1113,8 @@ const PersonalInformation = () => {
         console.error("Invalid response structure:", response.data);
         toast.error("Failed to initialize form - invalid response");
       }
+
+      await fetchProgressData(user._id);
     } catch (error) {
       console.error("Error initializing form:", error);
       toast.error("Failed to load form data");
@@ -1611,13 +1599,12 @@ const PersonalInformation = () => {
                           required
                           disabled={states.length === 0}
                         />
-                        <FormSelect
+                        <FormInput
                           label="City"
                           value={formData.city}
                           onChange={(value) => handleInputChange("city", value)}
-                          options={cities}
+                          placeholder="Enter your city"
                           required
-                          disabled={cities.length === 0}
                         />
                         <FormInput
                           label="Street Address"
@@ -2088,7 +2075,7 @@ const PersonalInformation = () => {
                         </div>
                         <div className="text-left sm:text-right">
                           <div className="text-base md:text-lg font-bold text-blue-600">
-                            {completedFormsCount}/20
+                            {completedFormsCount}/{totalForms}
                           </div>
                           <div className="text-xs text-gray-600">
                             Forms Completed

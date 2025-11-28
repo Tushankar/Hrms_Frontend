@@ -1459,6 +1459,7 @@ function Page6() {
 }
 
 const FORM_KEYS = [
+  "employmentType",
   "personalInformation",
   "professionalExperience",
   "workExperience",
@@ -1484,11 +1485,35 @@ const FORM_KEYS = [
 export default function W9Form() {
   const navigate = useNavigate();
   const baseURL = import.meta.env.VITE__BASEURL;
+
+  // Helper function to get total forms count based on employment type
+  const getTotalFormsCount = (empType) => {
+    if (!empType) return FORM_KEYS.length; // Default to all forms if no employment type selected yet
+    // If W-2 employee, W4 is required, W9 is optional (not counted)
+    // If 1099 contractor, W9 is required, W4 is optional (not counted)
+    return FORM_KEYS.length; // For now, keep all forms but we'll filter in progress calculation
+  };
+
+  // Helper function to check if a form should be counted in progress
+  const shouldCountForm = (formKey, empType) => {
+    if (!empType) return true; // Count all if no employment type selected
+
+    if (empType === "W-2") {
+      // For W-2 employees, W4 is required, W9 is optional
+      return formKey !== "w9Form";
+    } else if (empType === "1099") {
+      // For 1099 contractors, W9 is required, W4 is optional
+      return formKey !== "w4Form";
+    }
+
+    return true; // Default to counting all
+  };
   const [loading, setLoading] = useState(true);
   const [applicationId, setApplicationId] = useState(null);
   const [employeeId, setEmployeeId] = useState(null);
   const [overallProgress, setOverallProgress] = useState(0);
   const [completedFormsCount, setCompletedFormsCount] = useState(0);
+  const [employmentType, setEmploymentType] = useState(null);
   const [formData, setFormData] = useState({
     name: "",
     businessName: "",
@@ -1610,21 +1635,30 @@ export default function W9Form() {
         const completedFormsArray =
           backendData.application?.completedForms || [];
         const completedSet = new Set(completedFormsArray);
+        const empType = backendData.application?.employmentType;
+
+        setEmploymentType(empType);
 
         const completedForms = FORM_KEYS.filter((key) => {
+          // Only count forms that should be counted based on employment type
+          if (!shouldCountForm(key, empType)) return false;
+
           const form = forms[key];
           return (
             form?.status === "submitted" ||
             form?.status === "completed" ||
             form?.status === "under_review" ||
             form?.status === "approved" ||
-            completedSet.has(key)
+            completedSet.has(key) ||
+            (key === "employmentType" && empType)
           );
         }).length;
 
-        const percentage = Math.round(
-          (completedForms / FORM_KEYS.length) * 100
-        );
+        const totalForms = FORM_KEYS.filter((key) =>
+          shouldCountForm(key, empType)
+        ).length;
+
+        const percentage = Math.round((completedForms / totalForms) * 100);
         setOverallProgress(percentage);
         setCompletedFormsCount(completedForms);
       }
@@ -2298,9 +2332,12 @@ export default function W9Form() {
                                 <input
                                   type="checkbox"
                                   checked={
-                                    formData.taxClassification === "individual"
+                                    formData.taxClassification ===
+                                    "individual_sole_proprietor"
                                   }
-                                  onChange={() => handleCheckbox("individual")}
+                                  onChange={() =>
+                                    handleCheckbox("individual_sole_proprietor")
+                                  }
                                 />
                                 <span>Individual/sole proprietor</span>
                               </label>
@@ -2314,9 +2351,12 @@ export default function W9Form() {
                                 <input
                                   type="checkbox"
                                   checked={
-                                    formData.taxClassification === "c-corp"
+                                    formData.taxClassification ===
+                                    "c_corporation"
                                   }
-                                  onChange={() => handleCheckbox("c-corp")}
+                                  onChange={() =>
+                                    handleCheckbox("c_corporation")
+                                  }
                                 />
                                 <span>C corporation</span>
                               </label>
@@ -2330,9 +2370,12 @@ export default function W9Form() {
                                 <input
                                   type="checkbox"
                                   checked={
-                                    formData.taxClassification === "s-corp"
+                                    formData.taxClassification ===
+                                    "s_corporation"
                                   }
-                                  onChange={() => handleCheckbox("s-corp")}
+                                  onChange={() =>
+                                    handleCheckbox("s_corporation")
+                                  }
                                 />
                                 <span>S corporation</span>
                               </label>
@@ -2362,9 +2405,12 @@ export default function W9Form() {
                                 <input
                                   type="checkbox"
                                   checked={
-                                    formData.taxClassification === "trust"
+                                    formData.taxClassification ===
+                                    "trust_estate"
                                   }
-                                  onChange={() => handleCheckbox("trust")}
+                                  onChange={() =>
+                                    handleCheckbox("trust_estate")
+                                  }
                                 />
                                 <span>Trust/estate</span>
                               </label>
@@ -3060,7 +3106,12 @@ export default function W9Form() {
               </div>
               <div className="text-right">
                 <div className="text-lg font-bold text-blue-600">
-                  {completedFormsCount}/20
+                  {completedFormsCount}/
+                  {
+                    FORM_KEYS.filter((key) =>
+                      shouldCountForm(key, employmentType)
+                    ).length
+                  }
                 </div>
                 <div className="text-xs text-gray-600">Forms Completed</div>
               </div>

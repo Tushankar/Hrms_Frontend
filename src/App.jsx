@@ -43,6 +43,7 @@ import DirectDepositForm from "./Pages/Employee/DirectDepositForm";
 import EditDirectDepositForm from "./Pages/Employee/EditDirectDepositForm";
 import EmergencyContact from "./Pages/Employee/EmergencyContact";
 import EditEmergencyContact from "./Pages/Employee/EditEmergencyContact";
+import EmploymentTypeForm from "./Pages/Employee/EmploymentTypeForm";
 import StaffOfMisconductForm from "./Pages/Employee/StaffOfMisconductForm";
 import EditMisconductForm from "./Pages/Employee/EditMisconductForm";
 import CodeofEthics from "./Pages/Employee/CodeofEthics";
@@ -241,6 +242,11 @@ function App() {
           />
           <Route path="/employee/w4-form" exact element={<W4Form />} />
           <Route path="/employee/w9-form" exact element={<W9Form />} />
+          <Route
+            path="/employee/employment-type"
+            exact
+            element={<EmploymentTypeForm />}
+          />
           <Route path="/employee/i9-form" exact element={<I9Form />} />
           <Route
             path="/employee/emergency-contact"
@@ -275,6 +281,11 @@ function App() {
           />
           <Route path="/employee/forms/w4-form" exact element={<W4Form />} />
           <Route path="/employee/forms/w9-form" exact element={<W9Form />} />
+          <Route
+            path="/employee/forms/employment-type"
+            exact
+            element={<EmploymentTypeForm />}
+          />
           <Route path="/employee/forms/i9-form" exact element={<I9Form />} />
           <Route
             path="/employee/forms/emergency-contact"

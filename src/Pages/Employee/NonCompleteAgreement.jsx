@@ -18,6 +18,7 @@ import { jwtDecode } from "jwt-decode";
 import HRFeedback from "../../Components/Common/HRFeedback/HRFeedback";
 
 const FORM_KEYS = [
+  "employmentType",
   "personalInformation",
   "professionalExperience",
   "workExperience",
@@ -47,6 +48,8 @@ const NonCompleteAgreement = () => {
   const [applicationId, setApplicationId] = useState(null);
   const [overallProgress, setOverallProgress] = useState(0);
   const [completedFormsCount, setCompletedFormsCount] = useState(0);
+  const [totalForms, setTotalForms] = useState(20);
+  const [employmentType, setEmploymentType] = useState(null);
   const [employeeId, setEmployeeId] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
   const [employeeSignature, setEmployeeSignature] = useState("");
@@ -58,6 +61,12 @@ const NonCompleteAgreement = () => {
   const [formStatus, setFormStatus] = useState("draft");
   const [hrFeedback, setHrFeedback] = useState(null);
   const baseURL = import.meta.env.VITE__BASEURL;
+
+  const shouldCountForm = (key, empType) => {
+    if (key === "w4Form") return empType === "W-2";
+    if (key === "w9Form") return empType === "1099";
+    return true;
+  };
 
   // Helper to build normalized full URL
   const buildFullUrl = (relativePath) => {
@@ -289,7 +298,14 @@ const NonCompleteAgreement = () => {
           backendData.application?.completedForms || [];
         const completedSet = new Set(completedFormsArray);
 
-        const completedForms = FORM_KEYS.filter((key) => {
+        const currentEmploymentType =
+          backendData.application.employmentType || "";
+        setEmploymentType(currentEmploymentType);
+        const filteredKeys = FORM_KEYS.filter((key) =>
+          shouldCountForm(key, currentEmploymentType)
+        );
+
+        const completedForms = filteredKeys.filter((key) => {
           let form = forms[key];
 
           // Handle job description - check all variants
@@ -306,17 +322,18 @@ const NonCompleteAgreement = () => {
             form?.status === "completed" ||
             form?.status === "under_review" ||
             form?.status === "approved" ||
-            completedSet.has(key);
+            completedSet.has(key) ||
+            (key === "employmentType" && currentEmploymentType);
 
           return isCompleted;
         }).length;
 
-        const percentage = Math.round(
-          (completedForms / FORM_KEYS.length) * 100
-        );
+        const totalFormsCount = filteredKeys.length;
+        const percentage = Math.round((completedForms / totalFormsCount) * 100);
 
         setOverallProgress(percentage);
         setCompletedFormsCount(completedForms);
+        setTotalForms(totalFormsCount);
       }
 
       const templateResponse = await axios.get(
@@ -846,7 +863,7 @@ const NonCompleteAgreement = () => {
                 </div>
                 <div className="text-right">
                   <div className="text-lg font-bold text-blue-600">
-                    {completedFormsCount}/20
+                    {completedFormsCount}/{totalForms}
                   </div>
                   <div className="text-xs text-gray-600">Forms Completed</div>
                 </div>
@@ -1017,8 +1034,15 @@ const NonCompleteAgreement = () => {
                                     completedFormsArray
                                   );
 
+                                  const currentEmploymentType =
+                                    backendData.application.employmentType ||
+                                    "";
+                                  const filteredKeys = FORM_KEYS.filter((key) =>
+                                    shouldCountForm(key, currentEmploymentType)
+                                  );
+
                                   const updatedCompletedForms =
-                                    FORM_KEYS.filter((key) => {
+                                    filteredKeys.filter((key) => {
                                       let form = forms[key];
 
                                       // Handle job description - check all variants
@@ -1040,13 +1064,15 @@ const NonCompleteAgreement = () => {
                                       return isCompleted;
                                     }).length;
 
+                                  const totalFormsCount = filteredKeys.length;
                                   const updatedPercentage = Math.round(
-                                    (updatedCompletedForms / FORM_KEYS.length) *
+                                    (updatedCompletedForms / totalFormsCount) *
                                       100
                                   );
 
                                   setOverallProgress(updatedPercentage);
                                   setCompletedFormsCount(updatedCompletedForms);
+                                  setTotalForms(totalFormsCount);
                                 }
                               }, 500); // 500ms delay to ensure backend processing is complete
                             } catch (progressError) {

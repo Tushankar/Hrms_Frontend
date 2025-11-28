@@ -10,6 +10,7 @@ import Cookies from "js-cookie";
 import { jwtDecode } from "jwt-decode";
 
 const FORM_KEYS = [
+  "employmentType",
   "personalInformation",
   "professionalExperience",
   "workExperience",
@@ -43,7 +44,46 @@ const W4Form = () => {
   const [hrFeedback, setHrFeedback] = useState(null);
   const [overallProgress, setOverallProgress] = useState(0);
   const [completedFormsCount, setCompletedFormsCount] = useState(0);
+  const [employmentType, setEmploymentType] = useState(null);
   const baseURL = import.meta.env.VITE__BASEURL;
+
+  // Helper function to get total forms count based on employment type
+  const getTotalFormsCount = (empType) => {
+    if (!empType) return FORM_KEYS.length; // Default to all forms if no employment type selected yet
+    // If W-2 employee, W4 is required, W9 is optional (not counted)
+    // If 1099 contractor, W9 is required, W4 is optional (not counted)
+    return FORM_KEYS.length; // For now, keep all forms but we'll filter in progress calculation
+  };
+
+  // Helper function to check if a form should be counted in progress
+  const shouldCountForm = (formKey, empType) => {
+    if (!empType) return true; // Count all if no employment type selected
+
+    if (empType === "W-2") {
+      // For W-2 employees, W4 is required, W9 is optional
+      return formKey !== "w9Form";
+    } else if (empType === "1099") {
+      // For 1099 contractors, W9 is required, W4 is optional
+      return formKey !== "w4Form";
+    }
+
+    return true; // Default to counting all
+  };
+
+  const handleSSNChange = (digitIndex, value) => {
+    const currentDigits = formData.ssn || "";
+    const digitsArray = currentDigits.padEnd(9, " ").split("");
+    digitsArray[digitIndex] = value.replace(/\D/g, "") || " ";
+    const newDigits = digitsArray.join("").trim();
+    setFormData((prev) => ({ ...prev, ssn: newDigits }));
+  };
+
+  const handleSSNKeyDown = (e, index) => {
+    if (e.key === "Backspace" && !e.target.value && index > 0) {
+      const prevInput = e.target.parentElement.children[index - 1];
+      if (prevInput) prevInput.focus();
+    }
+  };
 
   useEffect(() => {
     initializeForm();
@@ -83,21 +123,30 @@ const W4Form = () => {
         const completedFormsArray =
           backendData.application?.completedForms || [];
         const completedSet = new Set(completedFormsArray);
+        const empType = backendData.application?.employmentType;
+
+        setEmploymentType(empType);
 
         const completedForms = FORM_KEYS.filter((key) => {
+          // Only count forms that should be counted based on employment type
+          if (!shouldCountForm(key, empType)) return false;
+
           const form = forms[key];
           return (
             form?.status === "submitted" ||
             form?.status === "completed" ||
             form?.status === "under_review" ||
             form?.status === "approved" ||
-            completedSet.has(key)
+            completedSet.has(key) ||
+            (key === "employmentType" && empType)
           );
         }).length;
 
-        const percentage = Math.round(
-          (completedForms / FORM_KEYS.length) * 100
-        );
+        const totalForms = FORM_KEYS.filter((key) =>
+          shouldCountForm(key, empType)
+        ).length;
+
+        const percentage = Math.round((completedForms / totalForms) * 100);
         setOverallProgress(percentage);
         setCompletedFormsCount(completedForms);
       }
@@ -433,14 +482,21 @@ const W4Form = () => {
                         <div className="text-[7pt] mb-px font-bold">
                           (b) Social security number
                         </div>
-                        <input
-                          name="ssn"
-                          value={formData.ssn || ""}
-                          onChange={handleChange}
-                          type="text"
-                          placeholder="XXX-XX-XXXX"
-                          className="w-full border-none border-b border-black outline-none text-[8pt] py-0.5 mb-1.5 placeholder:text-gray-400"
-                        />
+                        <div className="flex gap-1 mb-1.5">
+                          {[...Array(9)].map((_, i) => (
+                            <input
+                              key={i}
+                              type="text"
+                              maxLength="1"
+                              value={(formData.ssn || "")[i] || ""}
+                              onChange={(e) =>
+                                handleSSNChange(i, e.target.value)
+                              }
+                              onKeyDown={(e) => handleSSNKeyDown(e, i)}
+                              className="w-6 h-6 text-center border border-black px-0 py-0 outline-none bg-white text-[13px] font-bold text-black"
+                            />
+                          ))}
+                        </div>
                         <div className="text-[6.5pt] leading-[1.3]">
                           <span className="font-bold">
                             Does your name match the name on your social
@@ -1667,7 +1723,12 @@ const W4Form = () => {
             </div>
             <div className="text-right">
               <div className="text-lg font-bold text-blue-600">
-                {completedFormsCount}/20
+                {completedFormsCount}/
+                {
+                  FORM_KEYS.filter((key) =>
+                    shouldCountForm(key, employmentType)
+                  ).length
+                }
               </div>
               <div className="text-xs text-gray-600">Forms Completed</div>
             </div>

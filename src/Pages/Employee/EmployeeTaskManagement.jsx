@@ -30,6 +30,7 @@ import HRNotesIndicator from "../../Components/Common/HRNotesIndicator/HRNotesIn
 // Form keys array for progress calculation - matches CodeOfEthics.jsx (20 forms)
 // These are the core forms required for onboarding completion
 const FORM_KEYS = [
+  "employmentType",
   "personalInformation",
   "professionalExperience",
   "workExperience",
@@ -783,7 +784,7 @@ export const EmployeeTaskManagement = () => {
           },
           {
             id: "i9-form",
-            name: "I-94 Employment Eligibility",
+            name: "I-9 Employment Eligibility",
             priority: "Medium",
             type: "Documentation",
             creationDate: backendData.application?.createdAt
@@ -807,8 +808,8 @@ export const EmployeeTaskManagement = () => {
             ),
           },
           {
-            id: "w4-form",
-            name: "W-4 Tax Form",
+            id: "employment-type",
+            name: "Employment Type Selection",
             priority: "Medium",
             type: "Documentation",
             creationDate: backendData.application?.createdAt
@@ -816,46 +817,73 @@ export const EmployeeTaskManagement = () => {
                   .toISOString()
                   .split("T")[0]
               : new Date().toISOString().split("T")[0],
-            status: getFormStatus(backendData.forms?.w4Form),
-            submissionStatus: getSubmissionStatus(backendData.forms?.w4Form),
-            formsCompleted: getCompletionCount(backendData.forms?.w4Form),
+            status: backendData.application?.employmentType ? "Completed" : "Pending",
+            submissionStatus: backendData.application?.employmentType ? "Submitted" : "Not Started",
+            formsCompleted: backendData.application?.employmentType ? 1 : 0,
             totalForms: 1,
-            hrReviewStatus: getHrReviewStatus(
-              backendData.forms?.w4Form,
-              backendData.application?.applicationStatus
-            ),
-            formData: backendData.forms?.w4Form,
+            hrReviewStatus: null,
+            formData: { employmentType: backendData.application?.employmentType },
             applicationId: backendData.application?._id,
-            isEditable: isFormEditable(
-              backendData.forms?.w4Form,
-              backendData.application?.applicationStatus
-            ),
+            isEditable: true,
           },
-          {
-            id: "w9-form",
-            name: "W-9 Tax Form",
-            priority: "Medium",
-            type: "Documentation",
-            creationDate: backendData.application?.createdAt
-              ? new Date(backendData.application.createdAt)
-                  .toISOString()
-                  .split("T")[0]
-              : new Date().toISOString().split("T")[0],
-            status: getFormStatus(backendData.forms?.w9Form),
-            submissionStatus: getSubmissionStatus(backendData.forms?.w9Form),
-            formsCompleted: getCompletionCount(backendData.forms?.w9Form),
-            totalForms: 1,
-            hrReviewStatus: getHrReviewStatus(
-              backendData.forms?.w9Form,
-              backendData.application?.applicationStatus
-            ),
-            formData: backendData.forms?.w9Form,
-            applicationId: backendData.application?._id,
-            isEditable: isFormEditable(
-              backendData.forms?.w9Form,
-              backendData.application?.applicationStatus
-            ),
-          },
+          ...(backendData.application?.employmentType === "W-2"
+            ? [
+                {
+                  id: "w4-form",
+                  name: "W-4 Tax Form",
+                  priority: "Medium",
+                  type: "Documentation",
+                  creationDate: backendData.application?.createdAt
+                    ? new Date(backendData.application.createdAt)
+                        .toISOString()
+                        .split("T")[0]
+                    : new Date().toISOString().split("T")[0],
+                  status: getFormStatus(backendData.forms?.w4Form),
+                  submissionStatus: getSubmissionStatus(backendData.forms?.w4Form),
+                  formsCompleted: getCompletionCount(backendData.forms?.w4Form),
+                  totalForms: 1,
+                  hrReviewStatus: getHrReviewStatus(
+                    backendData.forms?.w4Form,
+                    backendData.application?.applicationStatus
+                  ),
+                  formData: backendData.forms?.w4Form,
+                  applicationId: backendData.application?._id,
+                  isEditable: isFormEditable(
+                    backendData.forms?.w4Form,
+                    backendData.application?.applicationStatus
+                  ),
+                },
+              ]
+            : []),
+          ...(backendData.application?.employmentType === "1099"
+            ? [
+                {
+                  id: "w9-form",
+                  name: "W-9 Tax Form",
+                  priority: "Medium",
+                  type: "Documentation",
+                  creationDate: backendData.application?.createdAt
+                    ? new Date(backendData.application.createdAt)
+                        .toISOString()
+                        .split("T")[0]
+                    : new Date().toISOString().split("T")[0],
+                  status: getFormStatus(backendData.forms?.w9Form),
+                  submissionStatus: getSubmissionStatus(backendData.forms?.w9Form),
+                  formsCompleted: getCompletionCount(backendData.forms?.w9Form),
+                  totalForms: 1,
+                  hrReviewStatus: getHrReviewStatus(
+                    backendData.forms?.w9Form,
+                    backendData.application?.applicationStatus
+                  ),
+                  formData: backendData.forms?.w9Form,
+                  applicationId: backendData.application?._id,
+                  isEditable: isFormEditable(
+                    backendData.forms?.w9Form,
+                    backendData.application?.applicationStatus
+                  ),
+                },
+              ]
+            : []),
           {
             id: "direct-deposit",
             name: "Direct Deposit Form",
@@ -1058,6 +1086,9 @@ export const EmployeeTaskManagement = () => {
         const positionType =
           backendData.forms?.positionType?.positionAppliedFor;
         setIsPCAEligible(positionType === "PCA");
+
+        // Set employment type for progress calculation
+        setEmploymentType(backendData.application?.employmentType);
 
         // Extract HR notes if they exist
         if (backendData.application?.hrNotesToEmployee) {
@@ -1427,7 +1458,7 @@ export const EmployeeTaskManagement = () => {
       },
       {
         id: "i9-form",
-        name: "I-94 Employment Eligibility",
+        name: "I-9 Employment Eligibility",
         priority: "Medium",
         type: "Documentation",
         creationDate: new Date().toISOString().split("T")[0],
@@ -1440,22 +1471,8 @@ export const EmployeeTaskManagement = () => {
         isEditable: true,
       },
       {
-        id: "w4-form",
-        name: "W-4 Tax Form",
-        priority: "Medium",
-        type: "Documentation",
-        creationDate: new Date().toISOString().split("T")[0],
-        status: "Pending",
-        submissionStatus: "Not Started",
-        formsCompleted: 0,
-        totalForms: 1,
-        hrReviewStatus: null,
-        formData: null,
-        isEditable: true,
-      },
-      {
-        id: "w9-form",
-        name: "W-9 Tax Form",
+        id: "employment-type",
+        name: "Employment Type Selection",
         priority: "Medium",
         type: "Documentation",
         creationDate: new Date().toISOString().split("T")[0],
@@ -1656,8 +1673,13 @@ export const EmployeeTaskManagement = () => {
     };
   }, [loading]);
 
+  // State to store employment type
+  const [employmentType, setEmploymentType] = useState(null);
+
   // Calculate overall progress
   const calculateOverallProgress = () => {
+    // Use the employmentType from state (set during fetchOnboardingData)
+
     // Count forms as completed based on FORM_KEYS to match CodeOfEthics.jsx
     // Only count the core forms that are in FORM_KEYS, not the additional forms
     const coreFormIds = [
@@ -1683,9 +1705,20 @@ export const EmployeeTaskManagement = () => {
       "direct-deposit",
     ];
 
-    const completedForms = tasks.filter((task) => {
-      // Only count if this is a core form (in FORM_KEYS)
-      if (!coreFormIds.includes(task.id)) {
+    // Filter forms based on employment type
+    const filteredFormIds = coreFormIds.filter((formId) => {
+      if (employmentType === "W-2 Employee") {
+        return formId !== "w9-form";
+      } else if (employmentType === "1099 Contractor") {
+        return formId !== "w4-form";
+      }
+      return formId !== "w9-form"; // default to W-2 if not set
+    });
+
+    // Count completed forms from tasks
+    const completedTasksCount = tasks.filter((task) => {
+      // Only count if this is a core form (in filtered FORM_KEYS)
+      if (!filteredFormIds.includes(task.id)) {
         return false;
       }
 
@@ -1697,15 +1730,20 @@ export const EmployeeTaskManagement = () => {
       );
     }).length;
 
-    const totalForms = FORM_KEYS.length; // Use FORM_KEYS length (20 forms)
+    // Count employmentType as completed if selected
+    const employmentTypeCompleted = employmentType ? 1 : 0;
+    const completedCount = completedTasksCount + employmentTypeCompleted;
+
+    // Total is filteredFormIds length (19 forms) + 1 for employmentType = 20
+    const totalForms = filteredFormIds.length + 1;
     const progressPercentage =
-      totalForms > 0 ? (completedForms / totalForms) * 100 : 0;
+      totalForms > 0 ? (completedCount / totalForms) * 100 : 0;
 
     return {
-      completed: completedForms,
+      completed: completedCount,
       total: totalForms,
       percentage: Math.round(progressPercentage),
-      isComplete: completedForms === totalForms && totalForms > 0,
+      isComplete: completedCount === totalForms && totalForms > 0,
     };
   };
 
@@ -2411,7 +2449,7 @@ export const EmployeeTaskManagement = () => {
                       Application Progress
                     </h2>
                     <p className="text-gray-600 text-sm">
-                      Complete all {FORM_KEYS.length} forms to{" "}
+                      Complete all {overallProgress.total} forms to{" "}
                       {applicationStatus === "submitted"
                         ? "resubmit"
                         : "submit"}{" "}
@@ -2422,7 +2460,7 @@ export const EmployeeTaskManagement = () => {
 
                 <div className="text-right">
                   <div className="text-2xl font-bold text-blue-600">
-                    {overallProgress.completed}/{FORM_KEYS.length}
+                    {overallProgress.completed}/{overallProgress.total}
                   </div>
                   <div className="text-sm text-gray-600">Forms Completed</div>
                 </div>
@@ -2876,6 +2914,8 @@ export const EmployeeTaskManagement = () => {
                                         task.id === "work-experience"
                                       ) {
                                         navigate("/employee/work-experience");
+                                      } else if (task.id === "employment-type") {
+                                        navigate("/employee/employment-type");
                                       } else if (task.id === "w4-form") {
                                         navigate("/employee/w4-form");
                                       } else if (task.id === "w9-form") {
@@ -3037,7 +3077,7 @@ export const EmployeeTaskManagement = () => {
                 <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
                   <div className="flex flex-col sm:flex-row items-center gap-4 text-sm text-gray-600">
                     <div>
-                      Showing {sortedTasks.length} of {FORM_KEYS.length} tasks
+                      Showing {sortedTasks.length} of {overallProgress.total} tasks
                     </div>
                     <div className="hidden sm:block w-px h-4 bg-gray-300"></div>
                     <div className="flex items-center gap-4">
