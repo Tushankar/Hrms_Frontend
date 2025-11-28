@@ -3150,45 +3150,13 @@ export default function W9Form() {
                 Exit Application
               </button>
             </div>
-            {(() => {
-              const hasHrNotes =
-                hrFeedback &&
-                (hrFeedback.generalNotes ||
-                  hrFeedback.personalInfoNotes ||
-                  hrFeedback.professionalExperienceNotes ||
-                  hrFeedback.emergencyContactNotes ||
-                  hrFeedback.backgroundCheckNotes ||
-                  hrFeedback.cprCertificateNotes ||
-                  hrFeedback.drivingLicenseNotes ||
-                  hrFeedback.professionalCertificatesNotes ||
-                  hrFeedback.tbSymptomScreenNotes ||
-                  hrFeedback.orientationNotes ||
-                  hrFeedback.w4FormNotes ||
-                  hrFeedback.w9FormNotes ||
-                  hrFeedback.i9FormNotes ||
-                  hrFeedback.directDepositNotes ||
-                  hrFeedback.codeOfEthicsNotes ||
-                  hrFeedback.serviceDeliveryPoliciesNotes ||
-                  hrFeedback.nonCompeteAgreementNotes ||
-                  hrFeedback.misconductStatementNotes);
-              const isSubmitted = formStatus === "submitted" && !hasHrNotes;
-
-              return (
-                <button
-                  type="button"
-                  onClick={handleSaveAndNext}
-                  className={`flex-1 px-4 sm:px-6 py-2 sm:py-3 text-white rounded-lg transition-all duration-200 shadow-md text-sm sm:text-base font-medium ${
-                    isSubmitted
-                      ? "bg-gray-400 cursor-not-allowed opacity-60"
-                      : "bg-gradient-to-r from-[#1F3A93] to-[#2748B4] hover:from-[#16306e] hover:to-[#1F3A93]"
-                  }`}
-                  disabled={isSubmitted}
-                  title={isSubmitted ? "Waiting for HR feedback" : ""}
-                >
-                  {isSubmitted ? "Awaiting HR Feedback" : "Save & Next"}
-                </button>
-              );
-            })()}
+            <button
+              type="button"
+              onClick={handleSaveAndNext}
+              className="flex-1 px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-[#1F3A93] to-[#2748B4] text-white rounded-lg hover:from-[#16306e] hover:to-[#1F3A93] transition-all duration-200 shadow-md text-sm sm:text-base font-medium"
+            >
+              Save & Next
+            </button>
           </div>
         </div>
       </div>

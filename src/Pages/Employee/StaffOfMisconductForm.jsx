@@ -476,18 +476,18 @@ const StaffOfMisconductForm = () => {
               <div className="max-w-4xl mx-auto bg-white p-4 sm:p-8 my-4 sm:my-8">
                 <div className="space-y-3 text-xs sm:text-sm leading-relaxed">
                   {/* Header */}
-                  <h1 className="text-center font-bold text-xs sm:text-sm mb-4 tracking-wide">
+                  <h1 className="text-left font-bold text-xs sm:text-sm mb-6 tracking-wide">
                     STAFF MISCONDUCT ABUSE STATEMENT FORM
                   </h1>
 
                   {/* Staff Title */}
-                  <div className="mb-4 flex items-baseline gap-2">
-                    <span className="font-semibold text-xs sm:text-sm">
-                      STAFF TITLE:
+                  <div className="mb-6">
+                    <span className="text-xs sm:text-sm">
+                      STAFF TITLE: 
                     </span>
                     <span
-                      className="flex-1 border-b border-black"
-                      style={{ minHeight: "1.2em" }}
+                      className="inline-block border-b border-black ml-1"
+                      style={{ minHeight: "1.2em", width: "250px" }}
                     >
                       <input
                         type="text"
@@ -503,19 +503,17 @@ const StaffOfMisconductForm = () => {
                   {/* Body Text */}
                   <div className="space-y-3 mt-6">
                     <p>
-                      I <u>understand and acknowledge</u> that I must comply
-                      with my employer's Code of Conduct and Abuse & Misconduct
-                      program.
+                      I understand and acknowledge that I must comply with <u>Pacific Health Systems LLC</u>, Code of Conduct and Abuse or Misconduct program.
                     </p>
 
                     <p>
-                      All laws, regulations, policies & procedures as well as
-                      any other applicable state or local ordinances as it
-                      pertains to the responsibilities of my position.
+                      All laws, regulations, policies & procedure as well as any
+                      other applicable state or local ordinances as it pertains
+                      to the responsibilities of my position.
                     </p>
 
                     <p>
-                      I <u>understand</u> that my failure to report any concerns
+                      I understand that my failure to report any concerns
                       regarding possible violations of these laws, regulations,
                       and Policies may result in disciplinary action, up to and
                       including termination.
@@ -538,10 +536,9 @@ const StaffOfMisconductForm = () => {
                           }
                           className="border-0 bg-transparent w-full px-1 focus:outline-none text-xs sm:text-sm"
                         />
-                      </span>
-                      , as an employee, hereby state that I have never shown any
-                      misconduct nor have a history of abuse and neglect of
-                      others.
+                      </span>{" "}
+                      as an employee of <u>Pacific Health Systems LLC</u>, I hereby state that, I have never shown any misconduct
+                      nor have a history of abuse and neglect of others.
                     </p>
 
                     <p>
@@ -640,32 +637,35 @@ const StaffOfMisconductForm = () => {
                     <p className="mb-2">
                       Who having been first duly sworn depose and say
                     </p>
-                    <p>
+                    <div className="flex items-start gap-2">
                       <span
-                        className="inline-block border-b border-black"
-                        style={{ minHeight: "1.2em", minWidth: "200px" }}
+                        className="inline-block border-b border-black flex-1"
+                        style={{ minHeight: "1.2em", maxWidth: "350px" }}
                       >
                         <input
                           type="text"
-                          value={formData.employeeNameParagraph}
+                          value={formData.exhibitName}
                           onChange={(e) =>
-                            handleChange(
-                              "employeeNameParagraph",
-                              e.target.value
-                            )
+                            handleChange("exhibitName", e.target.value)
                           }
                           className="border-0 bg-transparent w-full px-1 focus:outline-none text-xs sm:text-sm"
                         />
-                      </span>{" "}
-                      has never been shown to have exhibited any violent or
-                      abusive behavior or intentional or grossly negligent
-                      misconduct.
+                      </span>
+                      <span className="flex-1">
+                        has never been shown to have exhibited
+                      </span>
+                    </div>
+                    <p>
+                      any violent or abusive behavior or intentional or grossly negligent misconduct.
                     </p>
                     <p>
-                      I have never been accused or convicted of having abused,
-                      neglected, sexually assaulted, exploited, or deprived any
-                      person or subjected any person to serious injury as a
-                      result of intentional or grossly negligent misconduct.
+                      Also have never been accused or convicted to have been
+                      abused, neglected, sexually assaulted, exploited, or
+                      deprived any person or to have subjected any person to
+                      serious injury as a result of intentional or grossly
+                      negligent misconduct as evidence by an oral or written
+                      statement to this effect obtained at the time of
+                      application.
                     </p>
                   </div>
 
@@ -732,37 +732,12 @@ const StaffOfMisconductForm = () => {
                     </div>
                   </div>
 
-                  {/* Notary Signature Section */}
-                  <div className="space-y-3 mt-6">
-                    <div className="flex items-baseline gap-4">
-                      <div className="flex items-baseline gap-1 flex-1">
-                        <span className="text-xs sm:text-sm font-semibold">
-                          Notary Signature:
-                        </span>
-                        <span
-                          className="flex-1 border-b border-black"
-                          style={{ minHeight: "1.2em" }}
-                        >
-                          <input
-                            type="text"
-                            className="border-0 bg-transparent w-full px-1 focus:outline-none"
-                            style={{
-                              fontFamily: "'Great Vibes', cursive",
-                              fontSize: "20px",
-                              letterSpacing: "0.5px",
-                            }}
-                          />
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
                   {/* Notary Affidavit Section */}
-                  <div className="space-y-3 mt-6">
+                  <div className="space-y-2 mt-6">
                     <p className="font-bold italic text-xs sm:text-sm">
                       Notary Affidavit
                     </p>
-                    <p className="text-xs sm:text-sm">State of Georgia</p>
+                    <p className="text-xs sm:text-sm">State of: Georgia</p>
 
                     <p className="text-xs sm:text-sm">
                       Sworn and subscribed before me this{" "}
@@ -787,6 +762,7 @@ const StaffOfMisconductForm = () => {
                           className="border-0 bg-transparent w-full px-1 focus:outline-none text-xs sm:text-sm"
                         />
                       </span>{" "}
+                      Year{" "}
                       <span className="border-b border-black inline-block w-20 text-center">
                         <input
                           type="text"
@@ -795,10 +771,14 @@ const StaffOfMisconductForm = () => {
                             handleChange("notaryYear", e.target.value)
                           }
                           className="border-0 bg-transparent w-full text-center px-1 focus:outline-none text-xs sm:text-sm"
-                          placeholder="Year"
                         />
                       </span>
                     </p>
+
+                    <div className="mt-4">
+                      <p className="text-xs sm:text-sm mb-1">Notary Seal</p>
+                      <p className="text-xs sm:text-sm">Notary Signature</p>
+                    </div>
                   </div>
                 </div>
               </div>
