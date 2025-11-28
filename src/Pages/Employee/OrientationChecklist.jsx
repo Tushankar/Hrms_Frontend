@@ -69,7 +69,7 @@ const OrientationChecklist = () => {
     } else if (employmentType === "1099 Contractor") {
       return formKey !== "w4Form";
     }
-    return formKey !== "w9Form"; // default to W-2 if not set
+    return true; // default
   };
 
   useEffect(() => {
@@ -114,17 +114,16 @@ const OrientationChecklist = () => {
         const empType = response.data.data.application.employmentType;
         setEmploymentType(empType);
 
-        const filteredKeys = FORM_KEYS.filter((key) => {
-          if (empType === "W-2 Employee") {
-            return key !== "w9Form";
-          } else if (empType === "1099 Contractor") {
-            return key !== "w4Form";
-          }
-          return key !== "w9Form";
-        });
-        setTotalForms(filteredKeys.length);
+        // Calculate total forms based on employment type
+        let calculatedTotalForms = 20; // default
+        if (empType === "1099 Contractor") {
+          calculatedTotalForms = 20;
+        } else if (empType === "W-2 Employee") {
+          calculatedTotalForms = 20;
+        }
+        setTotalForms(calculatedTotalForms);
 
-        const completedForms = filteredKeys.filter((key) => {
+        const completedForms = FORM_KEYS.filter((key) => {
           let form = forms[key];
           if (key === "jobDescriptionPCA") {
             form =
@@ -142,7 +141,7 @@ const OrientationChecklist = () => {
         }).length;
 
         const progressPercentage = Math.round(
-          (completedForms / filteredKeys.length) * 100
+          (completedForms / calculatedTotalForms) * 100
         );
         setOverallProgress(progressPercentage);
         setCompletedFormsCount(completedForms);

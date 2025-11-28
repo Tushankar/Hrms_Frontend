@@ -895,55 +895,92 @@ export const EmployeeDashboard = () => {
             ),
           },
           {
-            id: "w4-form",
-            name: "W-4 Tax Form",
-            priority: "High",
+            id: "employment-type",
+            name: "Employment Type Selection",
+            priority: "Medium",
             type: "Documentation",
             creationDate: backendData.application?.createdAt
               ? new Date(backendData.application.createdAt)
                   .toISOString()
                   .split("T")[0]
               : new Date().toISOString().split("T")[0],
-            status: getFormStatus(backendData.forms?.w4Form),
-            submissionStatus: getSubmissionStatus(backendData.forms?.w4Form),
-            formsCompleted: getCompletionCount(backendData.forms?.w4Form),
+            status: backendData.application?.employmentType
+              ? "Completed"
+              : "Pending",
+            submissionStatus: backendData.application?.employmentType
+              ? "Submitted"
+              : "Not Started",
+            formsCompleted: backendData.application?.employmentType ? 1 : 0,
             totalForms: 1,
-            hrReviewStatus: getHrReviewStatus(
-              backendData.forms?.w4Form,
-              backendData.application?.applicationStatus
-            ),
-            formData: backendData.forms?.w4Form,
+            hrReviewStatus: null,
+            formData: {
+              employmentType: backendData.application?.employmentType,
+            },
             applicationId: backendData.application?._id,
-            isEditable: isFormEditable(
-              backendData.forms?.w4Form,
-              backendData.application?.applicationStatus
-            ),
+            isEditable: true,
           },
-          {
-            id: "w9-form",
-            name: "W-9 Tax Form",
-            priority: "High",
-            type: "Documentation",
-            creationDate: backendData.application?.createdAt
-              ? new Date(backendData.application.createdAt)
-                  .toISOString()
-                  .split("T")[0]
-              : new Date().toISOString().split("T")[0],
-            status: getFormStatus(backendData.forms?.w9Form),
-            submissionStatus: getSubmissionStatus(backendData.forms?.w9Form),
-            formsCompleted: getCompletionCount(backendData.forms?.w9Form),
-            totalForms: 1,
-            hrReviewStatus: getHrReviewStatus(
-              backendData.forms?.w9Form,
-              backendData.application?.applicationStatus
-            ),
-            formData: backendData.forms?.w9Form,
-            applicationId: backendData.application?._id,
-            isEditable: isFormEditable(
-              backendData.forms?.w9Form,
-              backendData.application?.applicationStatus
-            ),
-          },
+          ...(backendData.application?.employmentType === "W-2"
+            ? [
+                {
+                  id: "w4-form",
+                  name: "W-4 Tax Form",
+                  priority: "High",
+                  type: "Documentation",
+                  creationDate: backendData.application?.createdAt
+                    ? new Date(backendData.application.createdAt)
+                        .toISOString()
+                        .split("T")[0]
+                    : new Date().toISOString().split("T")[0],
+                  status: getFormStatus(backendData.forms?.w4Form),
+                  submissionStatus: getSubmissionStatus(
+                    backendData.forms?.w4Form
+                  ),
+                  formsCompleted: getCompletionCount(backendData.forms?.w4Form),
+                  totalForms: 1,
+                  hrReviewStatus: getHrReviewStatus(
+                    backendData.forms?.w4Form,
+                    backendData.application?.applicationStatus
+                  ),
+                  formData: backendData.forms?.w4Form,
+                  applicationId: backendData.application?._id,
+                  isEditable: isFormEditable(
+                    backendData.forms?.w4Form,
+                    backendData.application?.applicationStatus
+                  ),
+                },
+              ]
+            : []),
+          ...(backendData.application?.employmentType === "1099"
+            ? [
+                {
+                  id: "w9-form",
+                  name: "W-9 Tax Form",
+                  priority: "High",
+                  type: "Documentation",
+                  creationDate: backendData.application?.createdAt
+                    ? new Date(backendData.application.createdAt)
+                        .toISOString()
+                        .split("T")[0]
+                    : new Date().toISOString().split("T")[0],
+                  status: getFormStatus(backendData.forms?.w9Form),
+                  submissionStatus: getSubmissionStatus(
+                    backendData.forms?.w9Form
+                  ),
+                  formsCompleted: getCompletionCount(backendData.forms?.w9Form),
+                  totalForms: 1,
+                  hrReviewStatus: getHrReviewStatus(
+                    backendData.forms?.w9Form,
+                    backendData.application?.applicationStatus
+                  ),
+                  formData: backendData.forms?.w9Form,
+                  applicationId: backendData.application?._id,
+                  isEditable: isFormEditable(
+                    backendData.forms?.w9Form,
+                    backendData.application?.applicationStatus
+                  ),
+                },
+              ]
+            : []),
           {
             id: "direct-deposit",
             name: "Direct Deposit Form",
@@ -1153,10 +1190,20 @@ export const EmployeeDashboard = () => {
     }
   };
 
-  // Calculate overall progress
+  // Calculate overall progress - matches EmployeeTaskManagement.jsx logic
   const calculateOverallProgress = () => {
-    // Count forms as completed if they are submitted, completed, under review, or approved
-    const completedForms = onboardingTasks.filter((task) => {
+    if (!onboardingTasks || onboardingTasks.length === 0) {
+      return {
+        completed: 0,
+        total: 20,
+        percentage: 0,
+        isComplete: false,
+      };
+    }
+
+    // Count completed forms from tasks (excluding employment-type as it's counted separately)
+    const completedTasksCount = onboardingTasks.filter((task) => {
+      if (task.id === "employment-type") return false; // Don't count employment-type here
       const submissionStatus = task.submissionStatus;
       return (
         submissionStatus === "Submitted" ||
@@ -1165,15 +1212,33 @@ export const EmployeeDashboard = () => {
       );
     }).length;
 
-    const totalForms = onboardingTasks.length;
+    // Count employmentType separately if selected
+    const employmentTypeTask = onboardingTasks.find(
+      (task) => task.id === "employment-type"
+    );
+    const employmentTypeCompleted =
+      employmentTypeTask?.submissionStatus === "Submitted" ? 1 : 0;
+
+    const completedCount = completedTasksCount + employmentTypeCompleted;
+
+    console.log("📊 Dashboard Progress Calculation:", {
+      completedTasksCount,
+      employmentTypeCompleted,
+      employmentTypeStatus: employmentTypeTask?.submissionStatus,
+      completedCount,
+      totalForms: 20,
+    });
+
+    // Total forms is always 20
+    const totalForms = 20;
     const progressPercentage =
-      totalForms > 0 ? (completedForms / totalForms) * 100 : 0;
+      totalForms > 0 ? (completedCount / totalForms) * 100 : 0;
 
     return {
-      completed: completedForms,
+      completed: completedCount,
       total: totalForms,
       percentage: Math.round(progressPercentage),
-      isComplete: completedForms === totalForms && totalForms > 0,
+      isComplete: completedCount === totalForms && totalForms > 0,
     };
   };
 

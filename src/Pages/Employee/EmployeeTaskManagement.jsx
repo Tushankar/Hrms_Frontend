@@ -817,12 +817,18 @@ export const EmployeeTaskManagement = () => {
                   .toISOString()
                   .split("T")[0]
               : new Date().toISOString().split("T")[0],
-            status: backendData.application?.employmentType ? "Completed" : "Pending",
-            submissionStatus: backendData.application?.employmentType ? "Submitted" : "Not Started",
+            status: backendData.application?.employmentType
+              ? "Completed"
+              : "Pending",
+            submissionStatus: backendData.application?.employmentType
+              ? "Submitted"
+              : "Not Started",
             formsCompleted: backendData.application?.employmentType ? 1 : 0,
             totalForms: 1,
             hrReviewStatus: null,
-            formData: { employmentType: backendData.application?.employmentType },
+            formData: {
+              employmentType: backendData.application?.employmentType,
+            },
             applicationId: backendData.application?._id,
             isEditable: true,
           },
@@ -839,7 +845,9 @@ export const EmployeeTaskManagement = () => {
                         .split("T")[0]
                     : new Date().toISOString().split("T")[0],
                   status: getFormStatus(backendData.forms?.w4Form),
-                  submissionStatus: getSubmissionStatus(backendData.forms?.w4Form),
+                  submissionStatus: getSubmissionStatus(
+                    backendData.forms?.w4Form
+                  ),
                   formsCompleted: getCompletionCount(backendData.forms?.w4Form),
                   totalForms: 1,
                   hrReviewStatus: getHrReviewStatus(
@@ -868,7 +876,9 @@ export const EmployeeTaskManagement = () => {
                         .split("T")[0]
                     : new Date().toISOString().split("T")[0],
                   status: getFormStatus(backendData.forms?.w9Form),
-                  submissionStatus: getSubmissionStatus(backendData.forms?.w9Form),
+                  submissionStatus: getSubmissionStatus(
+                    backendData.forms?.w9Form
+                  ),
                   formsCompleted: getCompletionCount(backendData.forms?.w9Form),
                   totalForms: 1,
                   hrReviewStatus: getHrReviewStatus(
@@ -1678,50 +1688,8 @@ export const EmployeeTaskManagement = () => {
 
   // Calculate overall progress
   const calculateOverallProgress = () => {
-    // Use the employmentType from state (set during fetchOnboardingData)
-
-    // Count forms as completed based on FORM_KEYS to match CodeOfEthics.jsx
-    // Only count the core forms that are in FORM_KEYS, not the additional forms
-    const coreFormIds = [
-      "personal-information",
-      "professional-experience",
-      "work-experience",
-      "education",
-      "references",
-      "legal-disclosures",
-      "job-description-pca",
-      "code-of-ethics",
-      "service-delivery-policies",
-      "non-compete-agreement",
-      "misconduct-form",
-      "orientation-presentation",
-      "orientation-checklist",
-      "background-check",
-      "tb-symptom-screen",
-      "emergency-contact",
-      "i9-form",
-      "w4-form",
-      "w9-form",
-      "direct-deposit",
-    ];
-
-    // Filter forms based on employment type
-    const filteredFormIds = coreFormIds.filter((formId) => {
-      if (employmentType === "W-2 Employee") {
-        return formId !== "w9-form";
-      } else if (employmentType === "1099 Contractor") {
-        return formId !== "w4-form";
-      }
-      return formId !== "w9-form"; // default to W-2 if not set
-    });
-
     // Count completed forms from tasks
     const completedTasksCount = tasks.filter((task) => {
-      // Only count if this is a core form (in filtered FORM_KEYS)
-      if (!filteredFormIds.includes(task.id)) {
-        return false;
-      }
-
       const submissionStatus = task.submissionStatus;
       return (
         submissionStatus === "Submitted" ||
@@ -1734,8 +1702,8 @@ export const EmployeeTaskManagement = () => {
     const employmentTypeCompleted = employmentType ? 1 : 0;
     const completedCount = completedTasksCount + employmentTypeCompleted;
 
-    // Total is filteredFormIds length (19 forms) + 1 for employmentType = 20
-    const totalForms = filteredFormIds.length + 1;
+    // Total forms is always 20
+    const totalForms = 20;
     const progressPercentage =
       totalForms > 0 ? (completedCount / totalForms) * 100 : 0;
 
@@ -2914,7 +2882,9 @@ export const EmployeeTaskManagement = () => {
                                         task.id === "work-experience"
                                       ) {
                                         navigate("/employee/work-experience");
-                                      } else if (task.id === "employment-type") {
+                                      } else if (
+                                        task.id === "employment-type"
+                                      ) {
                                         navigate("/employee/employment-type");
                                       } else if (task.id === "w4-form") {
                                         navigate("/employee/w4-form");
@@ -3077,7 +3047,8 @@ export const EmployeeTaskManagement = () => {
                 <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
                   <div className="flex flex-col sm:flex-row items-center gap-4 text-sm text-gray-600">
                     <div>
-                      Showing {sortedTasks.length} of {overallProgress.total} tasks
+                      Showing {sortedTasks.length} of {overallProgress.total}{" "}
+                      tasks
                     </div>
                     <div className="hidden sm:block w-px h-4 bg-gray-300"></div>
                     <div className="flex items-center gap-4">
