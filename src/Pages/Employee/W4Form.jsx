@@ -286,7 +286,7 @@ const W4Form = () => {
         toast.success("W-4 Form saved successfully!");
         window.dispatchEvent(new Event("formStatusUpdated"));
         setTimeout(() => {
-          navigate("/employee/w9-form");
+          navigate("/employee/direct-deposit");
         }, 1500);
       }
     } catch (error) {
@@ -1758,7 +1758,7 @@ const W4Form = () => {
         <div className="flex flex-col sm:flex-row gap-4 sm:justify-between sm:items-center">
           <button
             type="button"
-            onClick={() => navigate("/employee/i9-form")}
+            onClick={() => navigate("/employee/employment-type")}
             className="w-full sm:w-auto px-6 sm:px-8 py-3 bg-gradient-to-r from-[#1F3A93] to-[#2748B4] text-white font-semibold rounded-xl hover:from-[#2748B4] hover:to-[#1F3A93] transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 text-sm sm:text-base"
           >
             <ArrowLeft className="w-4 h-4 inline mr-2" />
@@ -1796,7 +1796,7 @@ const W4Form = () => {
                 hrFeedback.serviceDeliveryPoliciesNotes ||
                 hrFeedback.nonCompeteAgreementNotes ||
                 hrFeedback.misconductStatementNotes);
-            const isSubmitted = formStatus === "submitted" && !hasHrNotes;
+            const isSubmitted = formStatus === "submitted" && hasHrNotes;
 
             return (
               <button

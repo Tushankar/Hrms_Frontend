@@ -1706,7 +1706,7 @@ export default function W9Form() {
   };
 
   const handlePrevious = () => {
-    navigate("/employee/w4-form");
+    navigate("/employee/employment-type");
   };
 
   const handleChange = (e) => {

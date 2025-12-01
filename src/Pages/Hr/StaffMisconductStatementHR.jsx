@@ -27,6 +27,7 @@ const StaffMisconductStatementHR = () => {
     notaryDay: "",
     notaryMonth: "",
     notaryYear: "",
+    notarySignature: "",
   });
   const [existingFeedback, setExistingFeedback] = useState(null);
 
@@ -122,6 +123,7 @@ const StaffMisconductStatementHR = () => {
             notaryDay: applicationData.notaryDay || "",
             notaryMonth: applicationData.notaryMonth || "",
             notaryYear: applicationData.notaryYear || "",
+            notarySignature: applicationData.notarySignature || "",
           });
 
           // Load existing HR feedback
@@ -401,75 +403,256 @@ const StaffMisconductStatementHR = () => {
                         </p>
                       </div>
 
-                      <div className="flex items-baseline gap-8 my-6">
-                        <div className="flex items-baseline flex-1">
-                          <span className="mr-2 whitespace-nowrap">
-                            Print Name:
-                          </span>
+                      <div
+                        className="flex items-baseline gap-1"
+                        style={{ maxWidth: "100%" }}
+                      >
+                        <span
+                          className="whitespace-nowrap"
+                          style={{
+                            verticalAlign: "middle",
+                            display: "inline-block",
+                            lineHeight: "20px",
+                            fontSize: "12px",
+                          }}
+                        >
+                          Print Name:
+                        </span>
+                        <span
+                          className="flex-1 border-b border-black"
+                          style={{
+                            minHeight: "20px",
+                            verticalAlign: "middle",
+                            display: "inline-block",
+                          }}
+                        >
                           <input
                             type="text"
                             value={formData.printName}
                             readOnly
-                            className="border-b border-black flex-1 px-1 bg-gray-50 cursor-not-allowed"
+                            className="border-0 bg-transparent w-full px-1 focus:outline-none cursor-not-allowed"
+                            style={{
+                              lineHeight: "20px",
+                              fontSize: "12px",
+                              margin: "0",
+                              padding: "0 2px",
+                              boxSizing: "border-box",
+                              display: "block",
+                            }}
                           />
-                        </div>
-                        <div className="flex items-baseline flex-1">
-                          <span className="mr-2">Signature:</span>
+                        </span>
+                        <span
+                          className="whitespace-nowrap ml-4"
+                          style={{
+                            verticalAlign: "middle",
+                            display: "inline-block",
+                            lineHeight: "20px",
+                            fontSize: "12px",
+                          }}
+                        >
+                          Signature:
+                        </span>
+                        <span
+                          className="flex-1 border-b border-black"
+                          style={{
+                            minHeight: "20px",
+                            verticalAlign: "middle",
+                            display: "inline-block",
+                          }}
+                        >
                           <p
                             style={{
                               fontFamily: "'Great Vibes', cursive",
-                              fontSize: "48px",
+                              fontSize: "20px",
                               letterSpacing: "0.5px",
+                              lineHeight: "20px",
+                              margin: "0",
+                              padding: "0 2px",
+                              boxSizing: "border-box",
+                              display: "block",
                             }}
-                            className="flex-1 px-1"
                           >
-                            {formData.signatureField || "No Signature"}
+                            {formData.signatureField || ""}
                           </p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-baseline mb-6">
-                        <span className="mr-2">Date:</span>
-                        <input
-                          type="text"
-                          value={formData.dateField2}
-                          readOnly
-                          className="border-b border-black w-48 px-1 bg-gray-50 cursor-not-allowed"
-                        />
+                        </span>
+                        <span
+                          className="whitespace-nowrap ml-4"
+                          style={{
+                            verticalAlign: "middle",
+                            display: "inline-block",
+                            lineHeight: "20px",
+                            fontSize: "12px",
+                          }}
+                        >
+                          Date:
+                        </span>
+                        <span
+                          className="border-b border-black"
+                          style={{
+                            minHeight: "20px",
+                            verticalAlign: "middle",
+                            display: "inline-block",
+                            width: "120px",
+                          }}
+                        >
+                          <input
+                            type="text"
+                            value={formData.dateField2}
+                            readOnly
+                            className="border-0 bg-transparent w-full px-1 focus:outline-none cursor-not-allowed"
+                            style={{
+                              lineHeight: "20px",
+                              fontSize: "12px",
+                              margin: "0",
+                              padding: "0 2px",
+                              boxSizing: "border-box",
+                              display: "block",
+                            }}
+                          />
+                        </span>
                       </div>
 
                       <div className="mt-8 space-y-4">
-                        <p className="italic font-bold">Notary Affidavit</p>
+                        <p
+                          style={{
+                            fontStyle: "italic",
+                            fontWeight: "bold",
+                            marginTop: "24px",
+                          }}
+                        >
+                          Notary Affidavit
+                        </p>
                         <p>State of Georgia</p>
 
                         <div className="flex items-baseline flex-wrap">
-                          <span className="mr-2">
+                          <span className="mr-2" style={{ fontSize: "12px" }}>
                             Sworn and subscribed before me this
                           </span>
-                          <input
-                            type="text"
-                            value={formData.notaryDay}
-                            readOnly
-                            className="border-b border-black w-16 mx-1 px-1 bg-gray-50 cursor-not-allowed"
-                          />
-                          <span className="mx-1">day of</span>
-                          <input
-                            type="text"
-                            value={formData.notaryMonth}
-                            readOnly
-                            className="border-b border-black w-24 mx-1 px-1 bg-gray-50 cursor-not-allowed"
-                          />
-                          <span className="mx-1">Year</span>
-                          <input
-                            type="text"
-                            value={formData.notaryYear}
-                            readOnly
-                            className="border-b border-black w-20 mx-1 px-1 bg-gray-50 cursor-not-allowed"
-                          />
+                          <span
+                            className="border-b border-black"
+                            style={{
+                              minHeight: "20px",
+                              verticalAlign: "middle",
+                              display: "inline-block",
+                              width: "60px",
+                              margin: "0 4px",
+                            }}
+                          >
+                            <input
+                              type="text"
+                              value={formData.notaryDay}
+                              readOnly
+                              className="border-0 bg-transparent w-full px-1 focus:outline-none cursor-not-allowed"
+                              style={{
+                                lineHeight: "20px",
+                                fontSize: "12px",
+                                margin: "0",
+                                padding: "0 2px",
+                                boxSizing: "border-box",
+                                display: "block",
+                              }}
+                            />
+                          </span>
+                          <span style={{ margin: "0 4px", fontSize: "12px" }}>
+                            day of
+                          </span>
+                          <span
+                            className="border-b border-black"
+                            style={{
+                              minHeight: "20px",
+                              verticalAlign: "middle",
+                              display: "inline-block",
+                              width: "140px",
+                              margin: "0 4px",
+                            }}
+                          >
+                            <input
+                              type="text"
+                              value={formData.notaryMonth}
+                              readOnly
+                              className="border-0 bg-transparent w-full px-1 focus:outline-none cursor-not-allowed"
+                              style={{
+                                lineHeight: "20px",
+                                fontSize: "12px",
+                                margin: "0",
+                                padding: "0 2px",
+                                boxSizing: "border-box",
+                                display: "block",
+                              }}
+                            />
+                          </span>
+                          <span style={{ margin: "0 4px", fontSize: "12px" }}>
+                            Year
+                          </span>
+                          <span
+                            className="border-b border-black"
+                            style={{
+                              minHeight: "20px",
+                              verticalAlign: "middle",
+                              display: "inline-block",
+                              width: "80px",
+                              margin: "0 4px",
+                            }}
+                          >
+                            <input
+                              type="text"
+                              value={formData.notaryYear}
+                              readOnly
+                              className="border-0 bg-transparent w-full px-1 focus:outline-none cursor-not-allowed"
+                              style={{
+                                lineHeight: "20px",
+                                fontSize: "12px",
+                                margin: "0",
+                                padding: "0 2px",
+                                boxSizing: "border-box",
+                                display: "block",
+                              }}
+                            />
+                          </span>
                         </div>
 
-                        <p className="mt-6">Notary Seal</p>
-                        <p className="mt-6">Notary Signature</p>
+                        <div className="mt-6">
+                          <p className="mb-3">Notary Seal</p>
+                          <div
+                            className="flex items-baseline gap-1"
+                            style={{ maxWidth: "50%" }}
+                          >
+                            <span
+                              className="whitespace-nowrap"
+                              style={{
+                                verticalAlign: "middle",
+                                display: "inline-block",
+                                lineHeight: "20px",
+                                fontSize: "12px",
+                              }}
+                            >
+                              Notary Signature:
+                            </span>
+                            <span
+                              className="flex-1 border-b border-black"
+                              style={{
+                                minHeight: "20px",
+                                verticalAlign: "middle",
+                                display: "inline-block",
+                              }}
+                            >
+                              <p
+                                style={{
+                                  fontFamily: "'Great Vibes', cursive",
+                                  fontSize: "20px",
+                                  letterSpacing: "0.5px",
+                                  lineHeight: "20px",
+                                  margin: "0",
+                                  padding: "0 2px",
+                                  boxSizing: "border-box",
+                                  display: "block",
+                                }}
+                              >
+                                {formData.notarySignature || ""}
+                              </p>
+                            </span>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
