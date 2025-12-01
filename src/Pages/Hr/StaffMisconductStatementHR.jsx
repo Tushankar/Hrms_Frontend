@@ -249,205 +249,214 @@ const StaffMisconductStatementHR = () => {
             </div>
 
             {/* Template Preview Section */}
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 sm:p-6">
-              <h2 className="text-lg sm:text-xl font-semibold text-gray-800 mb-3 sm:mb-4">
-                Step 1: Staff Misconduct Statement Form
-              </h2>
-              <div className="max-w-6xl mx-auto bg-white p-12 my-8">
-                <div className="border-4 border-black p-12 min-h-screen">
-                  <div className="space-y-4">
-                    <h1 className="text-sm font-bold mb-6">
+            <div className="bg-white p-0">
+              <div
+                className="mx-auto bg-white p-12 my-0"
+                style={{
+                  maxWidth: "700px",
+                  fontFamily: "Times New Roman, serif",
+                  lineHeight: "1.6",
+                  fontSize: "12px",
+                  border: "1px solid #333",
+                }}
+              >
+                <div className="space-y-0">
+                  {/* Header - Centered */}
+                  <div className="mb-4">
+                    <h1
+                      className="text-sm tracking-wider"
+                      style={{ fontSize: "13px" }}
+                    >
                       STAFF MISCONDUCT ABUSE STATEMENT FORM
                     </h1>
+                  </div>
 
-                    <div className="flex items-baseline mb-8">
-                      <span className="mr-2 text-xs">STAFF TITLE:</span>
-                      <input
-                        type="text"
-                        value={formData.staffTitle}
-                        readOnly
-                        className="border-b border-black flex-1 px-1 bg-gray-50 text-xs cursor-not-allowed"
-                      />
+                  {/* Staff Title */}
+                  <div className="mb-6" style={{ fontSize: "12px" }}>
+                    <span
+                      style={{
+                        display: "inline-block",
+                        verticalAlign: "middle",
+                        lineHeight: "20px",
+                      }}
+                    >
+                      STAFF TITLE:{" "}
+                    </span>
+                    <span
+                      className="inline-block border-b border-black"
+                      style={{
+                        minHeight: "20px",
+                        width: "300px",
+                        marginLeft: "4px",
+                        verticalAlign: "middle",
+                      }}
+                    >
+                      <span
+                        className="px-1"
+                        style={{
+                          fontSize: "12px",
+                          fontFamily: "Times New Roman, serif",
+                          lineHeight: "20px",
+                          margin: "0",
+                          padding: "0 2px",
+                          boxSizing: "border-box",
+                          display: "block",
+                        }}
+                      >
+                        {formData.staffTitle || ""}
+                      </span>
+                    </span>
+                  </div>
+
+                  {/* Body Text - Left Aligned with proper spacing */}
+                  <div
+                    className="space-y-4"
+                    style={{
+                      fontSize: "12px",
+                      textAlign: "justify",
+                      marginTop: "40px",
+                    }}
+                  >
+                    <p>
+                      I understand and acknowledge that I must comply with{" "}
+                      <u>Pacific Health Systems LLC</u>, Code of Conduct and
+                      Abuse or Misconduct program.
+                    </p>
+
+                    <p>
+                      All laws, regulations, policies & procedure as well as any
+                      other applicable state or local ordinances as it pertains
+                      to the responsibilities of my position.
+                    </p>
+
+                    <p>
+                      I understand that my failure to report any concerns
+                      regarding possible violations of these laws, regulations,
+                      and Policies may result in disciplinary action, up to and
+                      including termination.
+                    </p>
+
+                    <p>
+                      I{" "}
+                      <span
+                        className="inline-block border-b border-black"
+                        style={{
+                          minHeight: "20px",
+                          minWidth: "220px",
+                          verticalAlign: "middle",
+                        }}
+                      >
+                        <span
+                          className="px-1"
+                          style={{
+                            fontSize: "12px",
+                            fontFamily: "Times New Roman, serif",
+                            lineHeight: "20px",
+                            margin: "0",
+                            padding: "0 2px",
+                            boxSizing: "border-box",
+                            display: "block",
+                          }}
+                        >
+                          {formData.employeeNameParagraph || ""}
+                        </span>
+                      </span>{" "}
+                      as an employee of <u>Pacific Health Systems LLC</u>, I
+                      hereby state that, I have never shown any misconduct nor
+                      have a history of abuse and neglect of others.
+                    </p>
+
+                    <p style={{ whiteSpace: "nowrap", marginBottom: "12px" }}>
+                      I acknowledge that I have received and read the Misconduct
+                      or abuse statement form and that I clearly understand it.
+                    </p>
+                  </div>
+
+                  {/* Employee Information Fields */}
+                  <div className="space-y-4" style={{ fontSize: "12px" }}>
+                    <div className="flex items-baseline gap-2 mt-4">
+                      <span
+                        className="whitespace-nowrap"
+                        style={{
+                          verticalAlign: "middle",
+                          display: "inline-block",
+                          lineHeight: "20px",
+                        }}
+                      >
+                        Name of Employee (print):
+                      </span>
+                      <span
+                        className="border-b border-black"
+                        style={{
+                          minHeight: "20px",
+                          verticalAlign: "middle",
+                          display: "inline-block",
+                          width: "200px",
+                        }}
+                      >
+                        <span
+                          className="px-1"
+                          style={{
+                            fontSize: "12px",
+                            fontFamily: "Times New Roman, serif",
+                            lineHeight: "20px",
+                            margin: "0",
+                            padding: "0 2px",
+                            boxSizing: "border-box",
+                            display: "block",
+                          }}
+                        >
+                          {formData.employeeName || ""}
+                        </span>
+                      </span>
                     </div>
 
-                    <div className="space-y-4 leading-relaxed text-xs">
-                      <p>
-                        I <u>understand and acknowledge</u> that I must comply
-                        with Pacific Health Systems LLC{" "}
-                        <input
-                          type="text"
-                          value={formData.companyName}
-                          readOnly
-                          className="border-b border-black w-20 mx-1 px-1 bg-gray-50 cursor-not-allowed"
-                        />
-                        , Code of Conduct and Abuse & Misconduct program.
-                      </p>
-
-                      <p>
-                        All laws, regulations, policies & procedures as well as
-                        any other applicable state or local ordinances as it
-                        pertains to the responsibilities of my position.
-                      </p>
-
-                      <p>
-                        I <u>understand</u> that my failure to report any
-                        concerns regarding possible violations of these laws,
-                        regulations, and Policies may result in disciplinary
-                        action, up to and including termination.
-                      </p>
-
-                      <p>
-                        I{" "}
-                        <input
-                          type="text"
-                          value={formData.employeeNameParagraph}
-                          readOnly
-                          className="border-b border-black w-64 mx-1 px-1 bg-gray-50 cursor-not-allowed"
-                        />
-                        , as an employee of Pacific Health Systems LLC{" "}
-                        <input
-                          type="text"
-                          value={formData.employeeNameParagraph}
-                          readOnly
-                          className="border-b border-black w-16 mx-1 px-1 bg-gray-50 cursor-not-allowed"
-                        />
-                        , I hereby state that, I have never shown any misconduct
-                        nor have a history of abuse and neglect of others.
-                      </p>
-
-                      <p className="mb-6">
-                        I acknowledge that I have received and read the
-                        Misconduct or abuse statement form and that I clearly
-                        understand it.
-                      </p>
-
-                      <div className="space-y-3">
-                        <div className="flex items-baseline">
-                          <span className="mr-2 whitespace-nowrap">
-                            Name of Employee (print):
-                          </span>
-                          <input
-                            type="text"
-                            value={formData.employeeName}
-                            readOnly
-                            className="border-b border-black flex-1 px-1 bg-gray-50 cursor-not-allowed"
-                          />
-                        </div>
-
-                        <div className="flex items-baseline">
-                          <span className="mr-2 whitespace-nowrap">
-                            Employment Position:
-                          </span>
-                          <input
-                            type="text"
-                            value={formData.employmentPosition}
-                            readOnly
-                            className="border-b border-black flex-1 px-1 bg-gray-50 cursor-not-allowed"
-                          />
-                        </div>
-
-                        <div className="flex items-baseline">
-                          <span className="mr-2">Signature:</span>
-                          <p
-                            style={{
-                              fontFamily: "'Great Vibes', cursive",
-                              fontSize: "48px",
-                              letterSpacing: "0.5px",
-                            }}
-                            className="flex-1 px-1"
-                          >
-                            {formData.signatureLine || "No Signature"}
-                          </p>
-                          <span className="mx-2">Date:</span>
-                          <input
-                            type="text"
-                            value={formData.dateField1}
-                            readOnly
-                            className="border-b border-black w-32 px-1 bg-gray-50 cursor-not-allowed"
-                          />
-                        </div>
-                      </div>
-
-                      <div className="my-6">
-                        <p className="mb-2">
-                          Who having been first duly sworn depose and say
-                        </p>
-                        <div className="mb-1">
-                          <span>that </span>
-                          <input
-                            type="text"
-                            value={formData.exhibitName}
-                            readOnly
-                            className="border-b border-black w-full px-1 bg-gray-50 cursor-not-allowed"
-                          />
-                          <span> has never been shown to have exhibited</span>
-                        </div>
-                        <p>
-                          any violent or abusive behavior or intentional or
-                          grossly negligent misconduct{" "}
-                          <input
-                            type="text"
-                            readOnly
-                            className="border-b border-black w-24 mx-1 px-1 bg-gray-50 cursor-not-allowed"
-                          />
-                          .
-                        </p>
-                        <p className="mt-2">
-                          Also have never been accused or convicted to have been
-                          abused, neglected, sexually assaulted, exploited, or
-                          deprived any person or to have subjected any person to
-                          serious injury as a result of intentional or grossly
-                          negligent misconduct as evidenced by an out-of written
-                          statement to this affect obtained at the time of
-                          application.
-                        </p>
-                      </div>
-
-                      <div
-                        className="flex items-baseline gap-1"
-                        style={{ maxWidth: "100%" }}
+                    <div className="flex items-baseline gap-2">
+                      <span
+                        className="whitespace-nowrap"
+                        style={{
+                          verticalAlign: "middle",
+                          display: "inline-block",
+                          lineHeight: "20px",
+                        }}
                       >
+                        Employment Position:
+                      </span>
+                      <span
+                        className="border-b border-black"
+                        style={{
+                          minHeight: "20px",
+                          verticalAlign: "middle",
+                          display: "inline-block",
+                          width: "200px",
+                        }}
+                      >
+                        <span
+                          className="px-1"
+                          style={{
+                            fontSize: "12px",
+                            fontFamily: "Times New Roman, serif",
+                            lineHeight: "20px",
+                            margin: "0",
+                            padding: "0 2px",
+                            boxSizing: "border-box",
+                            display: "block",
+                          }}
+                        >
+                          {formData.employmentPosition || ""}
+                        </span>
+                      </span>
+                    </div>
+
+                    {/* Signature and Date Row 1 */}
+                    <div className="flex items-baseline gap-8">
+                      <div className="flex items-baseline gap-1 flex-1">
                         <span
                           className="whitespace-nowrap"
                           style={{
                             verticalAlign: "middle",
                             display: "inline-block",
                             lineHeight: "20px",
-                            fontSize: "12px",
-                          }}
-                        >
-                          Print Name:
-                        </span>
-                        <span
-                          className="flex-1 border-b border-black"
-                          style={{
-                            minHeight: "20px",
-                            verticalAlign: "middle",
-                            display: "inline-block",
-                          }}
-                        >
-                          <input
-                            type="text"
-                            value={formData.printName}
-                            readOnly
-                            className="border-0 bg-transparent w-full px-1 focus:outline-none cursor-not-allowed"
-                            style={{
-                              lineHeight: "20px",
-                              fontSize: "12px",
-                              margin: "0",
-                              padding: "0 2px",
-                              boxSizing: "border-box",
-                              display: "block",
-                            }}
-                          />
-                        </span>
-                        <span
-                          className="whitespace-nowrap ml-4"
-                          style={{
-                            verticalAlign: "middle",
-                            display: "inline-block",
-                            lineHeight: "20px",
-                            fontSize: "12px",
                           }}
                         >
                           Signature:
@@ -460,7 +469,203 @@ const StaffMisconductStatementHR = () => {
                             display: "inline-block",
                           }}
                         >
-                          <p
+                          <span
+                            style={{
+                              fontFamily: "'Great Vibes', cursive",
+                              fontSize: "20px",
+                              letterSpacing: "0.5px",
+                              lineHeight: "20px",
+                              margin: "0",
+                              padding: "0 2px",
+                              boxSizing: "border-box",
+                              display: "block",
+                            }}
+                          >
+                            {formData.signatureLine || ""}
+                          </span>
+                        </span>
+                      </div>
+                      <div className="flex items-baseline gap-1 flex-1">
+                        <span
+                          className="whitespace-nowrap"
+                          style={{
+                            verticalAlign: "middle",
+                            display: "inline-block",
+                            lineHeight: "20px",
+                          }}
+                        >
+                          Date:
+                        </span>
+                        <span
+                          className="flex-1 border-b border-black"
+                          style={{
+                            minHeight: "20px",
+                            verticalAlign: "middle",
+                            display: "inline-block",
+                          }}
+                        >
+                          <span
+                            className="px-1"
+                            style={{
+                              fontSize: "12px",
+                              fontFamily: "Times New Roman, serif",
+                              lineHeight: "20px",
+                              margin: "0",
+                              padding: "0 2px",
+                              boxSizing: "border-box",
+                              display: "block",
+                            }}
+                          >
+                            {formData.dateField1 || ""}
+                          </span>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Affidavit Section */}
+                  <div
+                    className="space-y-1 mt-8"
+                    style={{ fontSize: "12px", textAlign: "justify" }}
+                  >
+                    <p className="mb-0" style={{ marginTop: "20px" }}>
+                      Who having been first duly sworn depose and say
+                    </p>
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "baseline",
+                        gap: "4px",
+                        marginTop: "8px",
+                        flexWrap: "wrap",
+                      }}
+                    >
+                      <span
+                        style={{
+                          verticalAlign: "baseline",
+                          display: "inline",
+                          lineHeight: "20px",
+                          marginRight: "4px",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        that
+                      </span>
+                      <span
+                        className="inline-block border-b border-black"
+                        style={{
+                          minHeight: "20px",
+                          minWidth: "350px",
+                          verticalAlign: "middle",
+                          flex: "0 0 auto",
+                        }}
+                      >
+                        <span
+                          className="px-1"
+                          style={{
+                            fontSize: "12px",
+                            fontFamily: "Times New Roman, serif",
+                            lineHeight: "20px",
+                            margin: "0",
+                            padding: "0 2px",
+                            boxSizing: "border-box",
+                            display: "block",
+                          }}
+                        >
+                          {formData.exhibitName || ""}
+                        </span>
+                      </span>
+                      <span
+                        style={{
+                          verticalAlign: "middle",
+                          display: "inline-block",
+                          lineHeight: "20px",
+                          whiteSpace: "nowrap",
+                          marginLeft: "4px",
+                        }}
+                      >
+                        has never been shown to have exhibited
+                      </span>
+                    </div>
+                    <p style={{ marginTop: "2px" }}>
+                      any violent or abusive behavior or intentional or grossly
+                      negligent misconduct.
+                    </p>
+                    <p>
+                      Also have never been accused or convicted to have been
+                      abused, neglected, sexually assaulted, exploited, or
+                      deprived any person or to have subjected any person to
+                      serious injury as a result of intentional or grossly
+                      negligent misconduct as evidence by an oral or written
+                      statement to this effect obtained at the time of
+                      application.
+                    </p>
+                  </div>
+
+                  {/* Witness Section */}
+                  <div className="space-y-4 mt-2" style={{ fontSize: "12px" }}>
+                    <div className="flex items-baseline gap-4 mt-4">
+                      <div
+                        className="flex items-baseline gap-1"
+                        style={{ flex: "1.5" }}
+                      >
+                        <span
+                          className="whitespace-nowrap"
+                          style={{
+                            verticalAlign: "middle",
+                            display: "inline-block",
+                            lineHeight: "20px",
+                          }}
+                        >
+                          <b>Pr</b>int Name:
+                        </span>
+                        <span
+                          className="flex-1 border-b border-black"
+                          style={{
+                            minHeight: "20px",
+                            verticalAlign: "middle",
+                            display: "inline-block",
+                          }}
+                        >
+                          <span
+                            className="px-1"
+                            style={{
+                              fontSize: "12px",
+                              fontFamily: "Times New Roman, serif",
+                              lineHeight: "20px",
+                              margin: "0",
+                              padding: "0 2px",
+                              boxSizing: "border-box",
+                              display: "block",
+                            }}
+                          >
+                            {formData.printName || ""}
+                          </span>
+                        </span>
+                      </div>
+                      <div
+                        className="flex items-baseline gap-1"
+                        style={{ flex: "1.2" }}
+                      >
+                        <span
+                          className="whitespace-nowrap"
+                          style={{
+                            verticalAlign: "middle",
+                            display: "inline-block",
+                            lineHeight: "20px",
+                          }}
+                        >
+                          Signature:
+                        </span>
+                        <span
+                          className="flex-1 border-b border-black"
+                          style={{
+                            minHeight: "20px",
+                            verticalAlign: "middle",
+                            display: "inline-block",
+                          }}
+                        >
+                          <span
                             style={{
                               fontFamily: "'Great Vibes', cursive",
                               fontSize: "20px",
@@ -473,10 +678,155 @@ const StaffMisconductStatementHR = () => {
                             }}
                           >
                             {formData.signatureField || ""}
-                          </p>
+                          </span>
+                        </span>
+                      </div>
+                      <div
+                        className="flex items-baseline gap-1"
+                        style={{ flex: "0.8" }}
+                      >
+                        <span
+                          className="whitespace-nowrap"
+                          style={{
+                            verticalAlign: "middle",
+                            display: "inline-block",
+                            lineHeight: "20px",
+                          }}
+                        >
+                          Date:
                         </span>
                         <span
-                          className="whitespace-nowrap ml-4"
+                          className="flex-1 border-b border-black"
+                          style={{
+                            minHeight: "20px",
+                            verticalAlign: "middle",
+                            display: "inline-block",
+                          }}
+                        >
+                          <span
+                            className="px-1"
+                            style={{
+                              fontSize: "12px",
+                              fontFamily: "Times New Roman, serif",
+                              lineHeight: "20px",
+                              margin: "0",
+                              padding: "0 2px",
+                              boxSizing: "border-box",
+                              display: "block",
+                            }}
+                          >
+                            {formData.dateField2 || ""}
+                          </span>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Notary Affidavit Section */}
+                  <div className="space-y-2 mt-8" style={{ fontSize: "12px" }}>
+                    <p
+                      className="italic font-bold"
+                      style={{ marginTop: "10px", fontWeight: "bold" }}
+                    >
+                      Notary Affidavit
+                    </p>
+                    <p className="text-xs sm:text-sm">State of: Georgia</p>
+
+                    <p
+                      style={{
+                        display: "flex",
+                        alignItems: "baseline",
+                        gap: "4px",
+                        flexWrap: "nowrap",
+                      }}
+                    >
+                      <span style={{ whiteSpace: "nowrap" }}>
+                        Sworn and subscribed before me this
+                      </span>
+                      <span
+                        className="border-b border-black inline-block text-center"
+                        style={{
+                          width: "40px",
+                          minHeight: "20px",
+                          verticalAlign: "middle",
+                          flex: "0 0 auto",
+                        }}
+                      >
+                        <span
+                          className="text-center px-1"
+                          style={{
+                            fontSize: "12px",
+                            fontFamily: "Times New Roman, serif",
+                            lineHeight: "20px",
+                            margin: "0",
+                            padding: "0 2px",
+                            boxSizing: "border-box",
+                            display: "block",
+                          }}
+                        >
+                          {formData.notaryDay || ""}
+                        </span>
+                      </span>
+                      <span style={{ whiteSpace: "nowrap" }}>day of</span>
+                      <span
+                        className="border-b border-black inline-block"
+                        style={{
+                          width: "70px",
+                          minHeight: "20px",
+                          verticalAlign: "middle",
+                          flex: "0 0 auto",
+                        }}
+                      >
+                        <span
+                          className="px-1"
+                          style={{
+                            fontSize: "12px",
+                            fontFamily: "Times New Roman, serif",
+                            lineHeight: "20px",
+                            margin: "0",
+                            padding: "0 2px",
+                            boxSizing: "border-box",
+                            display: "block",
+                          }}
+                        >
+                          {formData.notaryMonth || ""}
+                        </span>
+                      </span>
+                      <span style={{ whiteSpace: "nowrap" }}>Year</span>
+                      <span
+                        className="border-b border-black inline-block text-center"
+                        style={{
+                          width: "50px",
+                          minHeight: "20px",
+                          verticalAlign: "middle",
+                          flex: "0 0 auto",
+                        }}
+                      >
+                        <span
+                          className="text-center px-1"
+                          style={{
+                            fontSize: "12px",
+                            fontFamily: "Times New Roman, serif",
+                            lineHeight: "20px",
+                            margin: "0",
+                            padding: "0 2px",
+                            boxSizing: "border-box",
+                            display: "block",
+                          }}
+                        >
+                          {formData.notaryYear || ""}
+                        </span>
+                      </span>
+                    </p>
+
+                    <div className="mt-6">
+                      <p className="mb-3">Notary Seal</p>
+                      <div
+                        className="flex items-baseline gap-1"
+                        style={{ maxWidth: "50%" }}
+                      >
+                        <span
+                          className="whitespace-nowrap"
                           style={{
                             verticalAlign: "middle",
                             display: "inline-block",
@@ -484,175 +834,31 @@ const StaffMisconductStatementHR = () => {
                             fontSize: "12px",
                           }}
                         >
-                          Date:
+                          Notary Signature:
                         </span>
                         <span
-                          className="border-b border-black"
+                          className="flex-1 border-b border-black"
                           style={{
                             minHeight: "20px",
                             verticalAlign: "middle",
                             display: "inline-block",
-                            width: "120px",
                           }}
                         >
-                          <input
-                            type="text"
-                            value={formData.dateField2}
-                            readOnly
-                            className="border-0 bg-transparent w-full px-1 focus:outline-none cursor-not-allowed"
+                          <span
                             style={{
+                              fontFamily: "'Great Vibes', cursive",
+                              fontSize: "20px",
+                              letterSpacing: "0.5px",
                               lineHeight: "20px",
-                              fontSize: "12px",
                               margin: "0",
                               padding: "0 2px",
                               boxSizing: "border-box",
                               display: "block",
                             }}
-                          />
+                          >
+                            {formData.notarySignature || ""}
+                          </span>
                         </span>
-                      </div>
-
-                      <div className="mt-8 space-y-4">
-                        <p
-                          style={{
-                            fontStyle: "italic",
-                            fontWeight: "bold",
-                            marginTop: "24px",
-                          }}
-                        >
-                          Notary Affidavit
-                        </p>
-                        <p>State of Georgia</p>
-
-                        <div className="flex items-baseline flex-wrap">
-                          <span className="mr-2" style={{ fontSize: "12px" }}>
-                            Sworn and subscribed before me this
-                          </span>
-                          <span
-                            className="border-b border-black"
-                            style={{
-                              minHeight: "20px",
-                              verticalAlign: "middle",
-                              display: "inline-block",
-                              width: "60px",
-                              margin: "0 4px",
-                            }}
-                          >
-                            <input
-                              type="text"
-                              value={formData.notaryDay}
-                              readOnly
-                              className="border-0 bg-transparent w-full px-1 focus:outline-none cursor-not-allowed"
-                              style={{
-                                lineHeight: "20px",
-                                fontSize: "12px",
-                                margin: "0",
-                                padding: "0 2px",
-                                boxSizing: "border-box",
-                                display: "block",
-                              }}
-                            />
-                          </span>
-                          <span style={{ margin: "0 4px", fontSize: "12px" }}>
-                            day of
-                          </span>
-                          <span
-                            className="border-b border-black"
-                            style={{
-                              minHeight: "20px",
-                              verticalAlign: "middle",
-                              display: "inline-block",
-                              width: "140px",
-                              margin: "0 4px",
-                            }}
-                          >
-                            <input
-                              type="text"
-                              value={formData.notaryMonth}
-                              readOnly
-                              className="border-0 bg-transparent w-full px-1 focus:outline-none cursor-not-allowed"
-                              style={{
-                                lineHeight: "20px",
-                                fontSize: "12px",
-                                margin: "0",
-                                padding: "0 2px",
-                                boxSizing: "border-box",
-                                display: "block",
-                              }}
-                            />
-                          </span>
-                          <span style={{ margin: "0 4px", fontSize: "12px" }}>
-                            Year
-                          </span>
-                          <span
-                            className="border-b border-black"
-                            style={{
-                              minHeight: "20px",
-                              verticalAlign: "middle",
-                              display: "inline-block",
-                              width: "80px",
-                              margin: "0 4px",
-                            }}
-                          >
-                            <input
-                              type="text"
-                              value={formData.notaryYear}
-                              readOnly
-                              className="border-0 bg-transparent w-full px-1 focus:outline-none cursor-not-allowed"
-                              style={{
-                                lineHeight: "20px",
-                                fontSize: "12px",
-                                margin: "0",
-                                padding: "0 2px",
-                                boxSizing: "border-box",
-                                display: "block",
-                              }}
-                            />
-                          </span>
-                        </div>
-
-                        <div className="mt-6">
-                          <p className="mb-3">Notary Seal</p>
-                          <div
-                            className="flex items-baseline gap-1"
-                            style={{ maxWidth: "50%" }}
-                          >
-                            <span
-                              className="whitespace-nowrap"
-                              style={{
-                                verticalAlign: "middle",
-                                display: "inline-block",
-                                lineHeight: "20px",
-                                fontSize: "12px",
-                              }}
-                            >
-                              Notary Signature:
-                            </span>
-                            <span
-                              className="flex-1 border-b border-black"
-                              style={{
-                                minHeight: "20px",
-                                verticalAlign: "middle",
-                                display: "inline-block",
-                              }}
-                            >
-                              <p
-                                style={{
-                                  fontFamily: "'Great Vibes', cursive",
-                                  fontSize: "20px",
-                                  letterSpacing: "0.5px",
-                                  lineHeight: "20px",
-                                  margin: "0",
-                                  padding: "0 2px",
-                                  boxSizing: "border-box",
-                                  display: "block",
-                                }}
-                              >
-                                {formData.notarySignature || ""}
-                              </p>
-                            </span>
-                          </div>
-                        </div>
                       </div>
                     </div>
                   </div>
