@@ -189,7 +189,7 @@ function FormI9({ initialFormData = {}, onFormDataChange }) {
                       className="w-full border-0 p-0 focus:outline-none"
                     />
                   </td>
-                  <td className="border border-black p-[2px]">
+                  <td className="border border-black p-[2px]" colSpan="2">
                     <div className="text-[7pt] whitespace-nowrap">
                       City or Town
                     </div>
@@ -201,7 +201,7 @@ function FormI9({ initialFormData = {}, onFormDataChange }) {
                       className="w-full border-0 p-0 focus:outline-none"
                     />
                   </td>
-                  <td className="border border-black p-[2px]">
+                  <td className="border border-black p-[2px] w-[40px]">
                     <div className="text-[7pt] whitespace-nowrap">State</div>
                     <select
                       name="state"
@@ -262,11 +262,12 @@ function FormI9({ initialFormData = {}, onFormDataChange }) {
                       <option value="WY">WY</option>
                     </select>
                   </td>
-                  <td className="border border-black p-[2px]">
+                  <td className="border border-black p-[2px] w-[80px]">
                     <div className="text-[7pt] whitespace-nowrap">ZIP Code</div>
                     <input
                       type="text"
                       name="zipCode"
+                      maxLength="9"
                       value={formData.zipCode || ""}
                       onChange={handleChange}
                       className="w-full border-0 p-0 focus:outline-none"
@@ -1292,7 +1293,7 @@ function FormI9({ initialFormData = {}, onFormDataChange }) {
                       <option value="WY">WY</option>
                     </select>
                   </td>
-                  <td className="border border-black p-[2px]" colSpan="2">
+                  <td className="border border-black p-[2px] w-[90px]">
                     <div className="text-[7pt]">ZIP Code</div>
                     <input
                       type="text"
@@ -1864,7 +1865,9 @@ const I9Form = () => {
           return (
             ["submitted", "completed", "under_review", "approved"].includes(
               form?.status
-            ) || (key === "employmentType" && applicationData.application.employmentType)
+            ) ||
+            (key === "employmentType" &&
+              applicationData.application.employmentType)
           );
         }).length;
 
