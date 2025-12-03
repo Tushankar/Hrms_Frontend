@@ -79,6 +79,40 @@ const GemaltoRegistrationForm = ({ onFormDataChange, initialData }) => {
     }
   };
 
+  const handleSSNChange = (digitIndex, value) => {
+    const currentDigits = formData.ssn || "";
+    const digitsArray = currentDigits.padEnd(9, " ").split("");
+    digitsArray[digitIndex] = value.replace(/\D/g, "") || " ";
+    const newDigits = digitsArray.join("").trim();
+    const updatedFormData = {
+      ...formData,
+      ssn: newDigits,
+    };
+    setFormData(updatedFormData);
+
+    // Auto-focus next input
+    if (value && digitIndex < 8) {
+      const nextInput = document.querySelector(
+        `input[name="ssn-${digitIndex + 1}"]`
+      );
+      if (nextInput) nextInput.focus();
+    }
+
+    // Notify parent component
+    if (onFormDataChange) {
+      onFormDataChange(updatedFormData);
+    }
+  };
+
+  const handleSSNKeyDown = (e, index) => {
+    if (e.key === "Backspace" && !e.target.value && index > 0) {
+      const prevInput = document.querySelector(
+        `input[name="ssn-${index - 1}"]`
+      );
+      if (prevInput) prevInput.focus();
+    }
+  };
+
   const LogoHeader = () => (
     <div className="flex flex-col sm:flex-row items-start mb-4">
       <div
@@ -187,15 +221,22 @@ const GemaltoRegistrationForm = ({ onFormDataChange, initialData }) => {
 
           {/* Physical Details Row */}
           <div className="grid grid-cols-12 gap-2 sm:gap-4">
-            <div className="col-span-12 sm:col-span-3">
+            <div className="col-span-12 sm:col-span-4">
               <label className="block text-xs mb-1">Social Security No.</label>
-              <input
-                type="text"
-                name="ssn"
-                value={formData.ssn}
-                onChange={handleChange}
-                className="w-full border-b-2 border-black focus:outline-none focus:border-blue-600 pb-1"
-              />
+              <div className="flex gap-[1px] justify-start items-center">
+                {[...Array(9)].map((_, i) => (
+                  <input
+                    key={i}
+                    type="text"
+                    name={`ssn-${i}`}
+                    maxLength="1"
+                    value={(formData.ssn || "")[i] || ""}
+                    onChange={(e) => handleSSNChange(i, e.target.value)}
+                    onKeyDown={(e) => handleSSNKeyDown(e, i)}
+                    className="w-5 h-6 text-center border border-black px-0 py-0 outline-none bg-white text-[12px] font-bold text-black flex-shrink-0"
+                  />
+                ))}
+              </div>
             </div>
             <div className="col-span-6 sm:col-span-2">
               <label className="block text-xs mb-1">Height</label>
@@ -227,7 +268,7 @@ const GemaltoRegistrationForm = ({ onFormDataChange, initialData }) => {
                 className="w-full border-b-2 border-black focus:outline-none focus:border-blue-600 pb-1"
               />
             </div>
-            <div className="col-span-6 sm:col-span-3">
+            <div className="col-span-6 sm:col-span-2">
               <label className="block text-xs mb-1">Hair Color</label>
               <input
                 type="text"
@@ -535,7 +576,7 @@ const GemaltoRegistrationForm = ({ onFormDataChange, initialData }) => {
 };
 
 const FORM_KEYS = [
-   "employmentType",
+  "employmentType",
   "personalInformation",
   "professionalExperience",
   "workExperience",

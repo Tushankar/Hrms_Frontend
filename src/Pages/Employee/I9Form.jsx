@@ -71,6 +71,47 @@ function FormI9({ initialFormData = {}, onFormDataChange }) {
     }
   };
 
+  const handleDateOfBirthChange = (e) => {
+    let value = e.target.value.replace(/\D/g, ""); // remove non-digits
+    if (value.length >= 2) {
+      value = value.slice(0, 2) + "-" + value.slice(2);
+    }
+    if (value.length >= 5) {
+      value = value.slice(0, 5) + "-" + value.slice(5);
+    }
+    value = value.slice(0, 10); // limit to 10 chars
+    setFormData((prev) => ({ ...prev, dateOfBirth: value }));
+  };
+
+  // Format phone number as +1 (XXX) XXX-XXXX
+  const formatPhone = (value) => {
+    // Remove +1 prefix if it exists, then remove all non-digit characters
+    const withoutPrefix = value.replace(/^\+1\s*/, "");
+    const cleaned = withoutPrefix.replace(/\D/g, "");
+
+    // Limit to 10 digits
+    const limited = cleaned.slice(0, 10);
+
+    // Format as +1 (XXX) XXX-XXXX
+    if (limited.length === 0) {
+      return "";
+    } else if (limited.length <= 3) {
+      return `+1 (${limited}`;
+    } else if (limited.length <= 6) {
+      return `+1 (${limited.slice(0, 3)}) ${limited.slice(3)}`;
+    } else {
+      return `+1 (${limited.slice(0, 3)}) ${limited.slice(
+        3,
+        6
+      )}-${limited.slice(6)}`;
+    }
+  };
+
+  const handleTelephoneChange = (e) => {
+    const formatted = formatPhone(e.target.value);
+    setFormData((prev) => ({ ...prev, telephone: formatted }));
+  };
+
   return (
     <>
       <div className="max-w-full sm:max-w-[8.5in] mx-auto py-[0.25in] sm:py-[0.5in] px-2 sm:px-[0.5in] bg-white font-[Arial,sans-serif] text-[10pt] leading-[1.2]">
@@ -201,7 +242,7 @@ function FormI9({ initialFormData = {}, onFormDataChange }) {
                       className="w-full border-0 p-0 focus:outline-none"
                     />
                   </td>
-                  <td className="border border-black p-[2px] w-[40px]">
+                  <td className="border border-black p-[2px] w-[50px]">
                     <div className="text-[7pt] whitespace-nowrap">State</div>
                     <select
                       name="state"
@@ -262,7 +303,7 @@ function FormI9({ initialFormData = {}, onFormDataChange }) {
                       <option value="WY">WY</option>
                     </select>
                   </td>
-                  <td className="border border-black p-[2px] w-[80px]">
+                  <td className="border border-black p-[2px] w-[70px]">
                     <div className="text-[7pt] whitespace-nowrap">ZIP Code</div>
                     <input
                       type="text"
@@ -270,20 +311,20 @@ function FormI9({ initialFormData = {}, onFormDataChange }) {
                       maxLength="9"
                       value={formData.zipCode || ""}
                       onChange={handleChange}
-                      className="w-full border-0 p-0 focus:outline-none"
+                      className="w-full border-0 p-0 focus:outline-none text-[9pt]"
                     />
                   </td>
                 </tr>
                 <tr>
                   <td className="border border-black p-[2px]">
                     <div className="text-[7pt] whitespace-nowrap">
-                      Date of Birth (mm/dd/yyyy)
+                      Date of Birth (mm-dd-yyyy)
                     </div>
                     <input
                       type="text"
                       name="dateOfBirth"
                       value={formData.dateOfBirth || ""}
-                      onChange={handleChange}
+                      onChange={handleDateOfBirthChange}
                       className="w-full border-0 p-0 focus:outline-none"
                     />
                   </td>
@@ -310,11 +351,11 @@ function FormI9({ initialFormData = {}, onFormDataChange }) {
                       Employee's Email Address
                     </div>
                     <input
-                      type="text"
+                      type="email"
                       name="email"
                       value={formData.email || ""}
                       onChange={handleChange}
-                      className="w-full border-0 p-0 focus:outline-none"
+                      className="w-full border-0 p-0 focus:outline-none text-[9pt]"
                     />
                   </td>
                   <td className="border border-black p-[2px]">
@@ -325,8 +366,8 @@ function FormI9({ initialFormData = {}, onFormDataChange }) {
                       type="text"
                       name="telephone"
                       value={formData.telephone || ""}
-                      onChange={handleChange}
-                      className="w-full border-0 p-0 focus:outline-none"
+                      onChange={handleTelephoneChange}
+                      className="w-full border-0 p-0 focus:outline-none text-[9pt]"
                     />
                   </td>
                 </tr>
