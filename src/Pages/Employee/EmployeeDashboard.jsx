@@ -1568,7 +1568,7 @@ export const EmployeeDashboard = () => {
                       <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">
                         Email
                       </p>
-                      <p className="font-semibold text-gray-900 text-base mt-2 break-all">
+                      <p className="font-semibold text-gray-900 text-base mt-2 whitespace-nowrap">
                         {user?.email}
                       </p>
                     </div>
@@ -1581,7 +1581,7 @@ export const EmployeeDashboard = () => {
                       <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">
                         Phone
                       </p>
-                      <p className="font-semibold text-gray-900 text-base mt-2">
+                      <p className="font-semibold text-gray-900 text-base mt-2 whitespace-nowrap overflow-hidden text-ellipsis" title={formatPhone(user?.phoneNumber)}>
                         {formatPhone(user?.phoneNumber)}
                       </p>
                     </div>
