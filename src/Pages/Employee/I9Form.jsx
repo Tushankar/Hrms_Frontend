@@ -100,20 +100,77 @@ function FormI9({ initialFormData = {}, onFormDataChange }) {
     // Limit to 8 digits (mmddyyyy)
     value = value.slice(0, 8);
     
-    // Validate month (first 2 digits)
+    // Smart month handling
     if (value.length >= 1) {
       const firstDigit = parseInt(value[0]);
-      if (firstDigit > 1) {
-        // If first digit is 2-9, month must be 0X, so prepend 0
+      
+      // If user has typed 3+ digits and first digit is 1-9, check if we need to prepend 0
+      if (value.length >= 3) {
+        // If month part is single digit (1-9), prepend 0
+        const potentialMonth = value.slice(0, 2);
+        if (potentialMonth[0] !== '0' && potentialMonth[0] !== '1') {
+          // First digit is 2-9, so month must be 02-09
+          value = '0' + value;
+        } else if (potentialMonth[0] === '1') {
+          const month = parseInt(potentialMonth);
+          if (month > 12) {
+            // 13-19 is invalid, treat first digit as month 01-09
+            value = '0' + value;
+          }
+        }
+      } else if (value.length === 2) {
+        // Check if two-digit month is valid
+        const month = parseInt(value);
+        if (month > 12) {
+          // Invalid month like 13-99, treat as single digit month + day
+          value = '0' + value;
+        } else if (month === 0) {
+          value = '01';
+        }
+      } else if (value.length === 1 && firstDigit > 1) {
+        // Single digit 2-9 immediately becomes 02-09
         value = '0' + value;
       }
     }
     
+    // Revalidate month after prepending
     if (value.length >= 2) {
       const month = parseInt(value.slice(0, 2));
-      if (month > 12 || month === 0) {
-        // Invalid month, cap at 12
+      if (month > 12) {
         value = '12' + value.slice(2);
+      } else if (month === 0) {
+        value = '01' + value.slice(2);
+      }
+    }
+    
+    // Smart day handling - immediately prepend 0 for days 4-9
+    if (value.length >= 3) {
+      const month = parseInt(value.slice(0, 2));
+      const dayFirstDigit = value[2];
+      const firstDayDigit = parseInt(dayFirstDigit);
+      
+      // If day starts with 4-9, immediately prepend 0
+      if (value.length === 3 && firstDayDigit >= 4 && firstDayDigit <= 9) {
+        value = value.slice(0, 2) + '0' + value.slice(2);
+      }
+      // If user has typed more digits, check if day exceeds max
+      else if (value.length >= 5) {
+        const dayPart = value.slice(2, 4);
+        const day = parseInt(dayPart);
+        
+        if (firstDayDigit >= 4 && firstDayDigit <= 9) {
+          // Get max days for the month
+          let year = new Date().getFullYear();
+          if (value.length >= 8) {
+            year = parseInt(value.slice(4, 8));
+          }
+          const maxDays = getMaxDaysInMonth(month, year);
+          
+          // If the two-digit day exceeds max days, prepend 0
+          if (day > maxDays) {
+            value = value.slice(0, 2) + '0' + value.slice(2);
+          }
+        }
       }
     }
     
