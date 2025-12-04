@@ -74,13 +74,25 @@ function FormI9({ initialFormData = {}, onFormDataChange }) {
   const handleDateOfBirthChange = (e) => {
     let value = e.target.value.replace(/\D/g, ""); // remove non-digits
     if (value.length >= 2) {
-      value = value.slice(0, 2) + "-" + value.slice(2);
+      value = value.slice(0, 2) + "/" + value.slice(2);
     }
     if (value.length >= 5) {
-      value = value.slice(0, 5) + "-" + value.slice(5);
+      value = value.slice(0, 5) + "/" + value.slice(5);
     }
     value = value.slice(0, 10); // limit to 10 chars
     setFormData((prev) => ({ ...prev, dateOfBirth: value }));
+  };
+
+  const handleWorkAuthExpDateChange = (e) => {
+    let value = e.target.value.replace(/\D/g, ""); // remove non-digits
+    if (value.length >= 2) {
+      value = value.slice(0, 2) + "/" + value.slice(2);
+    }
+    if (value.length >= 5) {
+      value = value.slice(0, 5) + "/" + value.slice(5);
+    }
+    value = value.slice(0, 10); // limit to 10 chars
+    setFormData((prev) => ({ ...prev, workAuthExpDate: value }));
   };
 
   // Format phone number as +1 (XXX) XXX-XXXX
@@ -318,7 +330,7 @@ function FormI9({ initialFormData = {}, onFormDataChange }) {
                 <tr>
                   <td className="border border-black p-[2px]">
                     <div className="text-[7pt] whitespace-nowrap">
-                      Date of Birth (mm-dd-yyyy)
+                      Date of Birth (mm/dd/yyyy)
                     </div>
                     <input
                       type="text"
@@ -488,8 +500,8 @@ function FormI9({ initialFormData = {}, onFormDataChange }) {
                             type="text"
                             name="workAuthExpDate"
                             value={formData.workAuthExpDate || ""}
-                            onChange={handleChange}
-                            placeholder="(exp. date, if any)"
+                            onChange={handleWorkAuthExpDateChange}
+                            placeholder="(mm/dd/yyyy)"
                             className="w-40 border-0 border-b border-black px-1 ml-2 focus:outline-none"
                           />
                         </div>
