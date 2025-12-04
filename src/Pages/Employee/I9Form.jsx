@@ -73,24 +73,24 @@ function FormI9({ initialFormData = {}, onFormDataChange }) {
 
   // Helper function to check if a year is a leap year
   const isLeapYear = (year) => {
-    return (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0);
+    return (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
   };
 
   // Helper function to get max days in a month
   const getMaxDaysInMonth = (month, year) => {
     const daysInMonth = {
-      1: 31,  // January
-      2: isLeapYear(year) ? 29 : 28,  // February
-      3: 31,  // March
-      4: 30,  // April
-      5: 31,  // May
-      6: 30,  // June
-      7: 31,  // July
-      8: 31,  // August
-      9: 30,  // September
+      1: 31, // January
+      2: isLeapYear(year) ? 29 : 28, // February
+      3: 31, // March
+      4: 30, // April
+      5: 31, // May
+      6: 30, // June
+      7: 31, // July
+      8: 31, // August
+      9: 30, // September
       10: 31, // October
       11: 30, // November
-      12: 31  // December
+      12: 31, // December
     };
     return daysInMonth[month] || 31;
   };
@@ -99,23 +99,23 @@ function FormI9({ initialFormData = {}, onFormDataChange }) {
   const validateAndFormatDate = (value) => {
     // Limit to 8 digits (mmddyyyy)
     value = value.slice(0, 8);
-    
+
     // Smart month handling
     if (value.length >= 1) {
       const firstDigit = parseInt(value[0]);
-      
+
       // If user has typed 3+ digits and first digit is 1-9, check if we need to prepend 0
       if (value.length >= 3) {
         // If month part is single digit (1-9), prepend 0
         const potentialMonth = value.slice(0, 2);
-        if (potentialMonth[0] !== '0' && potentialMonth[0] !== '1') {
+        if (potentialMonth[0] !== "0" && potentialMonth[0] !== "1") {
           // First digit is 2-9, so month must be 02-09
-          value = '0' + value;
-        } else if (potentialMonth[0] === '1') {
+          value = "0" + value;
+        } else if (potentialMonth[0] === "1") {
           const month = parseInt(potentialMonth);
           if (month > 12) {
             // 13-19 is invalid, treat first digit as month 01-09
-            value = '0' + value;
+            value = "0" + value;
           }
         }
       } else if (value.length === 2) {
@@ -123,41 +123,41 @@ function FormI9({ initialFormData = {}, onFormDataChange }) {
         const month = parseInt(value);
         if (month > 12) {
           // Invalid month like 13-99, treat as single digit month + day
-          value = '0' + value;
+          value = "0" + value;
         } else if (month === 0) {
-          value = '01';
+          value = "01";
         }
       } else if (value.length === 1 && firstDigit > 1) {
         // Single digit 2-9 immediately becomes 02-09
-        value = '0' + value;
+        value = "0" + value;
       }
     }
-    
+
     // Revalidate month after prepending
     if (value.length >= 2) {
       const month = parseInt(value.slice(0, 2));
       if (month > 12) {
-        value = '12' + value.slice(2);
+        value = "12" + value.slice(2);
       } else if (month === 0) {
-        value = '01' + value.slice(2);
+        value = "01" + value.slice(2);
       }
     }
-    
+
     // Smart day handling - immediately prepend 0 for days 4-9
     if (value.length >= 3) {
       const month = parseInt(value.slice(0, 2));
       const dayFirstDigit = value[2];
       const firstDayDigit = parseInt(dayFirstDigit);
-      
+
       // If day starts with 4-9, immediately prepend 0
       if (value.length === 3 && firstDayDigit >= 4 && firstDayDigit <= 9) {
-        value = value.slice(0, 2) + '0' + value.slice(2);
+        value = value.slice(0, 2) + "0" + value.slice(2);
       }
       // If user has typed more digits, check if day exceeds max
       else if (value.length >= 5) {
         const dayPart = value.slice(2, 4);
         const day = parseInt(dayPart);
-        
+
         if (firstDayDigit >= 4 && firstDayDigit <= 9) {
           // Get max days for the month
           let year = new Date().getFullYear();
@@ -165,44 +165,48 @@ function FormI9({ initialFormData = {}, onFormDataChange }) {
             year = parseInt(value.slice(4, 8));
           }
           const maxDays = getMaxDaysInMonth(month, year);
-          
+
           // If the two-digit day exceeds max days, prepend 0
           if (day > maxDays) {
-            value = value.slice(0, 2) + '0' + value.slice(2);
+            value = value.slice(0, 2) + "0" + value.slice(2);
           }
         }
       }
     }
-    
+
     // Validate day (digits 3-4)
     if (value.length >= 4) {
       const month = parseInt(value.slice(0, 2));
       const day = parseInt(value.slice(2, 4));
-      
+
       // Get year if available, otherwise use current year for validation
       let year = new Date().getFullYear();
       if (value.length >= 8) {
         year = parseInt(value.slice(4, 8));
       }
-      
+
       const maxDays = getMaxDaysInMonth(month, year);
-      
+
       if (day > maxDays) {
-        value = value.slice(0, 2) + maxDays.toString().padStart(2, '0') + value.slice(4);
+        value =
+          value.slice(0, 2) +
+          maxDays.toString().padStart(2, "0") +
+          value.slice(4);
       } else if (day === 0) {
-        value = value.slice(0, 2) + '01' + value.slice(4);
+        value = value.slice(0, 2) + "01" + value.slice(4);
       }
     }
-    
+
     // Format as mm/dd/yyyy
     let formatted = value;
     if (value.length >= 2) {
       formatted = value.slice(0, 2) + "/" + value.slice(2);
     }
     if (value.length >= 4) {
-      formatted = value.slice(0, 2) + "/" + value.slice(2, 4) + "/" + value.slice(4);
+      formatted =
+        value.slice(0, 2) + "/" + value.slice(2, 4) + "/" + value.slice(4);
     }
-    
+
     return formatted;
   };
 
@@ -210,16 +214,16 @@ function FormI9({ initialFormData = {}, onFormDataChange }) {
     const input = e.target.value;
     // Remove all non-digits
     let value = input.replace(/\D/g, "");
-    
+
     const formatted = validateAndFormatDate(value);
     setFormData((prev) => ({ ...prev, dateOfBirth: formatted }));
   };
 
   const handleDateOfBirthKeyDown = (e) => {
-    if (e.key === 'Backspace') {
+    if (e.key === "Backspace") {
       const currentValue = formData.dateOfBirth || "";
       const digits = currentValue.replace(/\D/g, "");
-      
+
       if (digits.length > 0) {
         e.preventDefault();
         const newDigits = digits.slice(0, -1);
@@ -233,21 +237,202 @@ function FormI9({ initialFormData = {}, onFormDataChange }) {
     const input = e.target.value;
     // Remove all non-digits
     let value = input.replace(/\D/g, "");
-    
+
     const formatted = validateAndFormatDate(value);
     setFormData((prev) => ({ ...prev, workAuthExpDate: formatted }));
   };
 
   const handleWorkAuthExpDateKeyDown = (e) => {
-    if (e.key === 'Backspace') {
+    if (e.key === "Backspace") {
       const currentValue = formData.workAuthExpDate || "";
       const digits = currentValue.replace(/\D/g, "");
-      
+
       if (digits.length > 0) {
         e.preventDefault();
         const newDigits = digits.slice(0, -1);
         const formatted = validateAndFormatDate(newDigits);
         setFormData((prev) => ({ ...prev, workAuthExpDate: formatted }));
+      }
+    }
+  };
+
+  // Additional date field handlers
+  const handleEmployeeSignatureDateChange = (e) => {
+    const input = e.target.value;
+    let value = input.replace(/\D/g, "");
+    const formatted = validateAndFormatDate(value);
+    setFormData((prev) => ({ ...prev, employeeSignatureDate: formatted }));
+  };
+
+  const handleEmployeeSignatureDateKeyDown = (e) => {
+    if (e.key === "Backspace") {
+      const currentValue = formData.employeeSignatureDate || "";
+      const digits = currentValue.replace(/\D/g, "");
+      if (digits.length > 0) {
+        e.preventDefault();
+        const newDigits = digits.slice(0, -1);
+        const formatted = validateAndFormatDate(newDigits);
+        setFormData((prev) => ({ ...prev, employeeSignatureDate: formatted }));
+      }
+    }
+  };
+
+  const handleFirstDayEmploymentChange = (e) => {
+    const input = e.target.value;
+    let value = input.replace(/\D/g, "");
+    const formatted = validateAndFormatDate(value);
+    setFormData((prev) => ({ ...prev, firstDayEmployment: formatted }));
+  };
+
+  const handleFirstDayEmploymentKeyDown = (e) => {
+    if (e.key === "Backspace") {
+      const currentValue = formData.firstDayEmployment || "";
+      const digits = currentValue.replace(/\D/g, "");
+      if (digits.length > 0) {
+        e.preventDefault();
+        const newDigits = digits.slice(0, -1);
+        const formatted = validateAndFormatDate(newDigits);
+        setFormData((prev) => ({ ...prev, firstDayEmployment: formatted }));
+      }
+    }
+  };
+
+  const handleEmployerSignatureDateChange = (e) => {
+    const input = e.target.value;
+    let value = input.replace(/\D/g, "");
+    const formatted = validateAndFormatDate(value);
+    setFormData((prev) => ({ ...prev, employerSignatureDate: formatted }));
+  };
+
+  const handleEmployerSignatureDateKeyDown = (e) => {
+    if (e.key === "Backspace") {
+      const currentValue = formData.employerSignatureDate || "";
+      const digits = currentValue.replace(/\D/g, "");
+      if (digits.length > 0) {
+        e.preventDefault();
+        const newDigits = digits.slice(0, -1);
+        const formatted = validateAndFormatDate(newDigits);
+        setFormData((prev) => ({ ...prev, employerSignatureDate: formatted }));
+      }
+    }
+  };
+
+  const handlePrepDateChange = (num) => (e) => {
+    const input = e.target.value;
+    let value = input.replace(/\D/g, "");
+    const formatted = validateAndFormatDate(value);
+    setFormData((prev) => ({ ...prev, [`prep${num}Date`]: formatted }));
+  };
+
+  const handlePrepDateKeyDown = (num) => (e) => {
+    if (e.key === "Backspace") {
+      const currentValue = formData[`prep${num}Date`] || "";
+      const digits = currentValue.replace(/\D/g, "");
+      if (digits.length > 0) {
+        e.preventDefault();
+        const newDigits = digits.slice(0, -1);
+        const formatted = validateAndFormatDate(newDigits);
+        setFormData((prev) => ({ ...prev, [`prep${num}Date`]: formatted }));
+      }
+    }
+  };
+
+  const handleRevDateChange = (num) => (e) => {
+    const input = e.target.value;
+    let value = input.replace(/\D/g, "");
+    const formatted = validateAndFormatDate(value);
+    setFormData((prev) => ({ ...prev, [`rev${num}Date`]: formatted }));
+  };
+
+  const handleRevDateKeyDown = (num) => (e) => {
+    if (e.key === "Backspace") {
+      const currentValue = formData[`rev${num}Date`] || "";
+      const digits = currentValue.replace(/\D/g, "");
+      if (digits.length > 0) {
+        e.preventDefault();
+        const newDigits = digits.slice(0, -1);
+        const formatted = validateAndFormatDate(newDigits);
+        setFormData((prev) => ({ ...prev, [`rev${num}Date`]: formatted }));
+      }
+    }
+  };
+
+  const handleRevExpDateChange = (num) => (e) => {
+    const input = e.target.value;
+    let value = input.replace(/\D/g, "");
+    const formatted = validateAndFormatDate(value);
+    setFormData((prev) => ({ ...prev, [`rev${num}ExpDate`]: formatted }));
+  };
+
+  const handleRevExpDateKeyDown = (num) => (e) => {
+    if (e.key === "Backspace") {
+      const currentValue = formData[`rev${num}ExpDate`] || "";
+      const digits = currentValue.replace(/\D/g, "");
+      if (digits.length > 0) {
+        e.preventDefault();
+        const newDigits = digits.slice(0, -1);
+        const formatted = validateAndFormatDate(newDigits);
+        setFormData((prev) => ({ ...prev, [`rev${num}ExpDate`]: formatted }));
+      }
+    }
+  };
+
+  const handleListAExpDateChange = (num) => (e) => {
+    const input = e.target.value;
+    let value = input.replace(/\D/g, "");
+    const formatted = validateAndFormatDate(value);
+    setFormData((prev) => ({ ...prev, [`listAExpDate${num}`]: formatted }));
+  };
+
+  const handleListAExpDateKeyDown = (num) => (e) => {
+    if (e.key === "Backspace") {
+      const currentValue = formData[`listAExpDate${num}`] || "";
+      const digits = currentValue.replace(/\D/g, "");
+      if (digits.length > 0) {
+        e.preventDefault();
+        const newDigits = digits.slice(0, -1);
+        const formatted = validateAndFormatDate(newDigits);
+        setFormData((prev) => ({ ...prev, [`listAExpDate${num}`]: formatted }));
+      }
+    }
+  };
+
+  const handleListBExpDateChange = (e) => {
+    const input = e.target.value;
+    let value = input.replace(/\D/g, "");
+    const formatted = validateAndFormatDate(value);
+    setFormData((prev) => ({ ...prev, listBExpDate1: formatted }));
+  };
+
+  const handleListBExpDateKeyDown = (e) => {
+    if (e.key === "Backspace") {
+      const currentValue = formData.listBExpDate1 || "";
+      const digits = currentValue.replace(/\D/g, "");
+      if (digits.length > 0) {
+        e.preventDefault();
+        const newDigits = digits.slice(0, -1);
+        const formatted = validateAndFormatDate(newDigits);
+        setFormData((prev) => ({ ...prev, listBExpDate1: formatted }));
+      }
+    }
+  };
+
+  const handleListCExpDateChange = (e) => {
+    const input = e.target.value;
+    let value = input.replace(/\D/g, "");
+    const formatted = validateAndFormatDate(value);
+    setFormData((prev) => ({ ...prev, listCExpDate1: formatted }));
+  };
+
+  const handleListCExpDateKeyDown = (e) => {
+    if (e.key === "Backspace") {
+      const currentValue = formData.listCExpDate1 || "";
+      const digits = currentValue.replace(/\D/g, "");
+      if (digits.length > 0) {
+        e.preventDefault();
+        const newDigits = digits.slice(0, -1);
+        const formatted = validateAndFormatDate(newDigits);
+        setFormData((prev) => ({ ...prev, listCExpDate1: formatted }));
       }
     }
   };
@@ -741,7 +926,8 @@ function FormI9({ initialFormData = {}, onFormDataChange }) {
                       type="text"
                       name="employeeSignatureDate"
                       value={formData.employeeSignatureDate || ""}
-                      onChange={handleChange}
+                      onChange={handleEmployeeSignatureDateChange}
+                      onKeyDown={handleEmployeeSignatureDateKeyDown}
                       className="w-full border-0 focus:outline-none"
                     />
                   </td>
@@ -957,7 +1143,8 @@ function FormI9({ initialFormData = {}, onFormDataChange }) {
                           type="text"
                           name="listAExpDate1"
                           value={formData.listAExpDate1 || ""}
-                          onChange={handleChange}
+                          onChange={handleListAExpDateChange(1)}
+                          onKeyDown={handleListAExpDateKeyDown(1)}
                           className="w-full border-0 p-0 focus:outline-none text-[7pt] bg-transparent"
                         />
                       </div>
@@ -968,7 +1155,8 @@ function FormI9({ initialFormData = {}, onFormDataChange }) {
                       type="text"
                       name="listBExpDate1"
                       value={formData.listBExpDate1 || ""}
-                      onChange={handleChange}
+                      onChange={handleListBExpDateChange}
+                      onKeyDown={handleListBExpDateKeyDown}
                       className="w-full border-0 p-0 focus:outline-none text-[7pt] bg-transparent"
                     />
                   </td>
@@ -977,7 +1165,8 @@ function FormI9({ initialFormData = {}, onFormDataChange }) {
                       type="text"
                       name="listCExpDate1"
                       value={formData.listCExpDate1 || ""}
-                      onChange={handleChange}
+                      onChange={handleListCExpDateChange}
+                      onKeyDown={handleListCExpDateKeyDown}
                       className="w-full border-0 p-0 focus:outline-none text-[7pt] bg-transparent"
                     />
                   </td>
@@ -1153,7 +1342,8 @@ function FormI9({ initialFormData = {}, onFormDataChange }) {
                           type="text"
                           name="listAExpDate3"
                           value={formData.listAExpDate3 || ""}
-                          onChange={handleChange}
+                          onChange={handleListAExpDateChange(3)}
+                          onKeyDown={handleListAExpDateKeyDown(3)}
                           className="w-full border-0 p-0 focus:outline-none text-[7pt] bg-transparent"
                         />
                       </div>
@@ -1178,7 +1368,8 @@ function FormI9({ initialFormData = {}, onFormDataChange }) {
                       type="text"
                       name="firstDayEmployment"
                       value={formData.firstDayEmployment || ""}
-                      onChange={handleChange}
+                      onChange={handleFirstDayEmploymentChange}
+                      onKeyDown={handleFirstDayEmploymentKeyDown}
                       className="w-full border-0 p-0 focus:outline-none text-[7pt] bg-transparent"
                     />
                   </td>
@@ -1218,7 +1409,8 @@ function FormI9({ initialFormData = {}, onFormDataChange }) {
                       type="text"
                       name="employerSignatureDate"
                       value={formData.employerSignatureDate || ""}
-                      onChange={handleChange}
+                      onChange={handleEmployerSignatureDateChange}
+                      onKeyDown={handleEmployerSignatureDateKeyDown}
                       className="w-full border-0 p-0 focus:outline-none text-[7pt] bg-transparent"
                     />
                   </td>
@@ -1384,7 +1576,8 @@ function FormI9({ initialFormData = {}, onFormDataChange }) {
                       type="text"
                       name={`prep${num}Date`}
                       value={formData[`prep${num}Date`] || ""}
-                      onChange={handleChange}
+                      onChange={handlePrepDateChange(num)}
+                      onKeyDown={handlePrepDateKeyDown(num)}
                       className="w-full border-0 p-0 focus:outline-none"
                     />
                   </td>
@@ -1643,7 +1836,8 @@ function FormI9({ initialFormData = {}, onFormDataChange }) {
                       type="text"
                       name={`rev${num}Date`}
                       value={formData[`rev${num}Date`] || ""}
-                      onChange={handleChange}
+                      onChange={handleRevDateChange(num)}
+                      onKeyDown={handleRevDateKeyDown(num)}
                       className="w-full border-0 p-0 focus:outline-none"
                     />
                   </td>
@@ -1736,7 +1930,8 @@ function FormI9({ initialFormData = {}, onFormDataChange }) {
                               type="text"
                               name={`rev${num}ExpDate`}
                               value={formData[`rev${num}ExpDate`] || ""}
-                              onChange={handleChange}
+                              onChange={handleRevExpDateChange(num)}
+                              onKeyDown={handleRevExpDateKeyDown(num)}
                               className="w-full border-0 p-0 focus:outline-none bg-transparent"
                             />
                           </td>
