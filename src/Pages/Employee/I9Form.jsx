@@ -71,28 +71,128 @@ function FormI9({ initialFormData = {}, onFormDataChange }) {
     }
   };
 
-  const handleDateOfBirthChange = (e) => {
-    let value = e.target.value.replace(/\D/g, ""); // remove non-digits
+  // Helper function to check if a year is a leap year
+  const isLeapYear = (year) => {
+    return (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0);
+  };
+
+  // Helper function to get max days in a month
+  const getMaxDaysInMonth = (month, year) => {
+    const daysInMonth = {
+      1: 31,  // January
+      2: isLeapYear(year) ? 29 : 28,  // February
+      3: 31,  // March
+      4: 30,  // April
+      5: 31,  // May
+      6: 30,  // June
+      7: 31,  // July
+      8: 31,  // August
+      9: 30,  // September
+      10: 31, // October
+      11: 30, // November
+      12: 31  // December
+    };
+    return daysInMonth[month] || 31;
+  };
+
+  // Helper function to validate and format date
+  const validateAndFormatDate = (value) => {
+    // Limit to 8 digits (mmddyyyy)
+    value = value.slice(0, 8);
+    
+    // Validate month (first 2 digits)
+    if (value.length >= 1) {
+      const firstDigit = parseInt(value[0]);
+      if (firstDigit > 1) {
+        // If first digit is 2-9, month must be 0X, so prepend 0
+        value = '0' + value;
+      }
+    }
+    
     if (value.length >= 2) {
-      value = value.slice(0, 2) + "/" + value.slice(2);
+      const month = parseInt(value.slice(0, 2));
+      if (month > 12 || month === 0) {
+        // Invalid month, cap at 12
+        value = '12' + value.slice(2);
+      }
     }
-    if (value.length >= 5) {
-      value = value.slice(0, 5) + "/" + value.slice(5);
+    
+    // Validate day (digits 3-4)
+    if (value.length >= 4) {
+      const month = parseInt(value.slice(0, 2));
+      const day = parseInt(value.slice(2, 4));
+      
+      // Get year if available, otherwise use current year for validation
+      let year = new Date().getFullYear();
+      if (value.length >= 8) {
+        year = parseInt(value.slice(4, 8));
+      }
+      
+      const maxDays = getMaxDaysInMonth(month, year);
+      
+      if (day > maxDays) {
+        value = value.slice(0, 2) + maxDays.toString().padStart(2, '0') + value.slice(4);
+      } else if (day === 0) {
+        value = value.slice(0, 2) + '01' + value.slice(4);
+      }
     }
-    value = value.slice(0, 10); // limit to 10 chars
-    setFormData((prev) => ({ ...prev, dateOfBirth: value }));
+    
+    // Format as mm/dd/yyyy
+    let formatted = value;
+    if (value.length >= 2) {
+      formatted = value.slice(0, 2) + "/" + value.slice(2);
+    }
+    if (value.length >= 4) {
+      formatted = value.slice(0, 2) + "/" + value.slice(2, 4) + "/" + value.slice(4);
+    }
+    
+    return formatted;
+  };
+
+  const handleDateOfBirthChange = (e) => {
+    const input = e.target.value;
+    // Remove all non-digits
+    let value = input.replace(/\D/g, "");
+    
+    const formatted = validateAndFormatDate(value);
+    setFormData((prev) => ({ ...prev, dateOfBirth: formatted }));
+  };
+
+  const handleDateOfBirthKeyDown = (e) => {
+    if (e.key === 'Backspace') {
+      const currentValue = formData.dateOfBirth || "";
+      const digits = currentValue.replace(/\D/g, "");
+      
+      if (digits.length > 0) {
+        e.preventDefault();
+        const newDigits = digits.slice(0, -1);
+        const formatted = validateAndFormatDate(newDigits);
+        setFormData((prev) => ({ ...prev, dateOfBirth: formatted }));
+      }
+    }
   };
 
   const handleWorkAuthExpDateChange = (e) => {
-    let value = e.target.value.replace(/\D/g, ""); // remove non-digits
-    if (value.length >= 2) {
-      value = value.slice(0, 2) + "/" + value.slice(2);
+    const input = e.target.value;
+    // Remove all non-digits
+    let value = input.replace(/\D/g, "");
+    
+    const formatted = validateAndFormatDate(value);
+    setFormData((prev) => ({ ...prev, workAuthExpDate: formatted }));
+  };
+
+  const handleWorkAuthExpDateKeyDown = (e) => {
+    if (e.key === 'Backspace') {
+      const currentValue = formData.workAuthExpDate || "";
+      const digits = currentValue.replace(/\D/g, "");
+      
+      if (digits.length > 0) {
+        e.preventDefault();
+        const newDigits = digits.slice(0, -1);
+        const formatted = validateAndFormatDate(newDigits);
+        setFormData((prev) => ({ ...prev, workAuthExpDate: formatted }));
+      }
     }
-    if (value.length >= 5) {
-      value = value.slice(0, 5) + "/" + value.slice(5);
-    }
-    value = value.slice(0, 10); // limit to 10 chars
-    setFormData((prev) => ({ ...prev, workAuthExpDate: value }));
   };
 
   // Format phone number as +1 (XXX) XXX-XXXX
@@ -337,6 +437,7 @@ function FormI9({ initialFormData = {}, onFormDataChange }) {
                       name="dateOfBirth"
                       value={formData.dateOfBirth || ""}
                       onChange={handleDateOfBirthChange}
+                      onKeyDown={handleDateOfBirthKeyDown}
                       className="w-full border-0 p-0 focus:outline-none"
                     />
                   </td>
@@ -501,6 +602,7 @@ function FormI9({ initialFormData = {}, onFormDataChange }) {
                             name="workAuthExpDate"
                             value={formData.workAuthExpDate || ""}
                             onChange={handleWorkAuthExpDateChange}
+                            onKeyDown={handleWorkAuthExpDateKeyDown}
                             placeholder="(mm/dd/yyyy)"
                             className="w-40 border-0 border-b border-black px-1 ml-2 focus:outline-none"
                           />
