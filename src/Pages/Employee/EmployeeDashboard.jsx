@@ -1582,7 +1582,7 @@ export const EmployeeDashboard = () => {
                         Phone
                       </p>
                       <p
-                        className="font-semibold text-gray-900 text-base mt-2"
+                        className="font-semibold text-gray-900 text-base mt-2 whitespace-nowrap"
                         title={formatPhone(user?.phoneNumber)}
                       >
                         {formatPhone(user?.phoneNumber)}
