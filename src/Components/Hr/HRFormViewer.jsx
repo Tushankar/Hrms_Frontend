@@ -41,7 +41,7 @@ const HRFormViewer = ({
 
         // Get application details
         const appResponse = await axios.get(
-          `https://api-hrms-backend.kyptronix.us/onboarding/get-all-applications`,
+          `http://localhost:1111/onboarding/get-all-applications`,
           {
             withCredentials: true,
           }
@@ -57,7 +57,7 @@ const HRFormViewer = ({
 
             // Get specific form data
             const formResponse = await axios.get(
-              `https://api-hrms-backend.kyptronix.us/onboarding/${apiEndpoint}/${applicationId}`,
+              `http://localhost:1111/onboarding/${apiEndpoint}/${applicationId}`,
               {
                 withCredentials: true,
               }

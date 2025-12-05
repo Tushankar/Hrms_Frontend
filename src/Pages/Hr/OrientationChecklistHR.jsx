@@ -10,8 +10,7 @@ const OrientationChecklistHR = () => {
   const { employeeId } = useParams(); // Changed from userId to employeeId
 
   // Base URL configuration
-  const baseURL =
-    import.meta.env.VITE__BASEURL || "https://api-hrms-backend.kyptronix.us";
+  const baseURL = import.meta.env.VITE__BASEURL || "http://localhost:1111";
 
   // State for form fields
   const [formData, setFormData] = useState({

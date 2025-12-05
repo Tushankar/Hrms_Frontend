@@ -1319,11 +1319,16 @@ const PersonalCareAssistantJD = () => {
                           { withCredentials: true }
                         );
 
-                        console.log("Status saved successfully:", statusResponse.data);
-                        
+                        console.log(
+                          "Status saved successfully:",
+                          statusResponse.data
+                        );
+
                         // Dispatch event to update sidebar
                         window.dispatchEvent(new Event("formStatusUpdated"));
-                        window.dispatchEvent(new CustomEvent("positionTypeSaved"));
+                        window.dispatchEvent(
+                          new CustomEvent("positionTypeSaved")
+                        );
                         toast.success(
                           `Job Description signed successfully for ${positionType} position`
                         );

@@ -427,7 +427,7 @@ export const Sidebar = ({
         // Get position type to check the correct job description field
         const positionType = forms.positionType?.positionAppliedFor;
         let jobDescStatus = undefined;
-        
+
         if (positionType === "PCA") {
           jobDescStatus = getFormStatus(forms.jobDescriptionPCA);
         } else if (positionType === "CNA") {
@@ -437,8 +437,13 @@ export const Sidebar = ({
         } else if (positionType === "RN") {
           jobDescStatus = getFormStatus(forms.jobDescriptionRN);
         }
-        
-        console.log("[Fetch] Position:", positionType, "Job Desc Status:", jobDescStatus);
+
+        console.log(
+          "[Fetch] Position:",
+          positionType,
+          "Job Desc Status:",
+          jobDescStatus
+        );
         completionMap["job-description-pca"] = jobDescStatus;
 
         // Check for employee details upload (professional certificates)

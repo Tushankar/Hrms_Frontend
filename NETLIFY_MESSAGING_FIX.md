@@ -12,7 +12,7 @@ The messaging feature was failing on Netlify because the WebSocket connection wa
 ### 1. **Dynamic WebSocket URL Construction**
 
 - Changed from hardcoded `wss://hrms-backend-t38z.onrender.com` to dynamic URL construction
-- Now automatically converts `https://api-hrms-backend.kyptronix.us` to `wss://api-hrms-backend.kyptronix.us`
+- Now automatically converts `http://localhost:1111` to `wss://api-hrms-backend.kyptronix.us`
 - Works for both local (ws://) and production (wss://) environments
 
 ### 2. **Improved Error Handling**
@@ -31,13 +31,13 @@ The messaging feature was failing on Netlify because the WebSocket connection wa
 ### Local Development (.env)
 
 ```
-VITE__BASEURL=https://api-hrms-backend.kyptronix.us
+VITE__BASEURL=http://localhost:1111
 ```
 
 ### Production on Netlify (.env.production)
 
 ```
-VITE__BASEURL=https://api-hrms-backend.kyptronix.us
+VITE__BASEURL=http://localhost:1111
 ```
 
 ### Netlify Environment Variables
@@ -45,7 +45,7 @@ VITE__BASEURL=https://api-hrms-backend.kyptronix.us
 Add these in Netlify Dashboard → Site Settings → Build & Deploy → Environment:
 
 ```
-VITE__BASEURL=https://api-hrms-backend.kyptronix.us
+VITE__BASEURL=http://localhost:1111
 ```
 
 ## Testing Steps
@@ -79,7 +79,7 @@ VITE__BASEURL=https://api-hrms-backend.kyptronix.us
 ### Issue: "Connection lost"
 
 - **Cause:** Backend unreachable
-- **Fix:** Check if backend is running and accessible from `https://api-hrms-backend.kyptronix.us`
+- **Fix:** Check if backend is running and accessible from `http://localhost:1111`
 
 ### Issue: Message appears locally but not on Netlify
 

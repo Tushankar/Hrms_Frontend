@@ -25,7 +25,7 @@ const ViewPersonalCareAssistantJD = () => {
       try {
         setLoading(true);
         const response = await axios.get(
-          `https://api-hrms-backend.kyptronix.us/onboarding/get-job-description/${taskId}/PCA`,
+          `http://localhost:1111/onboarding/get-job-description/${taskId}/PCA`,
           { withCredentials: true }
         );
 
