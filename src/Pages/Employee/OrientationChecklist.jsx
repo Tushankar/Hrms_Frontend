@@ -60,7 +60,8 @@ const OrientationChecklist = () => {
   const [totalForms, setTotalForms] = useState(20); // default to 20
   const [completedFormsCount, setCompletedFormsCount] = useState(0);
 
-  const baseURL = import.meta.env.VITE__BASEURL || "http://localhost:1111";
+  const baseURL =
+    import.meta.env.VITE__BASEURL || "https://api-hrms-backend.kyptronix.us";
 
   const shouldCountForm = (formKey) => {
     if (employmentType === "W-2 Employee") {

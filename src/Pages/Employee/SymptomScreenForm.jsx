@@ -102,7 +102,7 @@ const SymptomScreenForm = () => {
         : { _id: "67e0f8770c6feb6ba99d11d2" };
 
       const response = await axios.get(
-        `http://localhost:1111/onboarding/get-application/${user._id}`,
+        `https://api-hrms-backend.kyptronix.us/onboarding/get-application/${user._id}`,
         { withCredentials: true }
       );
 

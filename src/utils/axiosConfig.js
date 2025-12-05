@@ -1,7 +1,8 @@
 import axios from "axios";
 
 // Get the base URL from environment or default
-const VITE_BASEURL = import.meta.env.VITE__BASEURL || "http://localhost:1111";
+const VITE_BASEURL =
+  import.meta.env.VITE__BASEURL || "https://api-hrms-backend.kyptronix.us";
 
 console.log("🌍 API Base URL:", VITE_BASEURL);
 

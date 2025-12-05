@@ -18,7 +18,8 @@ const HRNotesIndicator = ({
   const [showModal, setShowModal] = useState(false);
 
   // Get base URL from environment variable
-  const baseURL = import.meta.env.VITE__BASEURL || "http://localhost:1111";
+  const baseURL =
+    import.meta.env.VITE__BASEURL || "https://api-hrms-backend.kyptronix.us";
   console.log("--------------------------", hrFeedback);
   // Don't show indicator if there's no HR feedback content at all (neither text nor signatures)
   const hasAnyFeedback = !!(

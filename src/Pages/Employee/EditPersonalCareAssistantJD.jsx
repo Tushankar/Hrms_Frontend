@@ -199,7 +199,8 @@ const EditPersonalCareAssistantJD = () => {
     fetchProgressData();
   }, [taskId]);
 
-  const baseURL = import.meta.env.VITE__BASEURL || "http://localhost:1111";
+  const baseURL =
+    import.meta.env.VITE__BASEURL || "https://api-hrms-backend.kyptronix.us";
 
   const fetchProgressData = async () => {
     try {
