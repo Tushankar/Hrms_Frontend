@@ -256,7 +256,7 @@ const Navbar = () => {
         )}
         <div className="hidden sm:flex justify-center items-center h-8 w-auto md:h-10 lg:h-14 flex-shrink-0">
           <img
-            src="https://www.pacifichealthsystems.net/wp-content/themes/pacifichealth/images/logo.png"
+            src="/pacific.png"
             alt="Pacific Health Systems Logo"
             className="h-full object-contain"
             onError={(e) => {
