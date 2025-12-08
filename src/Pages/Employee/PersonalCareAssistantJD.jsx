@@ -39,7 +39,6 @@ const FORM_KEYS = [
   "backgroundCheck",
   "tbSymptomScreen",
   "emergencyContact",
-  "i9Form",
   "w4Form",
   "w9Form",
   "directDeposit",
@@ -364,6 +363,8 @@ const PersonalCareAssistantJD = () => {
   const [isPlacingText, setIsPlacingText] = useState(false);
   const [isDraggingText, setIsDraggingText] = useState(false);
   const [textDragOffset, setTextDragOffset] = useState({ x: 0, y: 0 });
+  const [formStatus, setFormStatus] = useState("draft");
+  const [hrFeedback, setHrFeedback] = useState(null);
 
   const shouldCountForm = (key, empType) => {
     if (key === "w4Form") return empType === "W-2";
@@ -1377,10 +1378,24 @@ const PersonalCareAssistantJD = () => {
                         toast.error("Failed to save and proceed");
                       }
                     }}
-                    className="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-6 py-3 bg-gradient-to-r from-[#1F3A93] to-[#2748B4] text-white font-bold tracking-wide rounded-lg hover:from-[#16306e] hover:to-[#1F3A93] focus:ring-2 focus:ring-[#1F3A93]/30 transition-all duration-200 shadow-md hover:shadow-lg hover:-translate-y-0.5"
+                    className={`w-full sm:w-auto inline-flex items-center justify-center gap-3 px-6 py-3 font-bold tracking-wide rounded-lg focus:ring-2 focus:ring-[#1F3A93]/30 transition-all duration-200 shadow-md hover:shadow-lg hover:-translate-y-0.5 ${
+                      formStatus === "submitted" && !hrFeedback
+                        ? "bg-gray-400 text-gray-600 cursor-not-allowed opacity-60"
+                        : "bg-gradient-to-r from-[#1F3A93] to-[#2748B4] text-white hover:from-[#16306e] hover:to-[#1F3A93] focus:ring-2 focus:ring-[#1F3A93]/30"
+                    }`}
+                    disabled={formStatus === "submitted" && !hrFeedback}
+                    title={
+                      formStatus === "submitted" && !hrFeedback
+                        ? "Form is submitted. HR notes are required to make changes."
+                        : "Save and proceed to next form"
+                    }
                   >
                     <Send className="w-5 h-5" />
-                    <span className="text-sm sm:text-base">Save & Next</span>
+                    <span className="text-sm sm:text-base">
+                      {formStatus === "submitted" && !hrFeedback
+                        ? "Awaiting HR Feedback"
+                        : "Save & Next"}
+                    </span>
                   </button>
                 </div>
               </div>

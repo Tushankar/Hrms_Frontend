@@ -34,7 +34,6 @@ const FORM_KEYS = [
   "backgroundCheck",
   "tbSymptomScreen",
   "emergencyContact",
-  "i9Form",
   "w4Form",
   "w9Form",
   "directDeposit",
@@ -390,13 +389,22 @@ const EmploymentTypeForm = () => {
             {/* Action Buttons */}
             <div className="flex justify-between items-center pt-6 border-t border-gray-200">
               <button
-                onClick={() => navigate("/employee/dashboard")}
+                onClick={() =>
+                  navigate("/employee/edit-tb-symptom-screen-form")
+                }
                 className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
               >
-                Back to Dashboard
+                ← Previous Form
               </button>
 
               <div className="flex gap-3">
+                <button
+                  onClick={() => navigate("/employee/dashboard")}
+                  className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                >
+                  Back to Dashboard
+                </button>
+
                 <button
                   onClick={handleSaveForm}
                   disabled={isSaving || !employmentType}

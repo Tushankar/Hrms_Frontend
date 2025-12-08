@@ -392,6 +392,44 @@ export const EmployeeDashboard = () => {
       );
       console.log("🔍 Full backend response:", response.data);
 
+      // Log all form statuses from backend
+      if (response.data?.data?.forms) {
+        console.log("📋 Form Statuses from Backend:");
+        const allFormKeys = [
+          "employmentType",
+          "personalInformation",
+          "professionalExperience",
+          "workExperience",
+          "education",
+          "references",
+          "legalDisclosures",
+          "jobDescriptionPCA",
+          "codeOfEthics",
+          "serviceDeliveryPolicy",
+          "nonCompeteAgreement",
+          "misconductStatement",
+          "orientationPresentation",
+          "orientationChecklist",
+          "backgroundCheck",
+          "tbSymptomScreen",
+          "emergencyContact",
+          "w4Form",
+          "w9Form",
+          "directDeposit",
+        ];
+
+        allFormKeys.forEach((formKey) => {
+          const formData = response.data.data.forms[formKey];
+          if (!formData) {
+            console.log(`  ❌ ${formKey}: MISSING`);
+          } else {
+            console.log(
+              `  ✓ ${formKey}: status = "${formData.status || "undefined"}"`
+            );
+          }
+        });
+      }
+
       if (response.data && response.data.data) {
         const backendData = response.data.data;
 
@@ -1190,6 +1228,62 @@ export const EmployeeDashboard = () => {
     }
   };
 
+  // Form keys array - 20 core forms (matches EmployeeTaskManagement.jsx)
+  const FORM_KEYS = [
+    "employmentType",
+    "personalInformation",
+    "professionalExperience",
+    "workExperience",
+    "education",
+    "references",
+    "legalDisclosures",
+    "jobDescriptionPCA",
+    "codeOfEthics",
+    "serviceDeliveryPolicy",
+    "nonCompeteAgreement",
+    "misconductStatement",
+    "orientationPresentation",
+    "orientationChecklist",
+    "backgroundCheck",
+    "tbSymptomScreen",
+    "emergencyContact",
+    "w4Form",
+    "w9Form",
+    "directDeposit",
+  ];
+
+  // Helper function to determine if a form should be counted based on employment type
+  const shouldCountForm = (formKey, empType) => {
+    if (!empType) return true;
+    if (empType === "W-2") return formKey !== "w9Form";
+    if (empType === "1099") return formKey !== "w4Form";
+    return true;
+  };
+
+  // Map task IDs to form keys (matches EmployeeTaskManagement.jsx)
+  const taskIdToFormKey = {
+    "personal-information": "personalInformation",
+    education: "education",
+    references: "references",
+    "work-experience": "workExperience",
+    "professional-experience": "professionalExperience",
+    "legal-disclosures": "legalDisclosures",
+    "job-description-pca": "jobDescriptionPCA",
+    "code-of-ethics": "codeOfEthics",
+    "service-delivery-policy": "serviceDeliveryPolicy",
+    "non-compete-agreement": "nonCompeteAgreement",
+    "emergency-contact": "emergencyContact",
+    "background-check": "backgroundCheck",
+    "misconduct-statement": "misconductStatement",
+    "tb-symptom-screen": "tbSymptomScreen",
+    "employment-type": "employmentType",
+    "direct-deposit": "directDeposit",
+    "orientation-presentation": "orientationPresentation",
+    "orientation-checklist": "orientationChecklist",
+    "w4-form": "w4Form",
+    "w9-form": "w9Form",
+  };
+
   // Calculate overall progress - matches EmployeeTaskManagement.jsx logic
   const calculateOverallProgress = () => {
     if (!onboardingTasks || onboardingTasks.length === 0) {
@@ -1201,9 +1295,20 @@ export const EmployeeDashboard = () => {
       };
     }
 
-    // Count completed forms from tasks (excluding employment-type as it's counted separately)
-    const completedTasksCount = onboardingTasks.filter((task) => {
-      if (task.id === "employment-type") return false; // Don't count employment-type here
+    // Get employment type from tasks
+    const employmentTypeTask = onboardingTasks.find(
+      (task) => task.id === "employment-type"
+    );
+    const empType = employmentTypeTask?.formData?.employmentType;
+
+    // Get all tasks that have a formKey mapping (these are the countable forms)
+    const countableTasks = onboardingTasks.filter((task) => {
+      const formKey = taskIdToFormKey[task.id];
+      return formKey && shouldCountForm(formKey, empType);
+    });
+
+    // Count completed forms from countable tasks
+    const completedCount = countableTasks.filter((task) => {
       const submissionStatus = task.submissionStatus;
       return (
         submissionStatus === "Submitted" ||
@@ -1212,27 +1317,20 @@ export const EmployeeDashboard = () => {
       );
     }).length;
 
-    // Count employmentType separately if selected
-    const employmentTypeTask = onboardingTasks.find(
-      (task) => task.id === "employment-type"
-    );
-    const employmentTypeCompleted =
-      employmentTypeTask?.submissionStatus === "Submitted" ? 1 : 0;
+    // Total forms = number of countable tasks
+    const totalForms = countableTasks.length;
 
-    const completedCount = completedTasksCount + employmentTypeCompleted;
-
-    console.log("📊 Dashboard Progress Calculation:", {
-      completedTasksCount,
-      employmentTypeCompleted,
-      employmentTypeStatus: employmentTypeTask?.submissionStatus,
-      completedCount,
-      totalForms: 20,
-    });
-
-    // Total forms is always 20
-    const totalForms = 20;
     const progressPercentage =
       totalForms > 0 ? (completedCount / totalForms) * 100 : 0;
+
+    console.log("📊 Dashboard Progress Calculation:", {
+      empType,
+      completedCount,
+      totalForms,
+      percentage: Math.round(progressPercentage),
+      countableTasksCount: countableTasks.length,
+      allTasksCount: onboardingTasks.length,
+    });
 
     return {
       completed: completedCount,

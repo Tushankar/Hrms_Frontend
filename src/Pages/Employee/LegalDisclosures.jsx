@@ -36,7 +36,6 @@ const FORM_KEYS = [
   "backgroundCheck",
   "tbSymptomScreen",
   "emergencyContact",
-  "i9Form",
   "w4Form",
   "w9Form",
   "directDeposit",
@@ -194,12 +193,9 @@ const LegalDisclosures = () => {
         const completedForms = filteredKeys.filter((key) => {
           const form = forms[key];
           return (
-            [
-              "submitted",
-              "completed",
-              "under_review",
-              "approved",
-            ].includes(form?.status) ||
+            ["submitted", "completed", "under_review", "approved"].includes(
+              form?.status
+            ) ||
             (key === "employmentType" && currentEmploymentType)
           );
         }).length;
@@ -598,7 +594,7 @@ const LegalDisclosures = () => {
                     <div className="w-full lg:w-auto">
                       <button
                         type="button"
-                        onClick={() => navigate("/employee/education")}
+                        onClick={() => navigate("/employee/professional-experience")}
                         className="inline-flex items-center justify-center gap-2 w-full max-w-xs py-3 px-6 sm:px-8 bg-gradient-to-r from-[#1F3A93] to-[#2748B4] text-white font-semibold rounded-xl hover:from-[#16306e] hover:to-[#1F3A93] transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 text-sm sm:text-base"
                       >
                         <ArrowLeft className="w-4 h-4 mr-2" />
@@ -640,11 +636,9 @@ const LegalDisclosures = () => {
                                 hrFeedback[key].trim().length > 0
                             ));
 
-                        // Check if form is locked (submitted or completed, and no HR notes)
+                        // Check if form is locked (submitted and no HR notes)
                         const isLocked =
-                          (formStatus === "submitted" ||
-                            formStatus === "completed") &&
-                          !hasHrNotes;
+                          formStatus === "submitted" && !hasHrNotes;
 
                         return (
                           <button
@@ -670,7 +664,7 @@ const LegalDisclosures = () => {
                             <span>
                               {isSubmitting
                                 ? "Submitting..."
-                                : isLocked
+                                : formStatus === "submitted" && isLocked
                                 ? "Awaiting HR Feedback"
                                 : "Save & Next"}
                             </span>

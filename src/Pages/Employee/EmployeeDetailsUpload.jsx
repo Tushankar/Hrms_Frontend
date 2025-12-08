@@ -34,7 +34,6 @@ const FORM_KEYS = [
   "backgroundCheck",
   "tbSymptomScreen",
   "emergencyContact",
-  "i9Form",
   "w4Form",
   "w9Form",
   "directDeposit",
@@ -174,7 +173,8 @@ const EmployeeDetailsUpload = () => {
             form?.status === "under_review" ||
             form?.status === "approved" ||
             completedSet.has(key) ||
-            (key === "employmentType" && appResponse.data.data.application.employmentType)
+            (key === "employmentType" &&
+              appResponse.data.data.application.employmentType)
           );
         }).length;
 
@@ -535,8 +535,9 @@ const EmployeeDetailsUpload = () => {
                           1.
                         </span>
                         <span>
-                          Prepare your signed job description document (PDF or
-                          image)
+                          Prepare your{" "}
+                          {getCertificateType(positionType).toLowerCase()} (PDF
+                          or image format)
                         </span>
                       </li>
                       <li className="flex gap-3">
@@ -544,7 +545,8 @@ const EmployeeDetailsUpload = () => {
                           2.
                         </span>
                         <span>
-                          Click "Choose File" to select and upload your document
+                          Click "Choose File" or drag and drop to upload your
+                          certificate
                         </span>
                       </li>
                       <li className="flex gap-3">
@@ -552,8 +554,8 @@ const EmployeeDetailsUpload = () => {
                           3.
                         </span>
                         <span>
-                          Once uploaded, you can view or remove the document if
-                          needed
+                          Once uploaded, you can view or remove the certificate
+                          if needed
                         </span>
                       </li>
                       <li className="flex gap-3">

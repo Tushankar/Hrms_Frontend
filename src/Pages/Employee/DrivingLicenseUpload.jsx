@@ -9,6 +9,7 @@ import {
   Send,
   X,
   Download,
+  Trash2,
 } from "lucide-react";
 import toast, { Toaster } from "react-hot-toast";
 import { Layout } from "../../Components/Common/layout/Layout";
@@ -20,7 +21,8 @@ import Cookies from "js-cookie";
 
 const DrivingLicenseUpload = () => {
   const navigate = useNavigate();
-  const [file, setFile] = useState(null);
+  const [files, setFiles] = useState([]); // Changed from single file to array
+  const [uploadedFiles, setUploadedFiles] = useState([]);
   const [uploading, setUploading] = useState(false);
   const [loading, setLoading] = useState(true);
   const [submission, setSubmission] = useState(null);
@@ -83,6 +85,13 @@ const DrivingLicenseUpload = () => {
               );
             }
 
+            // Load all uploaded files
+            if (licenseResponse.data?.drivingLicense?.uploadedFiles) {
+              setUploadedFiles(
+                licenseResponse.data.drivingLicense.uploadedFiles
+              );
+            }
+
             // Fetch HR feedback if available
             if (licenseResponse.data?.drivingLicense?.hrFeedback) {
               setHrFeedback(licenseResponse.data.drivingLicense.hrFeedback);
@@ -105,29 +114,40 @@ const DrivingLicenseUpload = () => {
   };
 
   const handleFileChange = (e) => {
-    const selectedFile = e.target.files[0];
-    if (selectedFile && selectedFile.type === "application/pdf") {
-      setFile(selectedFile);
-    } else {
-      toast.error("Please select a PDF file");
+    const selectedFiles = Array.from(e.target.files);
+    const pdfFiles = selectedFiles.filter(
+      (file) => file.type === "application/pdf"
+    );
+
+    if (pdfFiles.length !== selectedFiles.length) {
+      toast.error("All files must be PDF format");
+      return;
     }
+
+    setFiles([...files, ...pdfFiles]);
+  };
+
+  const removeSelectedFile = (index) => {
+    setFiles(files.filter((_, i) => i !== index));
   };
 
   const handleUpload = async () => {
-    if (!file) {
-      toast.error("Please select a file first");
-      return null;
+    if (files.length === 0) {
+      toast.error("Please select at least one file");
+      return;
     }
 
     setUploading(true);
     try {
       const formData = new FormData();
-      formData.append("file", file);
+      files.forEach((file, index) => {
+        formData.append("files", file);
+      });
       formData.append("applicationId", applicationId);
       formData.append("employeeId", employeeId);
 
       const response = await axios.post(
-        `${baseURL}/onboarding/employee-upload-driving-license`,
+        `${baseURL}/onboarding/employee-upload-driving-license-files`,
         formData,
         {
           headers: { "Content-Type": "multipart/form-data" },
@@ -135,59 +155,63 @@ const DrivingLicenseUpload = () => {
         }
       );
 
-      if (response.data) {
-        toast.success(`Government ID uploaded successfully!`);
-        setFile(null);
+      if (response.data?.drivingLicense) {
+        toast.success(`${files.length} file(s) uploaded successfully!`);
+        setFiles([]);
+        setUploadedFiles(response.data.drivingLicense.uploadedFiles || []);
         setSubmission(response.data.drivingLicense.employeeUploadedForm);
         window.dispatchEvent(new Event("formStatusUpdated"));
-        return response.data.drivingLicense.employeeUploadedForm;
       }
     } catch (error) {
-      console.error("Error uploading document:", error);
-      toast.error(error.response?.data?.message || "Failed to upload document");
-      return null;
+      console.error("Error uploading documents:", error);
+      toast.error(
+        error.response?.data?.message || "Failed to upload documents"
+      );
     } finally {
       setUploading(false);
     }
   };
 
-  const handleRemoveUpload = async () => {
+  const handleRemoveUploadedFile = async (fileId) => {
     try {
-      if (!applicationId || !employeeId) {
-        toast.error("Missing application information");
+      if (!applicationId || !fileId) {
+        toast.error("Missing required information");
         return;
       }
 
       await axios.post(
-        `${baseURL}/onboarding/remove-driving-license-upload`,
+        `${baseURL}/onboarding/remove-driving-license-file`,
         {
           applicationId,
-          employeeId,
+          fileId,
         },
         { withCredentials: true }
       );
 
-      setSubmission(null);
-      setFile(null);
-      toast.success(
-        "Document removed successfully. You can upload a different one."
-      );
+      const updatedFiles = uploadedFiles.filter((f) => f._id !== fileId);
+      setUploadedFiles(updatedFiles);
+
+      if (updatedFiles.length === 0) {
+        setSubmission(null);
+      }
+
+      toast.success("File removed successfully");
       window.dispatchEvent(new Event("formStatusUpdated"));
     } catch (error) {
-      console.error("Error removing document:", error);
-      toast.error(error.response?.data?.message || "Failed to remove document");
+      console.error("Error removing file:", error);
+      toast.error(error.response?.data?.message || "Failed to remove file");
     }
   };
 
-  const handleDownload = async () => {
+  const handleDownloadFile = async (fileId, fileName) => {
     try {
-      if (!submission?.filePath) {
-        toast.error("No file to download");
+      if (!applicationId || !fileId) {
+        toast.error("Missing required information");
         return;
       }
 
       const response = await axios.get(
-        `${baseURL}/onboarding/download-driving-license/${applicationId}`,
+        `${baseURL}/onboarding/download-driving-license-file/${applicationId}/${fileId}`,
         {
           responseType: "blob",
           withCredentials: true,
@@ -197,30 +221,59 @@ const DrivingLicenseUpload = () => {
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement("a");
       link.href = url;
-      link.setAttribute(
-        "download",
-        submission?.filename || `government-id.pdf`
-      );
+      link.setAttribute("download", fileName || "document.pdf");
       document.body.appendChild(link);
       link.click();
-      link.parentChild.removeChild(link);
+      link.parentElement.removeChild(link);
       window.URL.revokeObjectURL(url);
     } catch (error) {
-      console.error("Error downloading document:", error);
-      toast.error("Failed to download document");
+      console.error("Error downloading file:", error);
+      toast.error("Failed to download file");
+    }
+  };
+
+  const handleRemoveAllUploads = async () => {
+    try {
+      if (!applicationId || !employeeId) {
+        toast.error("Missing application information");
+        return;
+      }
+
+      // Remove each file
+      for (const file of uploadedFiles) {
+        await axios.post(
+          `${baseURL}/onboarding/remove-driving-license-file`,
+          {
+            applicationId,
+            fileId: file._id,
+          },
+          { withCredentials: true }
+        );
+      }
+
+      setUploadedFiles([]);
+      setSubmission(null);
+      setFiles([]);
+      toast.success(
+        "All documents removed successfully. You can upload new ones."
+      );
+      window.dispatchEvent(new Event("formStatusUpdated"));
+    } catch (error) {
+      console.error("Error removing documents:", error);
+      toast.error(
+        error.response?.data?.message || "Failed to remove documents"
+      );
     }
   };
 
   const handleSaveAndNext = async () => {
     try {
-      let hasSubmission = submission;
+      let hasSubmission = uploadedFiles.length > 0;
 
-      // If file is selected but not uploaded yet, upload it first
-      if (file && !submission) {
-        const uploadResult = await handleUpload();
-        if (uploadResult) {
-          hasSubmission = uploadResult;
-        }
+      // If files are selected but not uploaded yet, upload them first
+      if (files.length > 0 && !hasSubmission) {
+        await handleUpload();
+        hasSubmission = true;
       }
 
       const status = hasSubmission ? "completed" : "draft";
@@ -269,23 +322,26 @@ const DrivingLicenseUpload = () => {
           {!loading && (
             <div
               className={`mb-6 p-4 rounded-lg border ${
-                submission
+                uploadedFiles.length > 0
                   ? "bg-green-50 border-green-200"
                   : "bg-red-50 border-red-200"
               }`}
             >
               <div className="flex items-center justify-center gap-3">
-                {submission ? (
+                {uploadedFiles.length > 0 ? (
                   <CheckCircle className="w-6 h-6 text-green-600 flex-shrink-0" />
                 ) : (
                   <FileText className="w-6 h-6 text-red-600 flex-shrink-0" />
                 )}
                 <div>
-                  {submission ? (
+                  {uploadedFiles.length > 0 ? (
                     <>
                       <p className="text-base font-semibold text-green-800">
-                        ✅ Progress Updated - Uploaded Successfully on{" "}
-                        {new Date(submission.uploadedAt).toLocaleDateString()}
+                        ✅ Progress Updated - {uploadedFiles.length} Document(s)
+                        Uploaded Successfully on{" "}
+                        {new Date(
+                          uploadedFiles[0]?.uploadedAt
+                        ).toLocaleDateString()}
                       </p>
                       <p className="text-sm text-green-600 mt-1">
                         You cannot make any changes to the form until HR
@@ -294,8 +350,8 @@ const DrivingLicenseUpload = () => {
                     </>
                   ) : (
                     <p className="text-base font-semibold text-red-800">
-                      ⚠️ Not filled yet - Upload your document to complete your
-                      progress
+                      ⚠️ Not filled yet - Upload your document(s) to complete
+                      your progress
                     </p>
                   )}
                 </div>
@@ -398,48 +454,149 @@ const DrivingLicenseUpload = () => {
 
               <div className="border border-gray-200 rounded-lg p-6">
                 <h2 className="text-xl font-semibold text-gray-800 mb-4">
-                  Upload Government ID Document
+                  Upload Government ID Document(s)
                 </h2>
 
-                {submission ? (
-                  <div className="bg-green-50 border border-green-200 rounded-lg p-4 space-y-4">
-                    <div className="flex items-center gap-2 text-green-700 mb-3">
-                      <CheckCircle className="w-5 h-5" />
-                      <span className="font-medium">
-                        Document submitted successfully
-                      </span>
-                      {hrFeedback && (
-                        <HRNotesIndicator
-                          hrFeedback={hrFeedback}
-                          formStatus="submitted"
-                          formTitle="Government ID Document Upload"
+                {uploadedFiles.length > 0 ? (
+                  <div className="space-y-4">
+                    <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                      <div className="flex items-center gap-2 text-green-700 mb-3">
+                        <CheckCircle className="w-5 h-5" />
+                        <span className="font-medium">
+                          {uploadedFiles.length} document(s) submitted
+                          successfully
+                        </span>
+                        {hrFeedback && (
+                          <HRNotesIndicator
+                            hrFeedback={hrFeedback}
+                            formStatus="submitted"
+                            formTitle="Government ID Document Upload"
+                          />
+                        )}
+                      </div>
+
+                      <div className="space-y-3 mt-4">
+                        {uploadedFiles.map((file, index) => (
+                          <div
+                            key={file._id}
+                            className="flex items-center justify-between bg-white p-3 rounded border border-gray-200"
+                          >
+                            <div className="flex items-center gap-3 flex-1">
+                              <FileText className="w-5 h-5 text-blue-500 flex-shrink-0" />
+                              <div className="flex-1">
+                                <p className="text-sm font-medium text-gray-800">
+                                  {file.originalName || file.filename}
+                                </p>
+                                <p className="text-xs text-gray-500">
+                                  {new Date(file.uploadedAt).toLocaleDateString(
+                                    "en-US",
+                                    {
+                                      year: "numeric",
+                                      month: "short",
+                                      day: "numeric",
+                                      hour: "2-digit",
+                                      minute: "2-digit",
+                                    }
+                                  )}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="flex gap-2 ml-3">
+                              <button
+                                onClick={() =>
+                                  handleDownloadFile(
+                                    file._id,
+                                    file.originalName || file.filename
+                                  )
+                                }
+                                className="p-2 text-blue-500 hover:bg-blue-50 rounded transition-colors"
+                                title="Download"
+                              >
+                                <Download className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() =>
+                                  handleRemoveUploadedFile(file._id)
+                                }
+                                className="p-2 text-red-500 hover:bg-red-50 rounded transition-colors"
+                                title="Remove"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div className="mt-4 pt-4 border-t border-green-200">
+                        <button
+                          onClick={handleRemoveAllUploads}
+                          className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors text-sm font-medium"
+                        >
+                          Remove All Documents
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Allow uploading additional files */}
+                    <div className="mt-6 pt-6 border-t border-gray-200">
+                      <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                        Add More Documents
+                      </h3>
+                      <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+                        <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                        <input
+                          type="file"
+                          accept=".pdf"
+                          onChange={handleFileChange}
+                          multiple
+                          className="hidden"
+                          id="driving-license-upload-additional"
                         />
+                        <label
+                          htmlFor="driving-license-upload-additional"
+                          className="cursor-pointer inline-flex items-center gap-2 px-6 py-3 bg-[#1F3A93] text-white rounded-lg hover:bg-[#16307E] transition-colors"
+                        >
+                          <FileText className="w-5 h-5" />
+                          Add More PDF Documents
+                        </label>
+
+                        {files.length > 0 && (
+                          <div className="mt-4 space-y-2">
+                            {files.map((file, index) => (
+                              <div
+                                key={index}
+                                className="flex items-center justify-between gap-2 text-green-600 bg-green-50 px-4 py-2 rounded-lg"
+                              >
+                                <div className="flex items-center gap-2">
+                                  <CheckCircle className="w-5 h-5" />
+                                  <span className="font-medium text-sm">
+                                    {file.name}
+                                  </span>
+                                </div>
+                                <button
+                                  onClick={() => removeSelectedFile(index)}
+                                  className="text-red-500 hover:text-red-700"
+                                >
+                                  <X className="w-4 h-4" />
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+
+                      {files.length > 0 && (
+                        <button
+                          onClick={handleUpload}
+                          disabled={uploading}
+                          className="w-full mt-4 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          {uploading
+                            ? `Uploading ${files.length} file(s)...`
+                            : `Upload ${files.length} File(s)`}
+                        </button>
                       )}
-                    </div>
-                    <div className="space-y-2">
-                      <p className="text-sm text-gray-600">
-                        <span className="font-semibold">File:</span>{" "}
-                        {submission.filename}
-                      </p>
-                      <p className="text-sm text-gray-600">
-                        <span className="font-semibold">Submitted on:</span>{" "}
-                        {new Date(submission.uploadedAt).toLocaleDateString()}
-                      </p>
-                    </div>
-                    <div className="flex gap-2 pt-2">
-                      <button
-                        onClick={handleDownload}
-                        className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors text-sm font-medium inline-flex items-center gap-2"
-                      >
-                        <Download className="w-4 h-4" />
-                        Download Document
-                      </button>
-                      <button
-                        onClick={handleRemoveUpload}
-                        className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors text-sm font-medium"
-                      >
-                        Remove Document
-                      </button>
                     </div>
                   </div>
                 ) : (
@@ -450,6 +607,7 @@ const DrivingLicenseUpload = () => {
                         type="file"
                         accept=".pdf"
                         onChange={handleFileChange}
+                        multiple
                         className="hidden"
                         id="driving-license-upload"
                       />
@@ -458,31 +616,47 @@ const DrivingLicenseUpload = () => {
                         className="cursor-pointer inline-flex items-center gap-2 px-6 py-3 bg-[#1F3A93] text-white rounded-lg hover:bg-[#16307E] transition-colors"
                       >
                         <FileText className="w-5 h-5" />
-                        Select PDF Document
+                        Select PDF Document(s)
                       </label>
-                      {file && (
-                        <div className="mt-4 flex items-center justify-center gap-2">
-                          <div className="flex items-center gap-2 text-green-600 bg-green-50 px-4 py-2 rounded-lg">
-                            <CheckCircle className="w-5 h-5" />
-                            <span className="font-medium">{file.name}</span>
-                            <button
-                              onClick={() => setFile(null)}
-                              className="ml-2 text-red-500 hover:text-red-700"
+                      <p className="text-sm text-gray-500 mt-2">
+                        You can upload multiple files at once (e.g., front and
+                        back of ID)
+                      </p>
+
+                      {files.length > 0 && (
+                        <div className="mt-4 space-y-2">
+                          {files.map((file, index) => (
+                            <div
+                              key={index}
+                              className="flex items-center justify-between gap-2 text-green-600 bg-green-50 px-4 py-2 rounded-lg"
                             >
-                              <X className="w-4 h-4" />
-                            </button>
-                          </div>
+                              <div className="flex items-center gap-2">
+                                <CheckCircle className="w-5 h-5" />
+                                <span className="font-medium text-sm">
+                                  {file.name}
+                                </span>
+                              </div>
+                              <button
+                                onClick={() => removeSelectedFile(index)}
+                                className="text-red-500 hover:text-red-700"
+                              >
+                                <X className="w-4 h-4" />
+                              </button>
+                            </div>
+                          ))}
                         </div>
                       )}
                     </div>
 
-                    {file && !submission && (
+                    {files.length > 0 && (
                       <button
                         onClick={handleUpload}
                         disabled={uploading}
                         className="w-full px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                       >
-                        {uploading ? "Uploading..." : "Upload Document"}
+                        {uploading
+                          ? `Uploading ${files.length} file(s)...`
+                          : `Upload ${files.length} File(s)`}
                       </button>
                     )}
                   </>

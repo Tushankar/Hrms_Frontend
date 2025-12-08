@@ -76,7 +76,6 @@ export const Sidebar = ({
     part1: false,
     part2: true,
     part3: false,
-    part4: false,
   });
   const [isPCAEligible, setIsPCAEligible] = useState(false);
   const [pcaEligibilityChecked, setPcaEligibilityChecked] = useState(false);
@@ -214,11 +213,6 @@ export const Sidebar = ({
             path: "/employee/edit-tb-symptom-screen-form",
           },
           {
-            id: "i9-form",
-            name: "I-9 Employment Eligibility",
-            path: "/employee/i9-form",
-          },
-          {
             id: "employment-type",
             name: "Employment Type Selection",
             path: "/employee/employment-type",
@@ -246,11 +240,6 @@ export const Sidebar = ({
             name: "Direct Deposit Form",
             path: "/employee/direct-deposit",
           },
-        ],
-      },
-      part3: {
-        title: "Part 3: Orientation Documentation",
-        forms: [
           {
             id: "orientation-presentation",
             name: "Orientation PowerPoint Presentation",
@@ -263,8 +252,8 @@ export const Sidebar = ({
           },
         ],
       },
-      part4: {
-        title: "Part 4: After Hire",
+      part3: {
+        title: "Part 3: After Hire",
         forms: part4Forms,
       },
     };
@@ -276,7 +265,6 @@ export const Sidebar = ({
       ...formsByParts.part1.forms,
       ...formsByParts.part2.forms,
       ...formsByParts.part3.forms,
-      ...formsByParts.part4.forms,
     ],
     [formsByParts]
   );

@@ -213,7 +213,6 @@ const ProfessionalExperience = () => {
       "backgroundCheck",
       "tbSymptomScreen",
       "emergencyContact",
-      "i9Form",
       "w4Form",
       "w9Form",
       "directDeposit",
@@ -858,11 +857,9 @@ const ProfessionalExperience = () => {
                                   formData.hrFeedback[key].trim().length > 0
                               ));
 
-                          // Check if form is locked (submitted or completed, and no HR notes)
+                          // Check if form is locked (submitted and no HR notes)
                           const isLocked =
-                            (formData.status === "submitted" ||
-                              formData.status === "completed") &&
-                            !hasHrNotes;
+                            formData.status === "submitted" && !hasHrNotes;
 
                           return (
                             <button
@@ -888,7 +885,7 @@ const ProfessionalExperience = () => {
                               <span>
                                 {saving
                                   ? "Submitting..."
-                                  : isLocked
+                                  : formData.status === "submitted" && isLocked
                                   ? "Awaiting HR Feedback"
                                   : "Save & Next"}
                               </span>

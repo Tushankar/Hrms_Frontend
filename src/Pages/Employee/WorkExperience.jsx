@@ -178,7 +178,6 @@ const WorkExperience = () => {
           "backgroundCheck",
           "tbSymptomScreen",
           "emergencyContact",
-          "i9Form",
           "w4Form",
           "w9Form",
           "directDeposit",
@@ -1331,11 +1330,9 @@ const WorkExperience = () => {
                                   .length > 0
                             ));
 
-                        // Check if form is locked (submitted or completed, and no HR notes)
+                        // Check if form is locked (submitted and no HR notes)
                         const isLocked =
-                          (applicationStatus === "submitted" ||
-                            applicationStatus === "completed") &&
-                          !hasHrNotes;
+                          applicationStatus === "submitted" && !hasHrNotes;
 
                         return (
                           <button
@@ -1361,7 +1358,7 @@ const WorkExperience = () => {
                             <span>
                               {isLoading
                                 ? "Submitting..."
-                                : isLocked
+                                : applicationStatus === "submitted" && isLocked
                                 ? "Awaiting HR Feedback"
                                 : "Save & Next"}
                             </span>

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, Download, FileText } from "lucide-react";
+import { ArrowLeft, Download, FileText, Trash2 } from "lucide-react";
 import toast, { Toaster } from "react-hot-toast";
 import { Layout } from "../../Components/Common/layout/Layout";
 import Navbar from "../../Components/Common/Navbar/Navbar";
@@ -11,6 +11,7 @@ const DrivingLicenseHR = () => {
   const navigate = useNavigate();
   const { employeeId } = useParams();
   const [submission, setSubmission] = useState(null);
+  const [uploadedFiles, setUploadedFiles] = useState([]);
   const [loading, setLoading] = useState(true);
   const baseURL = import.meta.env.VITE__BASEURL;
 
@@ -22,6 +23,7 @@ const DrivingLicenseHR = () => {
 
   const fetchSubmission = async () => {
     try {
+      // First try to get the application with forms
       const response = await axios.get(
         `${baseURL}/onboarding/get-application/${employeeId}`,
         {
@@ -33,11 +35,85 @@ const DrivingLicenseHR = () => {
       if (drivingLicenseData) {
         setSubmission(drivingLicenseData);
       }
+
+      // Also fetch directly from driving license endpoint to get all uploaded files
+      try {
+        // Get the application ID from the first response
+        const appId = response.data?.data?.application?._id;
+        if (appId) {
+          const licenseResponse = await axios.get(
+            `${baseURL}/onboarding/get-driving-license/${appId}`,
+            {
+              withCredentials: true,
+              headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+              },
+            }
+          );
+
+          if (licenseResponse.data?.drivingLicense) {
+            const drivingLicense = licenseResponse.data.drivingLicense;
+            setSubmission(drivingLicense);
+
+            // Set uploaded files if available
+            if (
+              drivingLicense.uploadedFiles &&
+              drivingLicense.uploadedFiles.length > 0
+            ) {
+              setUploadedFiles(drivingLicense.uploadedFiles);
+            } else if (drivingLicense.employeeUploadedForm) {
+              // Fallback to single file for backward compatibility
+              setUploadedFiles([drivingLicense.employeeUploadedForm]);
+            }
+          }
+        }
+      } catch (licenseError) {
+        console.log(
+          "Could not fetch from driving license endpoint:",
+          licenseError.message
+        );
+      }
     } catch (error) {
       console.error("Error fetching submission:", error);
       toast.error("Failed to load employee submission");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDownloadFile = async (fileId, fileName) => {
+    try {
+      const appId = submission?.applicationId;
+      if (!appId || !fileId) {
+        // For backward compatibility with old data
+        window.open(
+          submission?.employeeUploadedForm?.fileUrl ||
+            `${baseURL}/${submission?.employeeUploadedForm?.filePath}`,
+          "_blank"
+        );
+        return;
+      }
+
+      const response = await axios.get(
+        `${baseURL}/onboarding/download-driving-license-file/${appId}/${fileId}`,
+        {
+          responseType: "blob",
+          withCredentials: true,
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        }
+      );
+
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", fileName || "document.pdf");
+      document.body.appendChild(link);
+      link.click();
+      link.parentElement.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Error downloading file:", error);
+      toast.error("Failed to download file");
     }
   };
 
@@ -69,60 +145,124 @@ const DrivingLicenseHR = () => {
             </div>
           ) : (
             <>
-              {!submission?.employeeUploadedForm && (
-                <div className="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg text-center">
-                  <p className="text-yellow-800">
-                    No driving license submission found for this employee.
-                  </p>
+              {uploadedFiles.length === 0 &&
+                !submission?.employeeUploadedForm && (
+                  <div className="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg text-center">
+                    <p className="text-yellow-800">
+                      No driving license submission found for this employee.
+                    </p>
+                  </div>
+                )}
+              {uploadedFiles.length > 0 && (
+                <div className="border border-gray-200 rounded-lg p-6 mb-6">
+                  <h2 className="text-xl font-semibold text-gray-800 mb-4">
+                    Employee Driving License Documents ({uploadedFiles.length})
+                  </h2>
+                  <div className="space-y-3">
+                    {uploadedFiles.map((file, index) => (
+                      <div
+                        key={file._id || index}
+                        className="flex items-center justify-between bg-gray-50 p-4 rounded-lg border border-gray-200 hover:border-gray-300 transition-colors"
+                      >
+                        <div className="flex items-center gap-3 flex-1">
+                          <FileText className="w-5 h-5 text-blue-500 flex-shrink-0" />
+                          <div className="flex-1">
+                            <p className="text-sm font-medium text-gray-800">
+                              {file.originalName || file.filename}
+                            </p>
+                            <p className="text-xs text-gray-500">
+                              {new Date(file.uploadedAt).toLocaleDateString(
+                                "en-US",
+                                {
+                                  year: "numeric",
+                                  month: "short",
+                                  day: "numeric",
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                }
+                              )}
+                            </p>
+                          </div>
+                        </div>
+                        <button
+                          onClick={() =>
+                            handleDownloadFile(
+                              file._id,
+                              file.originalName || file.filename
+                            )
+                          }
+                          className="inline-flex items-center gap-2 px-4 py-2 bg-[#1F3A93] text-white rounded hover:bg-[#16307E] transition-colors text-sm font-medium ml-3 flex-shrink-0"
+                        >
+                          <Download className="w-4 h-4" />
+                          Download
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                  {submission?.status && (
+                    <div className="mt-4 pt-4 border-t border-gray-200">
+                      <p className="text-sm text-gray-600">
+                        Status:{" "}
+                        <span className="capitalize px-2 py-1 rounded bg-green-100 text-green-800 font-medium">
+                          {submission.status}
+                        </span>
+                      </p>
+                    </div>
+                  )}
                 </div>
               )}
-              {submission?.employeeUploadedForm && (
-                <div className="border border-gray-200 rounded-lg p-6">
-                  <h2 className="text-xl font-semibold text-gray-800 mb-4">
-                    Employee Driving License
-                  </h2>
-                  <div className="mb-4 space-y-2">
-                    <p className="text-sm text-gray-600">
-                      Status:{" "}
-                      <span className="capitalize px-2 py-1 rounded bg-green-100 text-green-800">
-                        submitted
-                      </span>
-                    </p>
-                    {submission.employeeUploadedForm.filename && (
+              {uploadedFiles.length === 0 &&
+                submission?.employeeUploadedForm && (
+                  <div className="border border-gray-200 rounded-lg p-6 mb-6">
+                    <h2 className="text-xl font-semibold text-gray-800 mb-4">
+                      Employee Driving License (Legacy)
+                    </h2>
+                    <div className="mb-4 space-y-2">
                       <p className="text-sm text-gray-600">
-                        File:{" "}
-                        <span className="font-medium">
-                          {submission.employeeUploadedForm.filename}
+                        Status:{" "}
+                        <span className="capitalize px-2 py-1 rounded bg-green-100 text-green-800">
+                          submitted
                         </span>
                       </p>
-                    )}
-                    {submission.employeeUploadedForm.uploadedAt && (
-                      <p className="text-sm text-gray-600">
-                        Uploaded:{" "}
-                        <span className="font-medium">
-                          {new Date(
-                            submission.employeeUploadedForm.uploadedAt
-                          ).toLocaleDateString()}
-                        </span>
-                      </p>
-                    )}
-                    {(submission.employeeUploadedForm.filePath ||
-                      submission.employeeUploadedForm.fileUrl) && (
-                      <button
-                        onClick={() =>
-                          window.open(
-                            submission.employeeUploadedForm.fileUrl ||
-                              `${baseURL}/${submission.employeeUploadedForm.filePath}`,
-                            "_blank"
-                          )
-                        }
-                        className="inline-flex items-center gap-2 px-3 py-1.5 bg-[#1F3A93] text-white rounded hover:bg-[#16307E] transition-colors text-sm"
-                      >
-                        <Download className="w-4 h-4" />
-                        Download Submission
-                      </button>
-                    )}
+                      {submission.employeeUploadedForm.filename && (
+                        <p className="text-sm text-gray-600">
+                          File:{" "}
+                          <span className="font-medium">
+                            {submission.employeeUploadedForm.filename}
+                          </span>
+                        </p>
+                      )}
+                      {submission.employeeUploadedForm.uploadedAt && (
+                        <p className="text-sm text-gray-600">
+                          Uploaded:{" "}
+                          <span className="font-medium">
+                            {new Date(
+                              submission.employeeUploadedForm.uploadedAt
+                            ).toLocaleDateString()}
+                          </span>
+                        </p>
+                      )}
+                      {(submission.employeeUploadedForm.filePath ||
+                        submission.employeeUploadedForm.fileUrl) && (
+                        <button
+                          onClick={() =>
+                            window.open(
+                              submission.employeeUploadedForm.fileUrl ||
+                                `${baseURL}/${submission.employeeUploadedForm.filePath}`,
+                              "_blank"
+                            )
+                          }
+                          className="inline-flex items-center gap-2 px-3 py-1.5 bg-[#1F3A93] text-white rounded hover:bg-[#16307E] transition-colors text-sm"
+                        >
+                          <Download className="w-4 h-4" />
+                          Download Submission
+                        </button>
+                      )}
+                    </div>
                   </div>
+                )}
+              {(uploadedFiles.length > 0 || submission) && (
+                <div className="border border-gray-200 rounded-lg p-6">
                   <HRNotesInput
                     formType="drivingLicense"
                     employeeId={employeeId}

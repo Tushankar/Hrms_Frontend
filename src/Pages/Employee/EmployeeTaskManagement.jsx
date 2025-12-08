@@ -47,7 +47,6 @@ const FORM_KEYS = [
   "backgroundCheck",
   "tbSymptomScreen",
   "emergencyContact",
-  "i9Form",
   "w4Form",
   "w9Form",
   "directDeposit",
@@ -783,31 +782,6 @@ export const EmployeeTaskManagement = () => {
               : {}),
           },
           {
-            id: "i9-form",
-            name: "I-9 Employment Eligibility",
-            priority: "Medium",
-            type: "Documentation",
-            creationDate: backendData.application?.createdAt
-              ? new Date(backendData.application.createdAt)
-                  .toISOString()
-                  .split("T")[0]
-              : new Date().toISOString().split("T")[0],
-            status: getFormStatus(backendData.forms?.i9Form),
-            submissionStatus: getSubmissionStatus(backendData.forms?.i9Form),
-            formsCompleted: getCompletionCount(backendData.forms?.i9Form),
-            totalForms: 1,
-            hrReviewStatus: getHrReviewStatus(
-              backendData.forms?.i9Form,
-              backendData.application?.applicationStatus
-            ),
-            formData: backendData.forms?.i9Form,
-            applicationId: backendData.application?._id,
-            isEditable: isFormEditable(
-              backendData.forms?.i9Form,
-              backendData.application?.applicationStatus
-            ),
-          },
-          {
             id: "employment-type",
             name: "Employment Type Selection",
             priority: "Medium",
@@ -1467,20 +1441,6 @@ export const EmployeeTaskManagement = () => {
         isEditable: true,
       },
       {
-        id: "i9-form",
-        name: "I-9 Employment Eligibility",
-        priority: "Medium",
-        type: "Documentation",
-        creationDate: new Date().toISOString().split("T")[0],
-        status: "Pending",
-        submissionStatus: "Not Started",
-        formsCompleted: 0,
-        totalForms: 1,
-        hrReviewStatus: null,
-        formData: null,
-        isEditable: true,
-      },
-      {
         id: "employment-type",
         name: "Employment Type Selection",
         priority: "Medium",
@@ -1567,8 +1527,6 @@ export const EmployeeTaskManagement = () => {
           navigate("/employee/w4-form");
         } else if (firstUnfilledTask.id === "w9-form") {
           navigate("/employee/w9-form");
-        } else if (firstUnfilledTask.id === "i9-form") {
-          navigate("/employee/i9-form");
         } else if (firstUnfilledTask.id === "emergency-contact") {
           navigate("/employee/emergency-contact");
         } else if (firstUnfilledTask.id === "direct-deposit") {
@@ -1686,6 +1644,21 @@ export const EmployeeTaskManagement = () => {
   // State to store employment type
   const [employmentType, setEmploymentType] = useState(null);
 
+  // Helper function to check if a form should be counted in progress
+  const shouldCountForm = (formKey, empType) => {
+    if (!empType) return true; // Count all if no employment type selected
+
+    if (empType === "W-2") {
+      // For W-2 employees, W4 is required, W9 is optional
+      return formKey !== "w9Form";
+    } else if (empType === "1099") {
+      // For 1099 contractors, W9 is required, W4 is optional
+      return formKey !== "w4Form";
+    }
+
+    return true; // Default to counting all
+  };
+
   // Calculate overall progress
   const calculateOverallProgress = () => {
     if (!tasks || tasks.length === 0) {
@@ -1697,9 +1670,40 @@ export const EmployeeTaskManagement = () => {
       };
     }
 
-    // Count completed forms from tasks (excluding employment-type as it's counted separately)
-    const completedTasksCount = tasks.filter((task) => {
-      if (task.id === "employment-type") return false; // Don't count employment-type here
+    // Map task IDs to FORM_KEYS - only include forms that are in FORM_KEYS
+    const taskIdToFormKey = {
+      "personal-information": "personalInformation",
+      education: "education",
+      references: "references",
+      "work-experience": "workExperience",
+      "professional-experience": "professionalExperience",
+      "legal-disclosures": "legalDisclosures",
+      "job-description-pca": "jobDescriptionPCA",
+      "code-of-ethics": "codeOfEthics",
+      "service-delivery-policies": "serviceDeliveryPolicy",
+      "non-compete-agreement": "nonCompeteAgreement",
+      "emergency-contact": "emergencyContact",
+      "background-check": "backgroundCheck",
+      "misconduct-form": "misconductStatement",
+      "tb-symptom-screen": "tbSymptomScreen",
+      "employment-type": "employmentType",
+      "direct-deposit": "directDeposit",
+      "orientation-presentation": "orientationPresentation",
+      "orientation-checklist": "orientationChecklist",
+      "w4-form": "w4Form",
+      "w9-form": "w9Form",
+    };
+
+    // Count completed forms based on employment type filtering
+    const completedCount = tasks.filter((task) => {
+      const formKey = taskIdToFormKey[task.id];
+
+      // Skip tasks that aren't in FORM_KEYS (like employee-details-upload)
+      if (!formKey) return false;
+
+      // Only count forms that should be counted based on employment type
+      if (!shouldCountForm(formKey, employmentType)) return false;
+
       const submissionStatus = task.submissionStatus;
       return (
         submissionStatus === "Submitted" ||
@@ -1708,30 +1712,20 @@ export const EmployeeTaskManagement = () => {
       );
     }).length;
 
-    // Count employmentType separately if selected
-    const employmentTypeTask = tasks.find(
-      (task) => task.id === "employment-type"
-    );
-    const employmentTypeCompleted =
-      employmentTypeTask?.submissionStatus === "Submitted" ? 1 : 0;
+    // Calculate total forms based on employment type
+    const totalForms = FORM_KEYS.filter((key) =>
+      shouldCountForm(key, employmentType)
+    ).length;
 
-    const completedCount = Math.min(
-      completedTasksCount + employmentTypeCompleted,
-      20
-    );
-
-    console.log("📊 Task Management Progress Calculation:", {
-      completedTasksCount,
-      employmentTypeCompleted,
-      employmentTypeStatus: employmentTypeTask?.submissionStatus,
-      completedCount,
-      totalForms: 20,
-    });
-
-    // Total forms is always 20
-    const totalForms = 20;
     const progressPercentage =
       totalForms > 0 ? (completedCount / totalForms) * 100 : 0;
+
+    console.log("📊 Task Management Progress Calculation:", {
+      completedCount,
+      totalForms,
+      employmentType,
+      percentage: Math.round(progressPercentage),
+    });
 
     return {
       completed: completedCount,
@@ -2495,76 +2489,6 @@ export const EmployeeTaskManagement = () => {
                 </div>
               </div>
 
-              {/* Submit Application Button */}
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 bg-white rounded-xl border border-blue-200">
-                <div className="flex items-center gap-3">
-                  {overallProgress.isComplete ? (
-                    <>
-                      <CheckCircle2 className="w-8 h-8 text-green-500" />
-                      <div>
-                        <h3 className="font-bold text-green-700">
-                          {applicationStatus === "submitted"
-                            ? "Ready to Resubmit to HR!"
-                            : "Ready to Submit to HR!"}
-                        </h3>
-                        <p className="text-sm text-green-600">
-                          {applicationStatus === "submitted"
-                            ? "All forms completed - Ready for HR resubmission"
-                            : "All forms completed - Ready for HR review"}
-                        </p>
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      <Users className="w-8 h-8 text-blue-500" />
-                      <div>
-                        <h3 className="font-bold text-gray-700">
-                          Complete Remaining Forms
-                        </h3>
-                        <p className="text-sm text-gray-600">
-                          {overallProgress.total - overallProgress.completed}{" "}
-                          more form
-                          {overallProgress.total - overallProgress.completed !==
-                          1
-                            ? "s"
-                            : ""}{" "}
-                          before HR{" "}
-                          {applicationStatus === "submitted"
-                            ? "resubmission"
-                            : "submission"}
-                        </p>
-                      </div>
-                    </>
-                  )}
-                </div>
-
-                <button
-                  onClick={handleSubmitApplication}
-                  disabled={!overallProgress.isComplete}
-                  className={`inline-flex items-center gap-3 px-6 py-3 rounded-xl font-bold text-sm transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 min-w-[220px] justify-center ${
-                    overallProgress.isComplete
-                      ? "bg-gradient-to-r from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700 focus:ring-2 focus:ring-green-400"
-                      : "bg-gray-300 text-gray-500 cursor-not-allowed opacity-60"
-                  }`}
-                >
-                  {overallProgress.isComplete ? (
-                    <>
-                      <Send className="w-5 h-5" />
-                      {applicationStatus === "submitted"
-                        ? "Resubmit to HR"
-                        : "Submit to HR"}
-                    </>
-                  ) : (
-                    <>
-                      <Clock className="w-5 h-5" />
-                      {applicationStatus === "submitted"
-                        ? "Resubmit to HR"
-                        : "Submit to HR"}
-                    </>
-                  )}
-                </button>
-              </div>
-
               {/* DEBUG: Fix Forms Button (temporary) */}
               <div className="flex justify-center mt-4">
                 {/* <button
@@ -2916,8 +2840,6 @@ export const EmployeeTaskManagement = () => {
                                         navigate("/employee/w4-form");
                                       } else if (task.id === "w9-form") {
                                         navigate("/employee/w9-form");
-                                      } else if (task.id === "i9-form") {
-                                        navigate("/employee/i9-form");
                                       } else if (
                                         task.id === "emergency-contact"
                                       ) {
@@ -3066,6 +2988,79 @@ export const EmployeeTaskManagement = () => {
                     )}
                   </tbody>
                 </table>
+              </div>
+
+              {/* Submit Application Button - Moved to end of Part 2 */}
+              <div className="px-6 py-6 border-t border-gray-100 bg-blue-50">
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 bg-white rounded-xl border border-blue-200">
+                  <div className="flex items-center gap-3">
+                    {overallProgress.isComplete ? (
+                      <>
+                        <CheckCircle2 className="w-8 h-8 text-green-500" />
+                        <div>
+                          <h3 className="font-bold text-green-700">
+                            {applicationStatus === "submitted"
+                              ? "Ready to Resubmit to HR!"
+                              : "Ready to Submit to HR!"}
+                          </h3>
+                          <p className="text-sm text-green-600">
+                            {applicationStatus === "submitted"
+                              ? "All forms completed - Ready for HR resubmission"
+                              : "All forms completed - Ready for HR review"}
+                          </p>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <Users className="w-8 h-8 text-blue-500" />
+                        <div>
+                          <h3 className="font-bold text-gray-700">
+                            Complete Remaining Forms
+                          </h3>
+                          <p className="text-sm text-gray-600">
+                            {overallProgress.total - overallProgress.completed}{" "}
+                            more form
+                            {overallProgress.total -
+                              overallProgress.completed !==
+                            1
+                              ? "s"
+                              : ""}{" "}
+                            before HR{" "}
+                            {applicationStatus === "submitted"
+                              ? "resubmission"
+                              : "submission"}
+                          </p>
+                        </div>
+                      </>
+                    )}
+                  </div>
+
+                  <button
+                    onClick={handleSubmitApplication}
+                    disabled={!overallProgress.isComplete}
+                    className={`inline-flex items-center gap-3 px-6 py-3 rounded-xl font-bold text-sm transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 min-w-[220px] justify-center ${
+                      overallProgress.isComplete
+                        ? "bg-gradient-to-r from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700 focus:ring-2 focus:ring-green-400"
+                        : "bg-gray-300 text-gray-500 cursor-not-allowed opacity-60"
+                    }`}
+                  >
+                    {overallProgress.isComplete ? (
+                      <>
+                        <Send className="w-5 h-5" />
+                        {applicationStatus === "submitted"
+                          ? "Resubmit to HR"
+                          : "Submit to HR"}
+                      </>
+                    ) : (
+                      <>
+                        <Clock className="w-5 h-5" />
+                        {applicationStatus === "submitted"
+                          ? "Resubmit to HR"
+                          : "Submit to HR"}
+                      </>
+                    )}
+                  </button>
+                </div>
               </div>
 
               {/* Pagination & Summary */}

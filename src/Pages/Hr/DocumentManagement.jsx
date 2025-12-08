@@ -32,54 +32,6 @@ export const DocumentManagement = () => {
 
   const forms = [
     {
-      id: "employmentApplication",
-      name: "Employment Application",
-      color: "indigo",
-      category: "Application Forms",
-    },
-    {
-      id: "codeOfEthics",
-      name: "Code of Ethics",
-      color: "blue",
-      category: "Policy Forms",
-    },
-    {
-      id: "serviceDeliveryPolicy",
-      name: "Service Delivery Policy",
-      color: "cyan",
-      category: "Policy Forms",
-    },
-    {
-      id: "nonCompete",
-      name: "Non-Compete Agreement",
-      color: "purple",
-      category: "Policy Forms",
-    },
-    {
-      id: "backgroundCheck",
-      name: "Background Check",
-      color: "green",
-      category: "Screening Forms",
-    },
-    {
-      id: "tbSymptomScreen",
-      name: "TB Symptom Screen / X-Ray Form",
-      color: "teal",
-      category: "Screening Forms",
-    },
-    {
-      id: "emergencyContact",
-      name: "Emergency Contact Information",
-      color: "orange",
-      category: "Screening Forms",
-    },
-    {
-      id: "misconductStatement",
-      name: "Staff Misconduct Statement",
-      color: "rose",
-      category: "Screening Forms",
-    },
-    {
       id: "pcaTrainingQuestions",
       name: "PCA Training Questions",
       color: "violet",
@@ -91,54 +43,6 @@ export const DocumentManagement = () => {
       color: "fuchsia",
       category: "Training Materials",
       isVideo: true, // Special flag for video handling
-    },
-    {
-      id: "i9Form",
-      name: "I-9 Form",
-      color: "orange",
-      category: "Tax & Legal Forms",
-    },
-    {
-      id: "w4Form",
-      name: "W-4 Form",
-      color: "red",
-      category: "Tax & Legal Forms",
-    },
-    {
-      id: "w9Form",
-      name: "W-9 Form",
-      color: "pink",
-      category: "Tax & Legal Forms",
-    },
-    {
-      id: "directDeposit",
-      name: "Direct Deposit Form",
-      color: "emerald",
-      category: "Tax & Legal Forms",
-    },
-    {
-      id: "rnJobDescription",
-      name: "RN Job Description",
-      color: "teal",
-      category: "Job Descriptions",
-    },
-    {
-      id: "lpnJobDescription",
-      name: "LPN Job Description",
-      color: "emerald",
-      category: "Job Descriptions",
-    },
-    {
-      id: "cnaJobDescription",
-      name: "CNA Job Description",
-      color: "lime",
-      category: "Job Descriptions",
-    },
-    {
-      id: "pcaJobDescription",
-      name: "PCA Job Description",
-      color: "amber",
-      category: "Job Descriptions",
     },
     {
       id: "orientationPresentation",

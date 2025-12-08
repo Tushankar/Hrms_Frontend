@@ -877,7 +877,7 @@ const PersonalInformation = () => {
   const [applicationStatus, setApplicationStatus] = useState("draft");
   const [overallProgress, setOverallProgress] = useState(0);
   const [completedFormsCount, setCompletedFormsCount] = useState(0);
-  const [totalForms, setTotalForms] = useState(21);
+  const [totalForms, setTotalForms] = useState(20);
   const [employmentType, setEmploymentType] = useState(null);
   const [countries, setCountries] = useState(COUNTRIES_DATA);
   const [states, setStates] = useState([]);
@@ -1009,7 +1009,6 @@ const PersonalInformation = () => {
           "backgroundCheck",
           "tbSymptomScreen",
           "emergencyContact",
-          "i9Form",
           "w4Form",
           "w9Form",
           "directDeposit",
@@ -2160,9 +2159,7 @@ const PersonalInformation = () => {
 
                           // Check if form is submitted or completed (and no HR notes to allow edits)
                           const isLocked =
-                            (formData.status === "submitted" ||
-                              formData.status === "completed") &&
-                            !hasHrNotes;
+                            formData.status === "submitted" && !hasHrNotes;
 
                           return (
                             <button
@@ -2188,7 +2185,7 @@ const PersonalInformation = () => {
                               <span>
                                 {saving
                                   ? "Submitting..."
-                                  : isLocked
+                                  : formData.status === "submitted" && isLocked
                                   ? "Awaiting HR Feedback"
                                   : "Save & Next"}
                               </span>

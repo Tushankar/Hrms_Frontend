@@ -7,6 +7,8 @@ import {
   CheckCircle,
   Send,
   Trash2,
+  Download,
+  X,
 } from "lucide-react";
 import toast, { Toaster } from "react-hot-toast";
 import { Layout } from "../../Components/Common/layout/Layout";
@@ -33,7 +35,6 @@ const FORM_KEYS = [
   "backgroundCheck",
   "tbSymptomScreen",
   "emergencyContact",
-  "i9Form",
   "w4Form",
   "w9Form",
   "directDeposit",
@@ -42,7 +43,8 @@ const FORM_KEYS = [
 const CPRFirstAidCertificate = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
-  const [cprFile, setCprFile] = useState(null);
+  const [cprFiles, setCprFiles] = useState([]);
+  const [uploadedCprCerts, setUploadedCprCerts] = useState([]);
   const [uploadingCpr, setUploadingCpr] = useState(false);
   const [applicationId, setApplicationId] = useState(null);
   const [uploadedCprCert, setUploadedCprCert] = useState(null);
@@ -94,6 +96,13 @@ const CPRFirstAidCertificate = () => {
           );
         }
 
+        // Load all uploaded CPR certificates
+        if (appResponse.data.data.forms.backgroundCheck?.cprCertificates) {
+          setUploadedCprCerts(
+            appResponse.data.data.forms.backgroundCheck.cprCertificates
+          );
+        }
+
         // Load status and HR feedback
         if (appResponse.data.data.forms.backgroundCheck?.status) {
           setFormStatus(appResponse.data.data.forms.backgroundCheck.status);
@@ -120,13 +129,11 @@ const CPRFirstAidCertificate = () => {
               forms.jobDescriptionRN;
           }
           return (
-            [
-              "submitted",
-              "completed",
-              "under_review",
-              "approved",
-            ].includes(form?.status) ||
-            (key === "employmentType" && appResponse.data.data.application.employmentType)
+            ["submitted", "completed", "under_review", "approved"].includes(
+              form?.status
+            ) ||
+            (key === "employmentType" &&
+              appResponse.data.data.application.employmentType)
           );
         });
 
@@ -146,18 +153,26 @@ const CPRFirstAidCertificate = () => {
   };
 
   const handleCprFileChange = (e) => {
-    const selectedFile = e.target.files[0];
-    if (selectedFile && selectedFile.type === "application/pdf") {
-      setCprFile(selectedFile);
-    } else {
-      setCprFile(null);
-      toast.error("Please select a PDF file");
+    const selectedFiles = Array.from(e.target.files);
+    const pdfFiles = selectedFiles.filter(
+      (file) => file.type === "application/pdf"
+    );
+
+    if (pdfFiles.length !== selectedFiles.length) {
+      toast.error("All files must be PDF format");
+      return;
     }
+
+    setCprFiles([...cprFiles, ...pdfFiles]);
+  };
+
+  const removeSelectedFile = (index) => {
+    setCprFiles(cprFiles.filter((_, i) => i !== index));
   };
 
   const handleCprUpload = async () => {
-    if (!cprFile) {
-      toast.error("Please select a CPR/First Aid certificate file");
+    if (cprFiles.length === 0) {
+      toast.error("Please select at least one file");
       return;
     }
 
@@ -177,12 +192,14 @@ const CPRFirstAidCertificate = () => {
       const user = JSON.parse(userCookie);
 
       const formData = new FormData();
-      formData.append("file", cprFile);
+      cprFiles.forEach((file) => {
+        formData.append("files", file);
+      });
       formData.append("applicationId", applicationId);
       formData.append("employeeId", user._id);
 
       const response = await axios.post(
-        `${baseURL}/onboarding/employee-upload-cpr-certificate`,
+        `${baseURL}/onboarding/employee-upload-cpr-certificates`,
         formData,
         {
           headers: { "Content-Type": "multipart/form-data" },
@@ -190,61 +207,118 @@ const CPRFirstAidCertificate = () => {
         }
       );
 
-      if (response.data) {
-        toast.success("CPR/First Aid certificate uploaded successfully!");
-        setCprFile(null);
+      if (response.data?.backgroundCheck) {
+        toast.success(`${cprFiles.length} file(s) uploaded successfully!`);
+        setCprFiles([]);
+        setUploadedCprCerts(
+          response.data.backgroundCheck.cprCertificates || []
+        );
         setUploadedCprCert(
           response.data.backgroundCheck.cprFirstAidCertificate
         );
         window.dispatchEvent(new Event("formStatusUpdated"));
       }
     } catch (error) {
-      console.error("Error uploading CPR certificate:", error);
+      console.error("Error uploading certificates:", error);
       toast.error(
-        error.response?.data?.message || "Failed to upload certificate"
+        error.response?.data?.message || "Failed to upload certificates"
       );
     } finally {
       setUploadingCpr(false);
     }
   };
 
-  const handleRemoveCprUpload = async () => {
-    if (!uploadedCprCert) {
-      toast.error("No certificate to remove");
-      return;
-    }
-
-    if (
-      !window.confirm(
-        "Are you sure you want to remove the uploaded certificate?"
-      )
-    ) {
-      return;
-    }
-
+  const handleRemoveUploadedFile = async (fileId) => {
     try {
-      const userCookie = Cookies.get("user");
-      if (!userCookie) {
-        toast.error("Session expired. Please log in again.");
+      if (!applicationId || !fileId) {
+        toast.error("Missing required information");
         return;
       }
-      const user = JSON.parse(userCookie);
 
       await axios.post(
-        `${baseURL}/onboarding/remove-cpr-certificate-upload`,
+        `${baseURL}/onboarding/remove-cpr-certificate-file`,
         {
           applicationId,
-          employeeId: user._id,
+          fileId,
         },
         { withCredentials: true }
       );
 
-      toast.success("Certificate removed successfully");
-      setUploadedCprCert(null);
+      const updatedFiles = uploadedCprCerts.filter((f) => f._id !== fileId);
+      setUploadedCprCerts(updatedFiles);
+
+      if (updatedFiles.length === 0) {
+        setUploadedCprCert(null);
+      }
+
+      toast.success("File removed successfully");
       window.dispatchEvent(new Event("formStatusUpdated"));
     } catch (error) {
-      console.error("Error removing certificate:", error);
-      toast.error("Failed to remove certificate");
+      console.error("Error removing file:", error);
+      toast.error(error.response?.data?.message || "Failed to remove file");
+    }
+  };
+
+  const handleDownloadFile = async (fileId, fileName) => {
+    try {
+      if (!applicationId || !fileId) {
+        toast.error("Missing required information");
+        return;
+      }
+
+      const response = await axios.get(
+        `${baseURL}/onboarding/download-cpr-certificate/${applicationId}/${fileId}`,
+        {
+          responseType: "blob",
+          withCredentials: true,
+        }
+      );
+
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", fileName || "certificate.pdf");
+      document.body.appendChild(link);
+      link.click();
+      link.parentElement.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Error downloading file:", error);
+      toast.error("Failed to download file");
+    }
+  };
+
+  const handleRemoveAllUploads = async () => {
+    try {
+      if (!applicationId) {
+        toast.error("Missing application information");
+        return;
+      }
+
+      // Remove each file
+      for (const file of uploadedCprCerts) {
+        await axios.post(
+          `${baseURL}/onboarding/remove-cpr-certificate-file`,
+          {
+            applicationId,
+            fileId: file._id,
+          },
+          { withCredentials: true }
+        );
+      }
+
+      setUploadedCprCerts([]);
+      setUploadedCprCert(null);
+      setCprFiles([]);
+      toast.success(
+        "All certificates removed successfully. You can upload new ones."
+      );
+      window.dispatchEvent(new Event("formStatusUpdated"));
+    } catch (error) {
+      console.error("Error removing certificates:", error);
+      toast.error(
+        error.response?.data?.message || "Failed to remove certificates"
+      );
     }
   };
 
@@ -309,24 +383,25 @@ const CPRFirstAidCertificate = () => {
               {!loading && (
                 <div
                   className={`mb-6 p-4 rounded-lg border ${
-                    uploadedCprCert
+                    uploadedCprCerts.length > 0
                       ? "bg-green-50 border-green-200"
                       : "bg-red-50 border-red-200"
                   }`}
                 >
                   <div className="flex items-center justify-center gap-3">
-                    {uploadedCprCert ? (
+                    {uploadedCprCerts.length > 0 ? (
                       <CheckCircle className="w-6 h-6 text-green-600 flex-shrink-0" />
                     ) : (
                       <FileText className="w-6 h-6 text-red-600 flex-shrink-0" />
                     )}
                     <div>
-                      {uploadedCprCert ? (
+                      {uploadedCprCerts.length > 0 ? (
                         <>
                           <p className="text-base font-semibold text-green-800">
-                            ✅ Progress Updated - Uploaded Successfully on{" "}
+                            ✅ Progress Updated - {uploadedCprCerts.length}{" "}
+                            Certificate(s) Uploaded Successfully on{" "}
                             {new Date(
-                              uploadedCprCert.uploadedAt
+                              uploadedCprCerts[0]?.uploadedAt
                             ).toLocaleDateString()}
                           </p>
                           <p className="text-sm text-green-600 mt-1">
@@ -336,7 +411,7 @@ const CPRFirstAidCertificate = () => {
                         </>
                       ) : (
                         <p className="text-base font-semibold text-red-800">
-                          ⚠️ Not filled yet - Upload your certificate to
+                          ⚠️ Not filled yet - Upload your certificate(s) to
                           complete your progress
                         </p>
                       )}
@@ -404,35 +479,146 @@ const CPRFirstAidCertificate = () => {
 
                 <div className="bg-purple-50 border border-purple-200 rounded-lg p-6">
                   <h2 className="text-xl font-semibold text-gray-800 mb-4">
-                    Upload CPR/First Aid Certificate
+                    Upload CPR/First Aid Certificate(s)
                   </h2>
                   <p className="text-sm text-gray-600 mb-4">
-                    This is optional. If you have a CPR/First Aid certificate,
-                    please upload it here.
+                    This is optional. If you have CPR/First Aid certificate(s),
+                    please upload them here. You can upload multiple
+                    certificates.
                   </p>
 
-                  {uploadedCprCert ? (
-                    <div className="bg-white border border-purple-300 rounded-lg p-4">
-                      <div className="flex items-center gap-2 text-purple-600 mb-2">
-                        <CheckCircle className="w-5 h-5" />
-                        <span className="font-semibold">
-                          Certificate Uploaded!
-                        </span>
+                  {uploadedCprCerts.length > 0 ? (
+                    <div className="space-y-4">
+                      <div className="bg-white border border-purple-300 rounded-lg p-4">
+                        <div className="flex items-center gap-2 text-purple-600 mb-3">
+                          <CheckCircle className="w-5 h-5" />
+                          <span className="font-semibold">
+                            {uploadedCprCerts.length} Certificate(s) Uploaded!
+                          </span>
+                        </div>
+
+                        <div className="space-y-3 mt-4">
+                          {uploadedCprCerts.map((cert, index) => (
+                            <div
+                              key={cert._id}
+                              className="flex items-center justify-between bg-gray-50 p-3 rounded border border-gray-200"
+                            >
+                              <div className="flex items-center gap-3 flex-1">
+                                <FileText className="w-5 h-5 text-blue-500 flex-shrink-0" />
+                                <div className="flex-1">
+                                  <p className="text-sm font-medium text-gray-800">
+                                    {cert.originalName || cert.filename}
+                                  </p>
+                                  <p className="text-xs text-gray-500">
+                                    {new Date(
+                                      cert.uploadedAt
+                                    ).toLocaleDateString("en-US", {
+                                      year: "numeric",
+                                      month: "short",
+                                      day: "numeric",
+                                      hour: "2-digit",
+                                      minute: "2-digit",
+                                    })}
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="flex gap-2 ml-3">
+                                <button
+                                  onClick={() =>
+                                    handleDownloadFile(
+                                      cert._id,
+                                      cert.originalName || cert.filename
+                                    )
+                                  }
+                                  className="p-2 text-blue-500 hover:bg-blue-50 rounded transition-colors"
+                                  title="Download"
+                                >
+                                  <Download className="w-4 h-4" />
+                                </button>
+                                <button
+                                  onClick={() =>
+                                    handleRemoveUploadedFile(cert._id)
+                                  }
+                                  className="p-2 text-red-500 hover:bg-red-50 rounded transition-colors"
+                                  title="Remove"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+
+                        <div className="mt-4 pt-4 border-t border-purple-200">
+                          <button
+                            onClick={handleRemoveAllUploads}
+                            className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors text-sm font-medium"
+                          >
+                            Remove All Certificates
+                          </button>
+                        </div>
                       </div>
-                      <p className="text-gray-600 text-sm break-words">
-                        File: {uploadedCprCert.filename}
-                      </p>
-                      <p className="text-gray-500 text-xs">
-                        Uploaded:{" "}
-                        {new Date(uploadedCprCert.uploadedAt).toLocaleString()}
-                      </p>
-                      <button
-                        onClick={handleRemoveCprUpload}
-                        className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-red-50 text-red-600 border border-red-200 rounded-lg hover:bg-red-100 transition-colors font-medium text-sm cursor-pointer"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                        Remove Certificate
-                      </button>
+
+                      {/* Allow uploading additional files */}
+                      <div className="mt-6 pt-6 border-t border-purple-200">
+                        <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                          Add More Certificates
+                        </h3>
+                        <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                          <Upload className="w-10 h-10 text-gray-400 mx-auto mb-3" />
+                          <input
+                            type="file"
+                            accept=".pdf"
+                            onChange={handleCprFileChange}
+                            multiple
+                            className="hidden"
+                            id="cpr-file-upload-additional"
+                          />
+                          <label
+                            htmlFor="cpr-file-upload-additional"
+                            className="cursor-pointer inline-flex items-center gap-2 px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+                          >
+                            <FileText className="w-5 h-5" />
+                            Add More Certificates
+                          </label>
+
+                          {cprFiles.length > 0 && (
+                            <div className="mt-4 space-y-2">
+                              {cprFiles.map((file, index) => (
+                                <div
+                                  key={index}
+                                  className="flex items-center justify-between gap-2 text-purple-600 bg-purple-50 px-4 py-2 rounded-lg"
+                                >
+                                  <div className="flex items-center gap-2">
+                                    <CheckCircle className="w-5 h-5" />
+                                    <span className="font-medium text-sm break-all">
+                                      {file.name}
+                                    </span>
+                                  </div>
+                                  <button
+                                    onClick={() => removeSelectedFile(index)}
+                                    className="text-red-500 hover:text-red-700"
+                                  >
+                                    <X className="w-4 h-4" />
+                                  </button>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+
+                        {cprFiles.length > 0 && (
+                          <button
+                            onClick={handleCprUpload}
+                            disabled={uploadingCpr}
+                            className="w-full mt-4 py-3 bg-gradient-to-r from-purple-600 to-purple-700 text-white font-semibold rounded-lg hover:from-purple-700 hover:to-purple-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                          >
+                            {uploadingCpr
+                              ? `Uploading ${cprFiles.length} file(s)...`
+                              : `Upload ${cprFiles.length} Certificate(s)`}
+                          </button>
+                        )}
+                      </div>
                     </div>
                   ) : (
                     <>
@@ -442,6 +628,7 @@ const CPRFirstAidCertificate = () => {
                           type="file"
                           accept=".pdf"
                           onChange={handleCprFileChange}
+                          multiple
                           className="hidden"
                           id="cpr-file-upload"
                         />
@@ -450,25 +637,48 @@ const CPRFirstAidCertificate = () => {
                           className="cursor-pointer inline-flex items-center gap-2 px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
                         >
                           <FileText className="w-5 h-5" />
-                          Select CPR/First Aid Certificate PDF
+                          Select CPR/First Aid Certificate PDF(s)
                         </label>
-                        {cprFile && (
-                          <div className="mt-3 flex items-center justify-center gap-2 text-purple-600">
-                            <CheckCircle className="w-5 h-5" />
-                            <span className="font-medium break-all">
-                              {cprFile.name}
-                            </span>
+                        <p className="text-sm text-gray-500 mt-2">
+                          You can upload multiple files at once
+                        </p>
+
+                        {cprFiles.length > 0 && (
+                          <div className="mt-4 space-y-2">
+                            {cprFiles.map((file, index) => (
+                              <div
+                                key={index}
+                                className="flex items-center justify-between gap-2 text-purple-600 bg-purple-50 px-4 py-2 rounded-lg"
+                              >
+                                <div className="flex items-center gap-2">
+                                  <CheckCircle className="w-5 h-5" />
+                                  <span className="font-medium text-sm break-all">
+                                    {file.name}
+                                  </span>
+                                </div>
+                                <button
+                                  onClick={() => removeSelectedFile(index)}
+                                  className="text-red-500 hover:text-red-700"
+                                >
+                                  <X className="w-4 h-4" />
+                                </button>
+                              </div>
+                            ))}
                           </div>
                         )}
                       </div>
 
-                      <button
-                        onClick={handleCprUpload}
-                        disabled={!cprFile || uploadingCpr}
-                        className="w-full py-3 bg-gradient-to-r from-purple-600 to-purple-700 text-white font-semibold rounded-lg hover:from-purple-700 hover:to-purple-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
-                      >
-                        {uploadingCpr ? "Uploading..." : "Upload Certificate"}
-                      </button>
+                      {cprFiles.length > 0 && (
+                        <button
+                          onClick={handleCprUpload}
+                          disabled={uploadingCpr}
+                          className="w-full py-3 bg-gradient-to-r from-purple-600 to-purple-700 text-white font-semibold rounded-lg hover:from-purple-700 hover:to-purple-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                        >
+                          {uploadingCpr
+                            ? `Uploading ${cprFiles.length} file(s)...`
+                            : `Upload ${cprFiles.length} Certificate(s)`}
+                        </button>
+                      )}
                     </>
                   )}
                 </div>
@@ -517,7 +727,7 @@ const CPRFirstAidCertificate = () => {
                     <button
                       type="button"
                       onClick={() =>
-                        navigate("/employee/background-check-upload")
+                        navigate("/employee/employee-details-upload")
                       }
                       className="w-full sm:w-auto px-6 sm:px-8 py-3 bg-gradient-to-r from-gray-500 to-gray-600 text-white font-semibold rounded-xl hover:from-gray-600 hover:to-gray-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 text-sm sm:text-base"
                     >
@@ -568,9 +778,10 @@ const CPRFirstAidCertificate = () => {
                               const userCookie = Cookies.get("user");
                               if (userCookie && applicationId) {
                                 const user = JSON.parse(userCookie);
-                                const status = uploadedCprCert
-                                  ? "completed"
-                                  : "draft";
+                                const status =
+                                  uploadedCprCerts.length > 0
+                                    ? "completed"
+                                    : "draft";
                                 await axios.post(
                                   `${baseURL}/onboarding/save-cpr-certificate`,
                                   {

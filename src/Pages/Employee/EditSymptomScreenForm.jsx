@@ -33,7 +33,6 @@ const FORM_KEYS = [
   "backgroundCheck",
   "tbSymptomScreen",
   "emergencyContact",
-  "i9Form",
   "w4Form",
   "w9Form",
   "directDeposit",
@@ -47,7 +46,7 @@ const shouldCountForm = (key, employmentType) => {
 
 const EditSymptomScreenForm = () => {
   const navigate = useNavigate();
-  const [file, setFile] = useState(null);
+  const [tbFiles, setTbFiles] = useState([]);
   const [uploading, setUploading] = useState(false);
   const [loading, setLoading] = useState(true);
   const [savingAndNext, setSavingAndNext] = useState(false);
@@ -142,7 +141,7 @@ const EditSymptomScreenForm = () => {
   const fetchUploadedDocument = async (appId) => {
     try {
       const response = await axios.get(
-        `${baseURL}/onboarding/tb-symptom-screen/get-tb-uploaded-documents/${appId}/tbSymptomScreen`,
+        `${baseURL}/onboarding/get-tb-uploaded-documents/${appId}/tbSymptomScreen`,
         { withCredentials: true }
       );
 
@@ -182,13 +181,25 @@ const EditSymptomScreenForm = () => {
       "image/jpeg",
       "image/jpg",
       "image/png",
+      "image/gif",
+      "image/x-png", // Alternative PNG MIME type
+      "image/pjpeg", // IE JPEG variant
     ];
+    const allowedExtensions = [".pdf", ".jpg", ".jpeg", ".png", ".gif"];
     const validFiles = [];
     const errors = [];
 
     files.forEach((file) => {
-      if (!allowedTypes.includes(file.type)) {
-        errors.push(`${file.name}: Invalid file type`);
+      // Check both MIME type and file extension for better compatibility
+      const fileName = file.name.toLowerCase();
+      const fileExtension = "." + fileName.split(".").pop();
+      const isMimeTypeAllowed = allowedTypes.includes(file.type);
+      const isExtensionAllowed = allowedExtensions.includes(fileExtension);
+
+      if (!isMimeTypeAllowed && !isExtensionAllowed) {
+        errors.push(
+          `${file.name}: Invalid file type. Only PDF, JPG, and PNG files are allowed.`
+        );
       } else if (file.size > 10 * 1024 * 1024) {
         errors.push(`${file.name}: File size exceeds 10MB`);
       } else {
@@ -201,14 +212,14 @@ const EditSymptomScreenForm = () => {
     }
 
     if (validFiles.length > 0) {
-      setFile(validFiles[0]);
-      toast.success("File selected successfully!");
+      setTbFiles([...tbFiles, ...validFiles]);
+      toast.success(`${validFiles.length} file(s) added!`);
     }
   };
 
   const handleFileUpload = async () => {
-    if (!file) {
-      toast.error("Please select a file to upload");
+    if (tbFiles.length === 0) {
+      toast.error("Please select at least one file to upload");
       return;
     }
 
@@ -221,13 +232,14 @@ const EditSymptomScreenForm = () => {
 
     try {
       const formData = new FormData();
-      formData.append("file", file);
+      tbFiles.forEach((file) => {
+        formData.append("files", file);
+      });
       formData.append("applicationId", applicationId);
       formData.append("employeeId", employeeId);
-      formData.append("positionType", "tbSymptomScreen");
 
       const response = await axios.post(
-        `${baseURL}/onboarding/employee-upload-document`,
+        `${baseURL}/onboarding/employee-upload-tb-documents`,
         formData,
         {
           withCredentials: true,
@@ -236,29 +248,29 @@ const EditSymptomScreenForm = () => {
       );
 
       if (response.data?.success) {
-        toast.success("Document uploaded successfully!");
-        setFile(null);
+        toast.success(`${tbFiles.length} document(s) uploaded successfully!`);
+        setTbFiles([]);
         if (fileInputRef.current) {
           fileInputRef.current.value = "";
         }
 
-        // Immediately update uploadedDocuments with the response
-        if (response.data?.document) {
-          const newDoc = {
-            ...response.data.document,
-            fullUrl: response.data.document.filePath.startsWith("http")
-              ? response.data.document.filePath
-              : `${baseURL}/${response.data.document.filePath}`,
-          };
-          setUploadedDocuments([newDoc]);
+        // Update uploadedDocuments with the response
+        if (response.data?.documents) {
+          const newDocs = response.data.documents.map((doc) => ({
+            ...doc,
+            fullUrl: doc.filePath.startsWith("http")
+              ? doc.filePath
+              : `${baseURL}/${doc.filePath}`,
+          }));
+          // Set the documents from response instead of appending
+          setUploadedDocuments(newDocs);
         }
 
         window.dispatchEvent(new Event("formStatusUpdated"));
-        await checkSubmission();
       }
     } catch (error) {
-      console.error("Error uploading document:", error);
-      toast.error("Failed to upload document. Please try again.");
+      console.error("Error uploading documents:", error);
+      toast.error("Failed to upload documents. Please try again.");
     } finally {
       setUploading(false);
     }
@@ -277,11 +289,10 @@ const EditSymptomScreenForm = () => {
 
     try {
       const response = await axios.post(
-        `${baseURL}/onboarding/tb-symptom-screen/remove-tb-document`,
+        `${baseURL}/onboarding/remove-tb-document-file`,
         {
           applicationId,
-          positionType: "tbSymptomScreen",
-          documentId,
+          fileId: documentId,
         },
         { withCredentials: true }
       );
@@ -298,6 +309,26 @@ const EditSymptomScreenForm = () => {
       console.error("Error removing document:", error);
       toast.error("Failed to remove document");
     }
+  };
+
+  const removeSelectedFile = (index) => {
+    setTbFiles(tbFiles.filter((_, i) => i !== index));
+    toast.success("File removed from selection");
+  };
+
+  const handleDownloadFile = (fileId, fileName) => {
+    if (!applicationId) {
+      toast.error("Missing application information");
+      return;
+    }
+
+    const downloadUrl = `${baseURL}/onboarding/download-tb-document/${applicationId}/${fileId}`;
+    const link = document.createElement("a");
+    link.href = downloadUrl;
+    link.download = fileName || "document";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   const handleSaveAndNext = async () => {
@@ -318,7 +349,7 @@ const EditSymptomScreenForm = () => {
       const status = "completed";
 
       await axios.post(
-        `${baseURL}/onboarding/tb-symptom-screen/save-status`,
+        `${baseURL}/onboarding/save-status`,
         {
           applicationId,
           employeeId: user._id,
@@ -334,7 +365,7 @@ const EditSymptomScreenForm = () => {
       await checkSubmission();
 
       await new Promise((resolve) => setTimeout(resolve, 500));
-      navigate("/employee/i9-form");
+      navigate("/employee/employment-type");
     } catch (error) {
       console.error("Error saving form:", error);
       toast.error(
@@ -483,7 +514,7 @@ const EditSymptomScreenForm = () => {
                             <File className="w-6 h-6 text-green-600 flex-shrink-0" />
                             <div className="flex-1 min-w-0">
                               <h3 className="text-sm font-medium text-green-800 truncate">
-                                {doc.filename}
+                                {doc.originalName || doc.filename}
                               </h3>
                               <div className="flex gap-3 text-xs text-gray-500">
                                 {doc.fileSize && (
@@ -501,14 +532,17 @@ const EditSymptomScreenForm = () => {
                             </div>
                           </div>
                           <div className="flex items-center gap-2 flex-shrink-0">
-                            <a
-                              href={doc.fullUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
+                            <button
+                              onClick={() =>
+                                handleDownloadFile(
+                                  doc._id,
+                                  doc.originalName || doc.filename
+                                )
+                              }
                               className="px-3 py-1 text-xs bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors whitespace-nowrap"
                             >
-                              View
-                            </a>
+                              Download
+                            </button>
                             <button
                               onClick={() => removeUploadedDocument(doc._id)}
                               className="px-3 py-1 text-xs bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors whitespace-nowrap"
@@ -523,7 +557,7 @@ const EditSymptomScreenForm = () => {
 
                   <div className="border-t border-gray-200 pt-6">
                     <h4 className="text-lg font-semibold text-gray-800 mb-4">
-                      Upload Additional Document
+                      Upload Additional Documents
                     </h4>
                     <div className="flex items-center justify-center w-full">
                       <label
@@ -549,42 +583,49 @@ const EditSymptomScreenForm = () => {
                           ref={fileInputRef}
                           onChange={handleFileSelect}
                           accept=".pdf,.jpg,.jpeg,.png"
+                          multiple
                         />
                       </label>
                     </div>
 
-                    {file && (
+                    {tbFiles && tbFiles.length > 0 && (
                       <div className="mt-4">
                         <h5 className="font-semibold text-gray-800 mb-3">
-                          File Ready to Upload:
+                          Files Ready to Upload ({tbFiles.length}):
                         </h5>
-                        <div className="flex items-center justify-between p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                          <div className="flex items-center gap-3">
-                            <File className="w-5 h-5 text-yellow-600" />
-                            <div>
-                              <p className="text-sm font-medium text-yellow-800">
-                                {file.name}
-                              </p>
-                              <p className="text-xs text-gray-600">
-                                {(file.size / 1024 / 1024).toFixed(2)} MB
-                              </p>
+                        <div className="space-y-2 mb-4">
+                          {tbFiles.map((file, index) => (
+                            <div
+                              key={index}
+                              className="flex items-center justify-between p-3 bg-yellow-50 border border-yellow-200 rounded-lg"
+                            >
+                              <div className="flex items-center gap-3 flex-1">
+                                <File className="w-5 h-5 text-yellow-600" />
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-sm font-medium text-yellow-800 truncate">
+                                    {file.name}
+                                  </p>
+                                  <p className="text-xs text-gray-600">
+                                    {(file.size / 1024 / 1024).toFixed(2)} MB
+                                  </p>
+                                </div>
+                              </div>
+                              <button
+                                onClick={() => removeSelectedFile(index)}
+                                className="px-3 py-1 text-xs bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors whitespace-nowrap"
+                              >
+                                Remove
+                              </button>
                             </div>
-                          </div>
-                          <button
-                            onClick={() => {
-                              setFile(null);
-                            }}
-                            className="px-2 py-1 text-xs bg-gray-400 text-white rounded hover:bg-gray-500 transition-colors"
-                          >
-                            Remove
-                          </button>
+                          ))}
                         </div>
+
                         <button
                           onClick={handleFileUpload}
                           disabled={uploading}
-                          className="w-full mt-4 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-semibold"
+                          className="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-semibold"
                         >
-                          {uploading ? "Uploading..." : "Upload Document"}
+                          {uploading ? "Uploading..." : "Upload Documents"}
                         </button>
                       </div>
                     )}
@@ -614,35 +655,41 @@ const EditSymptomScreenForm = () => {
                         ref={fileInputRef}
                         onChange={handleFileSelect}
                         accept=".pdf,.jpg,.jpeg,.png"
+                        multiple
                       />
                     </label>
                   </div>
 
-                  {file && (
+                  {tbFiles && tbFiles.length > 0 && (
                     <div className="space-y-3">
                       <h4 className="font-semibold text-gray-800">
-                        Selected File:
+                        Selected Files ({tbFiles.length}):
                       </h4>
-                      <div className="flex items-center justify-between p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                        <div className="flex items-center gap-3">
-                          <File className="w-5 h-5 text-blue-600" />
-                          <div>
-                            <p className="text-sm font-medium text-blue-800">
-                              {file.name}
-                            </p>
-                            <p className="text-xs text-blue-600">
-                              {(file.size / 1024 / 1024).toFixed(2)} MB
-                            </p>
+                      <div className="space-y-2 mb-4">
+                        {tbFiles.map((file, index) => (
+                          <div
+                            key={index}
+                            className="flex items-center justify-between p-3 bg-blue-50 border border-blue-200 rounded-lg"
+                          >
+                            <div className="flex items-center gap-3 flex-1">
+                              <File className="w-5 h-5 text-blue-600" />
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium text-blue-800 truncate">
+                                  {file.name}
+                                </p>
+                                <p className="text-xs text-blue-600">
+                                  {(file.size / 1024 / 1024).toFixed(2)} MB
+                                </p>
+                              </div>
+                            </div>
+                            <button
+                              onClick={() => removeSelectedFile(index)}
+                              className="px-3 py-1 text-xs bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors whitespace-nowrap"
+                            >
+                              Remove
+                            </button>
                           </div>
-                        </div>
-                        <button
-                          onClick={() => {
-                            setFile(null);
-                          }}
-                          className="px-3 py-1 text-xs bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
-                        >
-                          Remove
-                        </button>
+                        ))}
                       </div>
 
                       <button
@@ -650,7 +697,7 @@ const EditSymptomScreenForm = () => {
                         disabled={uploading}
                         className="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
                       >
-                        {uploading ? "Uploading..." : "Upload Document"}
+                        {uploading ? "Uploading..." : "Upload Documents"}
                       </button>
                     </div>
                   )}
@@ -699,7 +746,7 @@ const EditSymptomScreenForm = () => {
                 <button
                   type="button"
                   onClick={() =>
-                    navigate("/employee/edit-background-check-results")
+                    navigate("/employee/misconduct-form")
                   }
                   className="px-6 sm:px-8 py-3 bg-gradient-to-r from-[#1F3A93] to-[#2748B4] text-white font-semibold rounded-xl hover:from-[#2748B4] hover:to-[#1F3A93] transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 text-sm sm:text-base"
                 >

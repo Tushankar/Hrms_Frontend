@@ -30,6 +30,7 @@ const Navbar = () => {
   };
 
   const user = getUserFromToken();
+  const isHRUser = user?.role === "HR" || user?.role === "hr";
 
   // Search functionality
   const [searchQuery, setSearchQuery] = useState("");
@@ -214,59 +215,56 @@ const Navbar = () => {
         </p>
       </div>
       <div className="flex justify-center items-center gap-2 md:gap-3 lg:gap-5">
-        {/* Search Input */}
-        <div className="relative hidden sm:block" ref={searchRef}>
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="Search forms..."
-              value={searchQuery}
-              onChange={handleSearchChange}
-              onFocus={handleSearchFocus}
-              className="bg-[#F7F9FC] h-8 w-40 sm:w-48 md:h-8 md:w-80 lg:h-10 lg:w-96 rounded-full pl-8 md:pl-10 pr-3 md:pr-4 text-xs md:text-base lg:text-lg focus:outline-none focus:ring-2 focus:ring-[#1F3A93] focus:bg-white transition-all"
-            />
-            <Search className="absolute left-2 md:left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 md:w-5 md:h-5 lg:w-6 lg:h-6 text-gray-500" />
-          </div>
-
-          {/* Search Dropdown */}
-          {showSearchDropdown && (
-            <div className="absolute top-full mt-2 w-full bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-60 overflow-y-auto">
-              {filteredForms.length > 0 ? (
-                filteredForms.map((form, index) => (
-                  <button
-                    key={index}
-                    onClick={() => handleFormSelect(form)}
-                    className="w-full text-left px-4 py-3 hover:bg-gray-50 border-b border-gray-100 last:border-b-0 focus:outline-none focus:bg-gray-50 transition-colors"
-                  >
-                    <div className="text-sm md:text-base font-medium text-gray-900">
-                      {form.name}
-                    </div>
-                  </button>
-                ))
-              ) : (
-                <div className="px-4 py-3 text-sm text-gray-500 text-center">
-                  No forms match your search
-                </div>
-              )}
+        {/* Search Input - Hidden for HR Users */}
+        {!isHRUser && (
+          <div className="relative hidden sm:block" ref={searchRef}>
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Search forms..."
+                value={searchQuery}
+                onChange={handleSearchChange}
+                onFocus={handleSearchFocus}
+                className="bg-[#F7F9FC] h-8 w-40 sm:w-48 md:h-8 md:w-80 lg:h-10 lg:w-96 rounded-full pl-8 md:pl-10 pr-3 md:pr-4 text-xs md:text-base lg:text-lg focus:outline-none focus:ring-2 focus:ring-[#1F3A93] focus:bg-white transition-all"
+              />
+              <Search className="absolute left-2 md:left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 md:w-5 md:h-5 lg:w-6 lg:h-6 text-gray-500" />
             </div>
-          )}
-        </div>
-        <button className="hidden sm:flex justify-center items-center h-8 w-8 md:h-10 md:w-10 lg:h-14 lg:w-14 border border-black rounded-full overflow-hidden flex-shrink-0">
+
+            {/* Search Dropdown */}
+            {showSearchDropdown && (
+              <div className="absolute top-full mt-2 w-full bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-60 overflow-y-auto">
+                {filteredForms.length > 0 ? (
+                  filteredForms.map((form, index) => (
+                    <button
+                      key={index}
+                      onClick={() => handleFormSelect(form)}
+                      className="w-full text-left px-4 py-3 hover:bg-gray-50 border-b border-gray-100 last:border-b-0 focus:outline-none focus:bg-gray-50 transition-colors"
+                    >
+                      <div className="text-sm md:text-base font-medium text-gray-900">
+                        {form.name}
+                      </div>
+                    </button>
+                  ))
+                ) : (
+                  <div className="px-4 py-3 text-sm text-gray-500 text-center">
+                    No forms match your search
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+        <div className="hidden sm:flex justify-center items-center h-8 w-auto md:h-10 lg:h-14 flex-shrink-0">
           <img
-            src={
-              user?.profileImage ? `${baseURL}/${user.profileImage}` : VecIcon
-            }
-            alt="Profile"
-            className="rounded-full w-full h-full object-cover"
+            src="https://www.pacifichealthsystems.net/wp-content/themes/pacifichealth/images/logo.png"
+            alt="Pacific Health Systems Logo"
+            className="h-full object-contain"
             onError={(e) => {
-              console.log(
-                "Profile image failed to load:",
-                `${baseURL}/${user.profileImage}`
-              );
-              e.target.src = VecIcon;
+              console.log("Logo image failed to load");
+              e.target.style.display = "none";
             }}
           />
-        </button>
+        </div>
         {/* Mobile Hamburger Button */}
         <button
           className="md:hidden bg-[#1F3A93] h-8 w-8 rounded-lg flex justify-center items-center hover:bg-[#153073] transition-colors flex-shrink-0"

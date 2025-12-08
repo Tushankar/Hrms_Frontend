@@ -183,13 +183,13 @@ export const HrDashboard = () => {
         withCredentials: true,
       }
     );
-    
+
     // Set application with employment type
     setSelectedApplication({
       ...application,
-      employmentType: response.data?.data?.application?.employmentType
+      employmentType: response.data?.data?.application?.employmentType,
     });
-    
+
     const formsData = await fetchApplicationDetails(
       application.applicationId,
       application.employeeId
@@ -220,9 +220,6 @@ export const HrDashboard = () => {
         break;
       case "w9Form":
         router(`/hr/w9-form/${employeeId}`);
-        break;
-      case "i9Form":
-        router(`/hr/i9-form/${employeeId}`);
         break;
       case "emergencyContact":
         router(`/hr/emergency-contact/${employeeId}`);
@@ -1841,11 +1838,23 @@ export const HrDashboard = () => {
                               </div>
                               <button
                                 onClick={() => {
-                                  // Check if CPR certificate exists
+                                  // Check if CPR certificates exist
                                   const bgCheck =
                                     applicationForms?.backgroundCheck;
-                                  if (bgCheck?.cprFirstAidCertificate) {
-                                    // Show modal with certificate details
+                                  if (
+                                    bgCheck?.cprCertificates &&
+                                    bgCheck.cprCertificates.length > 0
+                                  ) {
+                                    // Show modal with multiple certificates
+                                    setSelectedFormDetail({
+                                      type: "cprCertificates",
+                                      data: bgCheck.cprCertificates,
+                                      fullData: bgCheck,
+                                      name: "CPR/First Aid Certificates",
+                                    });
+                                    setShowFormDetailModal(true);
+                                  } else if (bgCheck?.cprFirstAidCertificate) {
+                                    // Fallback to single certificate for backward compatibility
                                     setSelectedFormDetail({
                                       type: "cprCertificate",
                                       data: bgCheck.cprFirstAidCertificate,
@@ -1966,52 +1975,29 @@ export const HrDashboard = () => {
                             </div>
                           </div>
 
-                          {/* 12. I-9 Employment Eligibility */}
+                          {/* 12. Employment Type Selection */}
                           <div className="p-4 mb-3 rounded-lg border border-gray-200 bg-white">
                             <div className="flex items-center justify-between">
                               <div>
                                 <h5 className="font-medium">
-                                  12. I-9 Employment Eligibility
+                                  12. Employment Type Selection
                                 </h5>
                                 <p className="text-sm text-gray-600">
-                                  Employment Eligibility Verification
-                                </p>
-                              </div>
-                              <button
-                                onClick={() =>
-                                  handleViewFormDetail(
-                                    "i9Form",
-                                    "I-9 Employment Eligibility"
-                                  )
-                                }
-                                className="text-blue-600 hover:text-blue-800 text-sm font-medium px-4 py-2 rounded-lg hover:bg-blue-50 transition-colors"
-                              >
-                                View Details
-                              </button>
-                            </div>
-                          </div>
-
-                          {/* 13. Employment Type Selection */}
-                          <div className="p-4 mb-3 rounded-lg border border-gray-200 bg-white">
-                            <div className="flex items-center justify-between">
-                              <div>
-                                <h5 className="font-medium">
-                                  13. Employment Type Selection
-                                </h5>
-                                <p className="text-sm text-gray-600">
-                                  Selected: {selectedApplication?.employmentType || "Not Selected"}
+                                  Selected:{" "}
+                                  {selectedApplication?.employmentType ||
+                                    "Not Selected"}
                                 </p>
                               </div>
                             </div>
                           </div>
 
-                          {/* 14. W-4 Tax Form - Only show if W-2 */}
+                          {/* 13. W-4 Tax Form - Only show if W-2 */}
                           {selectedApplication?.employmentType === "W-2" && (
                             <div className="p-4 mb-3 rounded-lg border border-gray-200 bg-white">
                               <div className="flex items-center justify-between">
                                 <div>
                                   <h5 className="font-medium">
-                                    14. W-4 Tax Form
+                                    13. W-4 Tax Form
                                   </h5>
                                   <p className="text-sm text-gray-600">
                                     Employee's Withholding Certificate
@@ -2019,7 +2005,10 @@ export const HrDashboard = () => {
                                 </div>
                                 <button
                                   onClick={() =>
-                                    handleViewFormDetail("w4Form", "W-4 Tax Form")
+                                    handleViewFormDetail(
+                                      "w4Form",
+                                      "W-4 Tax Form"
+                                    )
                                   }
                                   className="text-blue-600 hover:text-blue-800 text-sm font-medium px-4 py-2 rounded-lg hover:bg-blue-50 transition-colors"
                                 >
@@ -2029,13 +2018,13 @@ export const HrDashboard = () => {
                             </div>
                           )}
 
-                          {/* 14. W-9 Tax Form - Only show if 1099 */}
+                          {/* 13. W-9 Tax Form - Only show if 1099 */}
                           {selectedApplication?.employmentType === "1099" && (
                             <div className="p-4 mb-3 rounded-lg border border-gray-200 bg-white">
                               <div className="flex items-center justify-between">
                                 <div>
                                   <h5 className="font-medium">
-                                    14. W-9 Tax Form
+                                    13. W-9 Tax Form
                                   </h5>
                                   <p className="text-sm text-gray-600">
                                     Taxpayer Identification Number and
@@ -2044,7 +2033,10 @@ export const HrDashboard = () => {
                                 </div>
                                 <button
                                   onClick={() =>
-                                    handleViewFormDetail("w9Form", "W-9 Tax Form")
+                                    handleViewFormDetail(
+                                      "w9Form",
+                                      "W-9 Tax Form"
+                                    )
                                   }
                                   className="text-blue-600 hover:text-blue-800 text-sm font-medium px-4 py-2 rounded-lg hover:bg-blue-50 transition-colors"
                                 >
@@ -2054,12 +2046,12 @@ export const HrDashboard = () => {
                             </div>
                           )}
 
-                          {/* 15. Direct Deposit Form */}
+                          {/* 14. Direct Deposit Form */}
                           <div className="p-4 mb-3 rounded-lg border border-gray-200 bg-white">
                             <div className="flex items-center justify-between">
                               <div>
                                 <h5 className="font-medium">
-                                  15. Direct Deposit Form
+                                  14. Direct Deposit Form
                                 </h5>
                                 <p className="text-sm text-gray-600">
                                   Banking information for payroll
@@ -2521,6 +2513,53 @@ export const HrDashboard = () => {
                     </div>
                   )}
 
+                  {selectedFormDetail.type === "cprCertificates" &&
+                    selectedFormDetail.data && (
+                      <div className="bg-orange-50 p-4 rounded-lg">
+                        <h3 className="font-semibold text-orange-900 mb-4">
+                          CPR/First Aid Certificates (
+                          {selectedFormDetail.data.length})
+                        </h3>
+                        <div className="space-y-4">
+                          {selectedFormDetail.data.map((cert, index) => (
+                            <div
+                              key={cert._id || index}
+                              className="bg-white border border-orange-200 rounded-lg p-4"
+                            >
+                              <div className="flex items-start justify-between mb-3">
+                                <div>
+                                  <h4 className="font-medium text-gray-900">
+                                    Certificate {index + 1}
+                                  </h4>
+                                  <p className="text-sm text-gray-600">
+                                    {cert.originalName || cert.filename}
+                                  </p>
+                                </div>
+                                <span className="text-green-600 font-medium text-sm">
+                                  ✓ Uploaded
+                                </span>
+                              </div>
+                              <p className="text-sm text-gray-500 mb-3">
+                                <strong>Upload Date:</strong>{" "}
+                                {new Date(cert.uploadedAt).toLocaleString()}
+                              </p>
+                              <a
+                                href={`${import.meta.env.VITE__BASEURL}/${
+                                  cert.filePath
+                                }`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-2 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors text-sm"
+                              >
+                                <FileText className="w-4 h-4" />
+                                View Certificate
+                              </a>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
                   {selectedFormDetail.type === "cprCertificate" &&
                     selectedFormDetail.data && (
                       <div className="bg-orange-50 p-4 rounded-lg">
@@ -2566,11 +2605,13 @@ export const HrDashboard = () => {
                     <h3 className="text-lg font-semibold text-gray-900 mb-4">
                       Complete Form Data
                     </h3>
-                    {selectedFormDetail.type === "cprCertificate" ? (
+                    {selectedFormDetail.type === "cprCertificates" ||
+                    selectedFormDetail.type === "cprCertificate" ? (
                       <div className="bg-gray-50 p-4 rounded-lg">
                         <p className="text-gray-600">
                           Certificate information displayed above. Use the "View
-                          Certificate" button to download or preview the PDF.
+                          Certificate" button(s) to download or preview the
+                          PDF(s).
                         </p>
                       </div>
                     ) : (

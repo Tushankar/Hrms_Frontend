@@ -61,7 +61,7 @@ const References = () => {
   const [applicationStatus, setApplicationStatus] = useState("draft");
   const [overallProgress, setOverallProgress] = useState(0);
   const [completedFormsCount, setCompletedFormsCount] = useState(0);
-  const [totalForms, setTotalForms] = useState(21);
+  const [totalForms, setTotalForms] = useState(20);
   const [employmentType, setEmploymentType] = useState(null);
 
   const baseURL = import.meta.env.VITE__BASEURL;
@@ -155,7 +155,6 @@ const References = () => {
           "backgroundCheck",
           "tbSymptomScreen",
           "emergencyContact",
-          "i9Form",
           "w4Form",
           "w9Form",
           "directDeposit",
@@ -800,9 +799,7 @@ const References = () => {
 
                         // Check if form is submitted or completed (and no HR notes)
                         const isLocked =
-                          (applicationStatus === "submitted" ||
-                            applicationStatus === "completed") &&
-                          !hasHrNotes;
+                          applicationStatus === "submitted" && !hasHrNotes;
 
                         return (
                           <button
@@ -828,7 +825,7 @@ const References = () => {
                             <span>
                               {isLoading
                                 ? "Submitting..."
-                                : isLocked
+                                : applicationStatus === "submitted" && isLocked
                                 ? "Awaiting HR Feedback"
                                 : "Save & Next"}
                             </span>

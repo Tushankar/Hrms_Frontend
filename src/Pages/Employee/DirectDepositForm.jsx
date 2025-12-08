@@ -27,7 +27,6 @@ const FORM_KEYS = [
   "backgroundCheck",
   "tbSymptomScreen",
   "emergencyContact",
-  "i9Form",
   "w4Form",
   "w9Form",
   "directDeposit",
@@ -48,17 +47,22 @@ const DirectDepositForm = () => {
   const [totalForms, setTotalForms] = useState(20); // default to 20
   const baseURL = import.meta.env.VITE__BASEURL;
 
-  const shouldCountForm = (formKey) => {
-    if (employmentType === "W-2 Employee") {
+  const shouldCountForm = (formKey, empType) => {
+    if (!empType) return true; // Count all if no employment type selected
+
+    if (empType === "W-2") {
+      // For W-2 employees, W4 is required, W9 is optional
       return formKey !== "w9Form";
-    } else if (employmentType === "1099 Contractor") {
+    } else if (empType === "1099") {
+      // For 1099 contractors, W9 is required, W4 is optional
       return formKey !== "w4Form";
     }
-    return true; // default
+
+    return true; // Default to counting all
   };
 
   const [formData, setFormData] = useState({
-    companyName: "Care Smart LLC / 39 18167860",
+    companyName: "PACIFIC HEALTH SYSTEMS/18107168",
     employeeName: "",
     employeeNumber: "",
     accounts: [
@@ -156,16 +160,10 @@ const DirectDepositForm = () => {
           backendData.application?.completedForms || [];
         const completedSet = new Set(completedFormsArray);
 
-        // Calculate total forms based on employment type
-        let calculatedTotalForms = 20; // default
-        if (empType === "1099 Contractor") {
-          calculatedTotalForms = 20;
-        } else if (empType === "W-2 Employee") {
-          calculatedTotalForms = 20;
-        }
-        setTotalForms(calculatedTotalForms);
-
         const completedForms = FORM_KEYS.filter((key) => {
+          // Only count forms that should be counted based on employment type
+          if (!shouldCountForm(key, empType)) return false;
+
           const form = forms[key];
           return (
             form?.status === "submitted" ||
@@ -177,11 +175,14 @@ const DirectDepositForm = () => {
           );
         }).length;
 
-        const percentage = Math.round(
-          (completedForms / calculatedTotalForms) * 100
-        );
+        const totalForms = FORM_KEYS.filter((key) =>
+          shouldCountForm(key, empType)
+        ).length;
+
+        const percentage = Math.round((completedForms / totalForms) * 100);
         setOverallProgress(percentage);
         setCompletedFormsCount(completedForms);
+        setTotalForms(totalForms);
       }
     } catch (error) {
       console.error("Error initializing form:", error);
@@ -1461,11 +1462,25 @@ const DirectDepositForm = () => {
         <div className="flex flex-col sm:flex-row gap-4 sm:justify-between sm:items-center">
           <button
             type="button"
-            onClick={() => navigate("/employee/w9-form")}
+            onClick={() => {
+              // Navigate to previous form based on employment type
+              if (employmentType === "W-2") {
+                navigate("/employee/w4-form");
+              } else if (employmentType === "1099") {
+                navigate("/employee/w9-form");
+              } else {
+                // Fallback if no employment type selected
+                navigate("/employee/task-management");
+              }
+            }}
             className="w-full sm:w-auto px-6 sm:px-8 py-3 bg-gradient-to-r from-[#1F3A93] to-[#2748B4] text-white font-semibold rounded-xl hover:from-[#2748B4] hover:to-[#1F3A93] transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 text-sm sm:text-base"
           >
             <ArrowLeft className="w-4 h-4 inline mr-2" />
-            Previous Form
+            {employmentType === "W-2"
+              ? "Previous Form (W-4)"
+              : employmentType === "1099"
+              ? "Previous Form (W-9)"
+              : "Previous Form"}
           </button>
 
           <div className="w-full sm:w-auto flex justify-center">

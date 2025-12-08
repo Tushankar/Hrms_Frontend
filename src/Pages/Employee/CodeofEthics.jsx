@@ -27,7 +27,6 @@ const FORM_KEYS = [
   "backgroundCheck",
   "tbSymptomScreen",
   "emergencyContact",
-  "i9Form",
   "w4Form",
   "w9Form",
   "directDeposit",
@@ -630,11 +629,8 @@ export default function CodeOfEthics() {
                           hrFeedback[key].trim().length > 0
                       ));
 
-                  // Check if form is locked (submitted or completed, and no HR notes)
-                  const isLocked =
-                    (formStatus === "submitted" ||
-                      formStatus === "completed") &&
-                    !hasHrNotes;
+                  // Check if form is locked (submitted and no HR notes)
+                  const isLocked = formStatus === "submitted" && !hasHrNotes;
 
                   return (
                     <button
@@ -707,7 +703,7 @@ export default function CodeOfEthics() {
                       <span>
                         {isSaving
                           ? "Saving..."
-                          : isLocked
+                          : formStatus === "submitted" && isLocked
                           ? "Awaiting HR Feedback"
                           : "Save & Next"}
                       </span>

@@ -35,7 +35,6 @@ const FORM_KEYS = [
   "backgroundCheck",
   "tbSymptomScreen",
   "emergencyContact",
-  "i9Form",
   "w4Form",
   "w9Form",
   "directDeposit",
@@ -503,22 +502,37 @@ const NonCompleteAgreement = () => {
                         type="text"
                         value={formData.day}
                         onChange={(e) => handleChange("day", e.target.value)}
-                        className="border-0 border-b border-black w-8 text-center focus:outline-none focus:border-b-2 bg-transparent"
+                        className={`border-0 border-b w-8 text-center focus:outline-none focus:border-b-2 bg-transparent ${
+                          errors.day ? "border-red-500" : "border-black"
+                        }`}
                       />
+                      {errors.day && (
+                        <span className="text-red-500 text-xs ml-1">*</span>
+                      )}
                       <span className="mx-1">day of</span>
                       <input
                         type="text"
                         value={formData.month}
                         onChange={(e) => handleChange("month", e.target.value)}
-                        className="border-0 border-b border-black w-20 text-center focus:outline-none focus:border-b-2 bg-transparent"
+                        className={`border-0 border-b w-20 text-center focus:outline-none focus:border-b-2 bg-transparent ${
+                          errors.month ? "border-red-500" : "border-black"
+                        }`}
                       />
+                      {errors.month && (
+                        <span className="text-red-500 text-xs ml-1">*</span>
+                      )}
                       <span>,</span>
                       <input
                         type="text"
                         value={formData.year}
                         onChange={(e) => handleChange("year", e.target.value)}
-                        className="border-0 border-b border-black w-16 text-center mx-1 focus:outline-none focus:border-b-2 bg-transparent"
+                        className={`border-0 border-b w-16 text-center mx-1 focus:outline-none focus:border-b-2 bg-transparent ${
+                          errors.year ? "border-red-500" : "border-black"
+                        }`}
                       />
+                      {errors.year && (
+                        <span className="text-red-500 text-xs ml-1">*</span>
+                      )}
                       <span>(the "Effective Date")</span>
                     </div>
 
@@ -535,21 +549,37 @@ const NonCompleteAgreement = () => {
                         onChange={(e) =>
                           handleChange("employeeName", e.target.value)
                         }
-                        className="border-0 border-b border-black w-full sm:w-48 focus:outline-none focus:border-b-2 bg-transparent"
+                        className={`border-0 border-b w-full sm:w-48 focus:outline-none focus:border-b-2 bg-transparent ${
+                          errors.employeeName
+                            ? "border-red-500"
+                            : "border-black"
+                        }`}
                       />
+                      {errors.employeeName && (
+                        <span className="text-red-500 text-xs ml-1">*</span>
+                      )}
                       <span className="mx-0 sm:mx-2">
                         ("Employee"), residing at
                       </span>
                     </div>
 
-                    <input
-                      type="text"
-                      value={formData.employeeAddress}
-                      onChange={(e) =>
-                        handleChange("employeeAddress", e.target.value)
-                      }
-                      className="border-0 border-b border-black w-full focus:outline-none focus:border-b-2 bg-transparent"
-                    />
+                    <div>
+                      <input
+                        type="text"
+                        value={formData.employeeAddress}
+                        onChange={(e) =>
+                          handleChange("employeeAddress", e.target.value)
+                        }
+                        className={`border-0 border-b w-full focus:outline-none focus:border-b-2 bg-transparent ${
+                          errors.employeeAddress
+                            ? "border-red-500"
+                            : "border-black"
+                        }`}
+                      />
+                      {errors.employeeAddress && (
+                        <span className="text-red-500 text-xs ml-1">*</span>
+                      )}
+                    </div>
 
                     <div className="flex flex-col sm:flex-row items-start sm:items-baseline gap-1 sm:gap-0">
                       <span className="mr-0 sm:mr-2">
@@ -561,8 +591,15 @@ const NonCompleteAgreement = () => {
                         onChange={(e) =>
                           handleChange("employeePosition", e.target.value)
                         }
-                        className="border-0 border-b border-black w-full sm:w-40 focus:outline-none focus:border-b-2 bg-transparent"
+                        className={`border-0 border-b w-full sm:w-40 focus:outline-none focus:border-b-2 bg-transparent ${
+                          errors.employeePosition
+                            ? "border-red-500"
+                            : "border-black"
+                        }`}
                       />
+                      {errors.employeePosition && (
+                        <span className="text-red-500 text-xs ml-1">*</span>
+                      )}
                       <span>.</span>
                     </div>
 
@@ -941,21 +978,63 @@ const NonCompleteAgreement = () => {
                     <button
                       type="button"
                       onClick={async () => {
-                        // Validate signature and date
+                        // Validate all required fields
                         const newErrors = {};
+                        const missingFields = [];
+
+                        if (!formData.day || !formData.day.trim()) {
+                          newErrors.day = "Day is required.";
+                          missingFields.push("Day");
+                        }
+                        if (!formData.month || !formData.month.trim()) {
+                          newErrors.month = "Month is required.";
+                          missingFields.push("Month");
+                        }
+                        if (!formData.year || !formData.year.trim()) {
+                          newErrors.year = "Year is required.";
+                          missingFields.push("Year");
+                        }
+                        if (
+                          !formData.employeeName ||
+                          !formData.employeeName.trim()
+                        ) {
+                          newErrors.employeeName = "Employee name is required.";
+                          missingFields.push("Employee Name");
+                        }
+                        if (
+                          !formData.employeeAddress ||
+                          !formData.employeeAddress.trim()
+                        ) {
+                          newErrors.employeeAddress =
+                            "Employee address is required.";
+                          missingFields.push("Employee Address");
+                        }
+                        if (
+                          !formData.employeePosition ||
+                          !formData.employeePosition.trim()
+                        ) {
+                          newErrors.employeePosition =
+                            "Employee position is required.";
+                          missingFields.push("Employee Position");
+                        }
                         if (!employeeSignature || !employeeSignature.trim()) {
                           newErrors.signature =
                             "Digital signature is required.";
+                          missingFields.push("Digital Signature");
                         }
                         if (!signatureDate) {
-                          newErrors.date = "Date is required.";
+                          newErrors.date = "Date signed is required.";
+                          missingFields.push("Date Signed");
                         }
 
                         setErrors(newErrors);
                         if (Object.keys(newErrors).length > 0) {
                           toast.error(
-                            "Please provide your signature and date before proceeding."
+                            `Please fill in all required fields: ${missingFields.join(
+                              ", "
+                            )}`
                           );
+                          window.scrollTo({ top: 0, behavior: "smooth" });
                           return;
                         }
 

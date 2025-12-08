@@ -27,7 +27,6 @@ const FORM_KEYS = [
   "backgroundCheck",
   "tbSymptomScreen",
   "emergencyContact",
-  "i9Form",
   "w4Form",
   "w9Form",
   "directDeposit",
@@ -54,6 +53,9 @@ export default function ServiceDeliveryPolicies() {
     policy4: "",
     policy5: "",
   });
+  const [policyContent, setPolicyContent] = useState(null);
+  const [contentLoading, setContentLoading] = useState(false);
+  const [lastContentFetch, setLastContentFetch] = useState(null);
   const baseURL = import.meta.env.VITE__BASEURL;
 
   const shouldCountForm = (key, empType) => {
@@ -61,6 +63,14 @@ export default function ServiceDeliveryPolicies() {
     if (key === "w9Form") return empType === "1099";
     return true;
   };
+
+  // Auto-refresh policy content every 30 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetchPolicyContent();
+    }, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     fetchProgressData();
@@ -237,10 +247,42 @@ export default function ServiceDeliveryPolicies() {
     }
   };
 
+  // Fetch policy content from backend (admin-managed)
+  const fetchPolicyContent = async () => {
+    try {
+      setContentLoading(true);
+      console.log("Fetching policy content from backend...");
+
+      const response = await axios.get(
+        `${baseURL}/onboarding/get-service-delivery-policy-content`,
+        { withCredentials: true }
+      );
+
+      console.log("Policy content response:", response.data);
+
+      if (response.data?.content) {
+        console.log(
+          "Policy content updated with new data:",
+          response.data.content
+        );
+        setPolicyContent(response.data.content);
+        setLastContentFetch(new Date());
+      } else {
+        console.warn("No content in response, using previous data");
+      }
+    } catch (error) {
+      console.error("Error fetching policy content:", error);
+      toast.error("Failed to load latest policy content");
+    } finally {
+      setContentLoading(false);
+    }
+  };
+
   useEffect(() => {
     const init = async () => {
       await initializeForm();
       fetchProgressData();
+      await fetchPolicyContent();
     };
     init();
   }, []);
@@ -288,13 +330,33 @@ export default function ServiceDeliveryPolicies() {
         <HRFeedback hrFeedback={hrFeedback} formStatus={formStatus} />
 
         <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-4 sm:p-6 md:p-8">
-          <div className="text-center mb-6 sm:mb-8">
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">
-              Service Delivery Policy
-            </h1>
-            <p className="text-sm sm:text-base text-gray-600">
-              Review the Service Delivery Policy document
-            </p>
+          <div className="flex justify-between items-start sm:items-center gap-4 mb-6 sm:mb-8">
+            <div className="text-center flex-1">
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">
+                Service Delivery Policy
+              </h1>
+              <p className="text-sm sm:text-base text-gray-600">
+                Review the Service Delivery Policy document
+              </p>
+              {lastContentFetch && (
+                <p className="text-xs text-gray-500 mt-1">
+                  Updated: {lastContentFetch.toLocaleTimeString()}
+                </p>
+              )}
+            </div>
+            <button
+              onClick={() => {
+                console.log("Manual refresh clicked");
+                fetchPolicyContent();
+              }}
+              disabled={contentLoading}
+              className="flex-shrink-0 p-2 text-gray-500 hover:text-gray-700 disabled:opacity-50 hover:bg-gray-100 rounded-lg transition-colors"
+              title="Refresh to get latest policy content"
+            >
+              <RotateCcw
+                className={`w-5 h-5 ${contentLoading ? "animate-spin" : ""}`}
+              />
+            </button>
           </div>
 
           <div className="space-y-6">
@@ -328,169 +390,83 @@ export default function ServiceDeliveryPolicies() {
             {/* Content Section */}
             <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 sm:p-6">
               <div className="max-w-3xl w-full px-3 sm:px-6 md:px-12 py-4 sm:py-8">
-                {/* Header with Logo */}
+                {/* Logo - Use fetched or default */}
                 <div className="flex items-center justify-center mb-4 sm:mb-6">
                   <img
-                    src="https://www.pacifichealthsystems.net/wp-content/themes/pacifichealth/images/logo.png"
-                    alt="Pacific Health Systems Logo"
+                    src={
+                      policyContent?.logoUrl ||
+                      "https://www.pacifichealthsystems.net/wp-content/themes/pacifichealth/images/logo.png"
+                    }
+                    alt={policyContent?.companyName || "Pacific Health Systems"}
                     className="h-16 sm:h-20"
+                    onError={(e) => {
+                      e.target.src =
+                        "https://www.pacifichealthsystems.net/wp-content/themes/pacifichealth/images/logo.png";
+                    }}
                   />
                 </div>
 
+                {/* Company Name - Display fetched value */}
+                {policyContent?.companyName && (
+                  <div className="text-center mb-2 text-sm sm:text-base font-semibold text-gray-800">
+                    {policyContent.companyName}
+                  </div>
+                )}
+
                 {/* Title */}
                 <h1 className="text-center text-sm sm:text-base font-bold mb-4 sm:mb-6 underline">
-                  Service Delivery Policies
+                  {policyContent?.policyTitle || "Service Delivery Policies"}
                 </h1>
 
                 {/* Introduction Text */}
                 <div className="text-xs sm:text-[13px] leading-normal mb-4 sm:mb-6">
                   <p>
-                    At the Pacific Health Systems orientation forum, employees
-                    where told of the significances of rendering quality service
-                    to our clients. Please initial the following statements and
-                    sign below:
+                    {policyContent?.introductionText ||
+                      "At the Pacific Health Systems orientation forum, employees where told of the significances of rendering quality service to our clients. Please initial the following statements and sign below:"}
                   </p>
                 </div>
 
-                {/* Policy Statements */}
+                {/* Policy Statements - Dynamic from Backend */}
                 <div className="space-y-4 sm:space-y-6">
-                  {/* Statement 1 - Magenta highlight */}
-                  <div className="flex flex-col sm:flex-row items-start gap-2 sm:gap-3">
-                    <input
-                      type="text"
-                      value={policyInitials.policy1}
-                      onChange={(e) =>
-                        setPolicyInitials((prev) => ({
-                          ...prev,
-                          policy1: e.target.value,
-                        }))
-                      }
-                      className="w-16 mt-0 sm:mt-3 shrink-0 text-center text-xs sm:text-sm bg-transparent outline-none italic"
-                      placeholder="Initials"
-                      style={{ fontStyle: "italic" }}
-                    />
-                    <div className="text-xs sm:text-[13px] leading-normal">
-                      <span className="bg-[#E91E8C]">
-                        I am aware of the agency policy of NO "EXU Login, NO
-                        pay"
-                      </span>
-                      <span className="bg-[#E91E8C]">
-                        . I understand that I have to complete my hours detail
-                        for the previous Date within 6 days and payroll week by
-                        11:00am on Monday
-                      </span>
-                      <span className="bg-[#E91E8C]">
-                        {" "}
-                        of the Payroll week and send in the copies of the
-                        Progress Notes by email to{" "}
-                      </span>
-                      <span className="bg-[#9400D3] text-white">
-                        office@pacifichealthsystems.com
-                      </span>
-                      <span className="bg-[#E91E8C]">
-                        {" "}
-                        or by dropping them at the office.
-                      </span>
-                    </div>
-                  </div>
+                  {policyContent && policyContent.policyStatements
+                    ? Object.keys(policyContent.policyStatements).map((key) => {
+                        const policy = policyContent.policyStatements[key];
+                        const initialKey = key; // e.g., "policy1"
 
-                  {/* Statement 2 - Yellow highlight */}
-                  <div className="flex flex-col sm:flex-row items-start gap-2 sm:gap-3">
-                    <input
-                      type="text"
-                      value={policyInitials.policy2}
-                      onChange={(e) =>
-                        setPolicyInitials((prev) => ({
-                          ...prev,
-                          policy2: e.target.value,
-                        }))
-                      }
-                      className="w-16 mt-0 sm:mt-3 shrink-0 text-center text-xs sm:text-sm bg-transparent outline-none italic"
-                      placeholder="Initials"
-                      style={{ fontStyle: "italic" }}
-                    />
-                    <div className="text-xs sm:text-[13px] leading-normal">
-                      <span className="bg-yellow-300">
-                        I understand that NO CALL, NO SHOW results in immediate
-                        termination
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Statement 3 - Cyan highlight */}
-                  <div className="flex flex-col sm:flex-row items-start gap-2 sm:gap-3">
-                    <input
-                      type="text"
-                      value={policyInitials.policy3}
-                      onChange={(e) =>
-                        setPolicyInitials((prev) => ({
-                          ...prev,
-                          policy3: e.target.value,
-                        }))
-                      }
-                      className="w-16 mt-0 sm:mt-3 shrink-0 text-center text-xs sm:text-sm bg-transparent outline-none italic"
-                      placeholder="Initials"
-                      style={{ fontStyle: "italic" }}
-                    />
-                    <div className="text-xs sm:text-[13px] leading-normal">
-                      <span className="bg-cyan-400">
-                        Should there be a need to attend to non-business or
-                        family matters during my scheduled hours, I understand
-                        that{" "}
-                      </span>
-                      <span className="bg-cyan-400">
-                        I have to let the Administration or my supervisor know
-                        my intentions of my plans to be off-duty as early as
-                        possible
-                      </span>
-                      <span className="bg-cyan-400">.</span>
-                    </div>
-                  </div>
-
-                  {/* Statement 4 */}
-                  <div className="flex flex-col sm:flex-row items-start gap-2 sm:gap-3">
-                    <input
-                      type="text"
-                      value={policyInitials.policy4}
-                      onChange={(e) =>
-                        setPolicyInitials((prev) => ({
-                          ...prev,
-                          policy4: e.target.value,
-                        }))
-                      }
-                      className="w-16 mt-0 sm:mt-3 shrink-0 text-center text-xs sm:text-sm bg-transparent outline-none italic"
-                      placeholder="Initials"
-                      style={{ fontStyle: "italic" }}
-                    />
-                    <div className="text-xs sm:text-[13px] leading-normal">
-                      I understand that it is against agency policy to borrow
-                      money from my client or tell my client about my personal
-                      challenges.
-                    </div>
-                  </div>
-
-                  {/* Statement 5 */}
-                  <div className="flex flex-col sm:flex-row items-start gap-2 sm:gap-3">
-                    <input
-                      type="text"
-                      value={policyInitials.policy5}
-                      onChange={(e) =>
-                        setPolicyInitials((prev) => ({
-                          ...prev,
-                          policy5: e.target.value,
-                        }))
-                      }
-                      className="w-16 mt-0 sm:mt-3 shrink-0 text-center text-xs sm:text-sm bg-transparent outline-none italic"
-                      placeholder="Initials"
-                      style={{ fontStyle: "italic" }}
-                    />
-                    <div className="text-xs sm:text-[13px] leading-normal">
-                      I understand that services are performed at client's home
-                      and I must seek agency approval before driving the client
-                      on Doctor's appointments, grocery shopping, purchase
-                      medication etc.
-                    </div>
-                  </div>
+                        return (
+                          <div
+                            key={key}
+                            className="flex flex-col sm:flex-row items-start gap-2 sm:gap-3"
+                          >
+                            <input
+                              type="text"
+                              value={policyInitials[initialKey] || ""}
+                              onChange={(e) =>
+                                setPolicyInitials((prev) => ({
+                                  ...prev,
+                                  [initialKey]: e.target.value,
+                                }))
+                              }
+                              className={`w-16 mt-0 sm:mt-3 shrink-0 text-center text-xs sm:text-sm bg-transparent outline-none italic border-b-2 ${
+                                errors[initialKey]
+                                  ? "border-red-500"
+                                  : "border-gray-300"
+                              }`}
+                              placeholder="Initials"
+                              style={{ fontStyle: "italic" }}
+                            />
+                            <div className="text-xs sm:text-[13px] leading-normal">
+                              <span>{policy.text}</span>
+                            </div>
+                            {errors[initialKey] && (
+                              <p className="text-red-500 text-xs mt-1">
+                                {errors[initialKey]}
+                              </p>
+                            )}
+                          </div>
+                        );
+                      })
+                    : null}
                 </div>
 
                 {/* Signature Section */}
@@ -643,17 +619,14 @@ export default function ServiceDeliveryPolicies() {
                           hrFeedback[key].trim().length > 0
                       ));
 
-                  // Check if form is locked (submitted or completed, and no HR notes)
-                  const isLocked =
-                    (formStatus === "submitted" ||
-                      formStatus === "completed") &&
-                    !hasHrNotes;
+                  // Check if form is locked (submitted and no HR notes)
+                  const isLocked = formStatus === "submitted" && !hasHrNotes;
 
                   return (
                     <button
                       type="button"
                       onClick={async () => {
-                        // Validate signature and date
+                        // Validate signature, date, and initials
                         const newErrors = {};
                         if (!employeeSignature || !employeeSignature.trim()) {
                           newErrors.signature =
@@ -663,10 +636,42 @@ export default function ServiceDeliveryPolicies() {
                           newErrors.date = "Date is required.";
                         }
 
+                        // Check all policy initials are filled
+                        if (
+                          !policyInitials.policy1 ||
+                          !policyInitials.policy1.trim()
+                        ) {
+                          newErrors.policy1 = "Initials required for Policy 1";
+                        }
+                        if (
+                          !policyInitials.policy2 ||
+                          !policyInitials.policy2.trim()
+                        ) {
+                          newErrors.policy2 = "Initials required for Policy 2";
+                        }
+                        if (
+                          !policyInitials.policy3 ||
+                          !policyInitials.policy3.trim()
+                        ) {
+                          newErrors.policy3 = "Initials required for Policy 3";
+                        }
+                        if (
+                          !policyInitials.policy4 ||
+                          !policyInitials.policy4.trim()
+                        ) {
+                          newErrors.policy4 = "Initials required for Policy 4";
+                        }
+                        if (
+                          !policyInitials.policy5 ||
+                          !policyInitials.policy5.trim()
+                        ) {
+                          newErrors.policy5 = "Initials required for Policy 5";
+                        }
+
                         setErrors(newErrors);
                         if (Object.keys(newErrors).length > 0) {
                           toast.error(
-                            "Please provide your signature and date before proceeding."
+                            "Please initial all policies and provide your signature and date before proceeding."
                           );
                           return;
                         }
@@ -740,7 +745,7 @@ export default function ServiceDeliveryPolicies() {
                       <span>
                         {isSaving
                           ? "Saving..."
-                          : isLocked
+                          : formStatus === "submitted" && isLocked
                           ? "Awaiting HR Feedback"
                           : "Save & Next"}
                       </span>

@@ -26,7 +26,6 @@ const FORM_KEYS = [
   "backgroundCheck",
   "tbSymptomScreen",
   "emergencyContact",
-  "i9Form",
   "w4Form",
   "w9Form",
   "directDeposit",
@@ -63,13 +62,18 @@ const OrientationChecklist = () => {
   const baseURL =
     import.meta.env.VITE__BASEURL || "https://api-hrms-backend.kyptronix.us";
 
-  const shouldCountForm = (formKey) => {
-    if (employmentType === "W-2 Employee") {
+  const shouldCountForm = (formKey, empType) => {
+    if (!empType) return true; // Count all if no employment type selected
+
+    if (empType === "W-2") {
+      // For W-2 employees, W4 is required, W9 is optional
       return formKey !== "w9Form";
-    } else if (employmentType === "1099 Contractor") {
+    } else if (empType === "1099") {
+      // For 1099 contractors, W9 is required, W4 is optional
       return formKey !== "w4Form";
     }
-    return true; // default
+
+    return true; // Default to counting all
   };
 
   useEffect(() => {
@@ -114,16 +118,15 @@ const OrientationChecklist = () => {
         const empType = response.data.data.application.employmentType;
         setEmploymentType(empType);
 
-        // Calculate total forms based on employment type
-        let calculatedTotalForms = 20; // default
-        if (empType === "1099 Contractor") {
-          calculatedTotalForms = 20;
-        } else if (empType === "W-2 Employee") {
-          calculatedTotalForms = 20;
-        }
-        setTotalForms(calculatedTotalForms);
+        const totalForms = FORM_KEYS.filter((key) =>
+          shouldCountForm(key, empType)
+        ).length;
+        setTotalForms(totalForms);
 
         const completedForms = FORM_KEYS.filter((key) => {
+          // Only count forms that should be counted based on employment type
+          if (!shouldCountForm(key, empType)) return false;
+
           let form = forms[key];
           if (key === "jobDescriptionPCA") {
             form =
@@ -133,15 +136,16 @@ const OrientationChecklist = () => {
               forms.jobDescriptionRN;
           }
           return (
-            ["submitted", "completed", "under_review", "approved"].includes(
-              form?.status
-            ) ||
+            form?.status === "submitted" ||
+            form?.status === "completed" ||
+            form?.status === "under_review" ||
+            form?.status === "approved" ||
             (key === "employmentType" && empType)
           );
         }).length;
 
         const progressPercentage = Math.round(
-          (completedForms / calculatedTotalForms) * 100
+          (completedForms / totalForms) * 100
         );
         setOverallProgress(progressPercentage);
         setCompletedFormsCount(completedForms);

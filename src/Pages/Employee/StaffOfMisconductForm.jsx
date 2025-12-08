@@ -34,7 +34,6 @@ const FORM_KEYS = [
   "backgroundCheck",
   "tbSymptomScreen",
   "emergencyContact",
-  "i9Form",
   "w4Form",
   "w9Form",
   "directDeposit",
@@ -1188,7 +1187,7 @@ const StaffOfMisconductForm = () => {
               <div className="flex flex-col sm:flex-row gap-4 sm:justify-between sm:items-center">
                 <button
                   type="button"
-                  onClick={() => navigate("/employee/non-compete-agreement")}
+                  onClick={() => navigate("/employee/background-check-upload")}
                   className="w-full sm:w-auto px-6 sm:px-8 py-3 bg-gradient-to-r from-[#1F3A93] to-[#2748B4] text-white font-semibold rounded-xl hover:from-[#2748B4] hover:to-[#1F3A93] transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 text-sm sm:text-base"
                 >
                   <ArrowLeft className="w-4 h-4 inline mr-2" />

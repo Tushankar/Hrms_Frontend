@@ -74,7 +74,7 @@ const TBSymptomScreenHR = () => {
       );
 
       const response = await axios.get(
-        `${baseURL}/onboarding/tb-symptom-screen/get-tb-uploaded-documents/${applicationId}/tbSymptomScreen`,
+        `${baseURL}/onboarding/get-tb-uploaded-documents/${applicationId}/tbSymptomScreen`,
         {
           withCredentials: true,
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
@@ -109,23 +109,42 @@ const TBSymptomScreenHR = () => {
 
   const handleDownload = async (doc) => {
     try {
-      const fileUrl = doc.filePath.startsWith("http")
-        ? doc.filePath
-        : `${baseURL}/${doc.filePath}`;
+      // Check if we have an applicationId to use the new download endpoint
+      const appId =
+        new URLSearchParams(window.location.search).get("appId") || employeeId;
 
-      const response = await axios.get(fileUrl, {
-        responseType: "blob",
-        withCredentials: true,
-      });
+      if (doc._id && appId && appId !== employeeId) {
+        // Use new download endpoint with fileId
+        const downloadUrl = `${baseURL}/onboarding/download-tb-document/${appId}/${doc._id}`;
+        const link = document.createElement("a");
+        link.href = downloadUrl;
+        link.download = doc.originalName || doc.filename || "document";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } else {
+        // Fallback to direct file download
+        const fileUrl = doc.filePath.startsWith("http")
+          ? doc.filePath
+          : `${baseURL}/${doc.filePath}`;
 
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement("a");
-      link.href = url;
-      link.setAttribute("download", doc.filename || "document");
-      document.body.appendChild(link);
-      link.click();
-      link.parentNode.removeChild(link);
-      window.URL.revokeObjectURL(url);
+        const response = await axios.get(fileUrl, {
+          responseType: "blob",
+          withCredentials: true,
+        });
+
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement("a");
+        link.href = url;
+        link.setAttribute(
+          "download",
+          doc.originalName || doc.filename || "document"
+        );
+        document.body.appendChild(link);
+        link.click();
+        link.parentNode.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      }
     } catch (error) {
       console.error("Error downloading document:", error);
       toast.error("Failed to download document");
@@ -190,7 +209,7 @@ const TBSymptomScreenHR = () => {
           {uploadedDocuments.length > 0 && (
             <div className="mb-8">
               <h2 className="text-2xl font-bold text-gray-800 mb-4">
-                Submitted Documents
+                Submitted Documents ({uploadedDocuments.length})
               </h2>
               <div className="space-y-3">
                 {uploadedDocuments.map((doc, index) => (
@@ -199,13 +218,13 @@ const TBSymptomScreenHR = () => {
                     className="bg-blue-50 border border-blue-200 rounded-lg p-4"
                   >
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-3 flex-1">
                         <File className="w-6 h-6 text-blue-600 flex-shrink-0" />
-                        <div className="flex-1">
-                          <h3 className="font-medium text-gray-800">
-                            {doc.filename}
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-medium text-gray-800 truncate">
+                            {doc.originalName || doc.filename}
                           </h3>
-                          <div className="flex gap-3 text-xs text-gray-600 mt-1">
+                          <div className="flex gap-3 text-xs text-gray-600 mt-1 flex-wrap">
                             {doc.fileSize && (
                               <span>
                                 {(doc.fileSize / 1024 / 1024).toFixed(2)} MB
@@ -220,7 +239,7 @@ const TBSymptomScreenHR = () => {
                           </div>
                         </div>
                       </div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 flex-shrink-0">
                         <a
                           href={
                             doc.fullUrl ||
@@ -230,14 +249,14 @@ const TBSymptomScreenHR = () => {
                           }
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                          className="inline-flex items-center gap-1 px-3 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap"
                         >
                           <Eye className="w-4 h-4" />
                           View
                         </a>
                         <button
                           onClick={() => handleDownload(doc)}
-                          className="inline-flex items-center gap-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                          className="inline-flex items-center gap-1 px-3 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 transition-colors whitespace-nowrap"
                         >
                           <Download className="w-4 h-4" />
                           Download
