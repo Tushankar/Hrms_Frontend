@@ -28,7 +28,7 @@ const HRFeedback = ({ hrFeedback, formStatus }) => {
           iconColor: 'text-red-400',
           titleColor: 'text-red-800',
           textColor: 'text-red-700',
-          dateColor: 'text-red-600'
+          dateColor: 'text-red-500'
         };
       case 'under_review':
         return {
