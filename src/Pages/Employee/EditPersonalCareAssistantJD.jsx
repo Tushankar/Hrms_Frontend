@@ -76,7 +76,7 @@ const EditPersonalCareAssistantJD = () => {
           .map(function (c) {
             return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
           })
-          .join("")
+          .join(""),
       );
 
       const decoded = JSON.parse(jsonPayload);
@@ -118,7 +118,7 @@ const EditPersonalCareAssistantJD = () => {
         try {
           const response = await axios.get(
             `${baseURL}/onboarding/get-job-description/${taskId}/PCA`,
-            { withCredentials: true }
+            { withCredentials: true },
           );
 
           if (
@@ -165,7 +165,7 @@ const EditPersonalCareAssistantJD = () => {
             setFormData(transformedData);
             console.log(
               "Loaded existing PCA Job Description form:",
-              transformedData
+              transformedData,
             );
           }
         } catch (error) {
@@ -200,7 +200,7 @@ const EditPersonalCareAssistantJD = () => {
   }, [taskId]);
 
   const baseURL =
-    import.meta.env.VITE__BASEURL || "https://api-hrms-backend.kyptronix.us";
+    import.meta.env.VITE__BASEURL || "https://api.carecompapp.com";
 
   const fetchProgressData = async () => {
     try {
@@ -211,7 +211,7 @@ const EditPersonalCareAssistantJD = () => {
 
       const response = await axios.get(
         `${baseURL}/onboarding/get-application/${user._id}`,
-        { withCredentials: true }
+        { withCredentials: true },
       );
 
       if (response.data?.data?.application) {
@@ -263,7 +263,7 @@ const EditPersonalCareAssistantJD = () => {
 
         const totalForms = 25;
         const progressPercentage = Math.round(
-          (completedForms / totalForms) * 100
+          (completedForms / totalForms) * 100,
         );
         setOverallProgress(progressPercentage);
       }
@@ -341,7 +341,7 @@ const EditPersonalCareAssistantJD = () => {
       const response = await axios.post(
         `${baseURL}/onboarding/save-job-description`,
         submissionData,
-        { withCredentials: true }
+        { withCredentials: true },
       );
 
       if (response.data && response.data.success) {
@@ -359,7 +359,7 @@ const EditPersonalCareAssistantJD = () => {
               },
               duration: 4000,
               icon: "✅",
-            }
+            },
           );
         } else {
           toast.success(
@@ -375,14 +375,14 @@ const EditPersonalCareAssistantJD = () => {
               },
               duration: 3000,
               icon: "💾",
-            }
+            },
           );
         }
 
         // Continue onboarding: navigate to Edit CNA form for the same application
         setTimeout(() => {
           navigate(
-            `/employee/edit-cna-form/${applicationId || taskId || "new"}`
+            `/employee/edit-cna-form/${applicationId || taskId || "new"}`,
           );
         }, 2000);
       }
@@ -705,7 +705,7 @@ const EditPersonalCareAssistantJD = () => {
                           onChange={(e) =>
                             handleAcknowledgmentChange(
                               "hasReadJobDescription",
-                              e.target.checked
+                              e.target.checked,
                             )
                           }
                           className="mt-1 w-4 h-4 text-[#1F3A93] bg-gray-100 border-gray-300 rounded focus:ring-[#1F3A93] focus:ring-2"
@@ -725,7 +725,7 @@ const EditPersonalCareAssistantJD = () => {
                           onChange={(e) =>
                             handleAcknowledgmentChange(
                               "understandsResponsibilities",
-                              e.target.checked
+                              e.target.checked,
                             )
                           }
                           className="mt-1 w-4 h-4 text-[#1F3A93] bg-gray-100 border-gray-300 rounded focus:ring-[#1F3A93] focus:ring-2"
@@ -745,7 +745,7 @@ const EditPersonalCareAssistantJD = () => {
                           onChange={(e) =>
                             handleAcknowledgmentChange(
                               "agreesToPerformDuties",
-                              e.target.checked
+                              e.target.checked,
                             )
                           }
                           className="mt-1 w-4 h-4 text-[#1F3A93] bg-gray-100 border-gray-300 rounded focus:ring-[#1F3A93] focus:ring-2"
@@ -765,7 +765,7 @@ const EditPersonalCareAssistantJD = () => {
                           onChange={(e) =>
                             handleAcknowledgmentChange(
                               "acknowledgesQualifications",
-                              e.target.checked
+                              e.target.checked,
                             )
                           }
                           className="mt-1 w-4 h-4 text-[#1F3A93] bg-gray-100 border-gray-300 rounded focus:ring-[#1F3A93] focus:ring-2"
@@ -786,7 +786,7 @@ const EditPersonalCareAssistantJD = () => {
                           onChange={(e) =>
                             handleAcknowledgmentChange(
                               "understandsReportingStructure",
-                              e.target.checked
+                              e.target.checked,
                             )
                           }
                           className="mt-1 w-4 h-4 text-[#1F3A93] bg-gray-100 border-gray-300 rounded focus:ring-[#1F3A93] focus:ring-2"
@@ -839,7 +839,7 @@ const EditPersonalCareAssistantJD = () => {
                             onChange={(e) =>
                               handleInputChange(
                                 "staffSignature.signature",
-                                e.target.value
+                                e.target.value,
                               )
                             }
                             className="w-full border border-gray-300 rounded-md px-3 py-2 focus:border-[#1F3A93] focus:outline-none focus:ring-1 focus:ring-[#1F3A93] transition-colors duration-200"
@@ -877,7 +877,7 @@ const EditPersonalCareAssistantJD = () => {
                             onChange={(e) =>
                               handleInputChange(
                                 "supervisorSignature.supervisorName",
-                                e.target.value
+                                e.target.value,
                               )
                             }
                             className="w-full border border-gray-300 rounded-md px-3 py-2 focus:border-[#1F3A93] focus:outline-none focus:ring-1 focus:ring-[#1F3A93] transition-colors duration-200"
@@ -894,7 +894,7 @@ const EditPersonalCareAssistantJD = () => {
                             onChange={(e) =>
                               handleInputChange(
                                 "supervisorSignature.supervisorTitle",
-                                e.target.value
+                                e.target.value,
                               )
                             }
                             className="w-full border border-gray-300 rounded-md px-3 py-2 focus:border-[#1F3A93] focus:outline-none focus:ring-1 focus:ring-[#1F3A93] transition-colors duration-200"
@@ -911,7 +911,7 @@ const EditPersonalCareAssistantJD = () => {
                             onChange={(e) =>
                               handleInputChange(
                                 "supervisorSignature.signature",
-                                e.target.value
+                                e.target.value,
                               )
                             }
                             className="w-full border border-gray-300 rounded-md px-3 py-2 focus:border-[#1F3A93] focus:outline-none focus:ring-1 focus:ring-[#1F3A93] transition-colors duration-200"
@@ -928,7 +928,7 @@ const EditPersonalCareAssistantJD = () => {
                               onChange={(date) =>
                                 handleInputChange(
                                   "supervisorSignature.date",
-                                  date
+                                  date,
                                 )
                               }
                               placeholderText="Select date"
@@ -1000,7 +1000,7 @@ const EditPersonalCareAssistantJD = () => {
                             e.preventDefault();
                             const targetId = taskId || "new";
                             navigate(
-                              `/employee/edit-orientation-checklist/${targetId}`
+                              `/employee/edit-orientation-checklist/${targetId}`,
                             );
                           }}
                           className="inline-flex items-center px-4 py-3 bg-gradient-to-r from-[#1F3A93] to-[#2748B4] text-white font-semibold rounded-xl hover:from-[#16306e] hover:to-[#1F3A93] focus:ring-2 focus:ring-[#1F3A93]/20 transition-all duration-300 shadow-md hover:shadow-lg text-sm sm:text-base"

@@ -60,7 +60,7 @@ const OrientationChecklist = () => {
   const [completedFormsCount, setCompletedFormsCount] = useState(0);
 
   const baseURL =
-    import.meta.env.VITE__BASEURL || "https://api-hrms-backend.kyptronix.us";
+    import.meta.env.VITE__BASEURL || "https://api.carecompapp.com";
 
   const shouldCountForm = (formKey, empType) => {
     if (!empType) return true; // Count all if no employment type selected
@@ -109,7 +109,7 @@ const OrientationChecklist = () => {
 
       const response = await axios.get(
         `${baseURL}/onboarding/get-application/${user._id}`,
-        { withCredentials: true }
+        { withCredentials: true },
       );
 
       if (response.data?.data?.application) {
@@ -119,7 +119,7 @@ const OrientationChecklist = () => {
         setEmploymentType(empType);
 
         const totalForms = FORM_KEYS.filter((key) =>
-          shouldCountForm(key, empType)
+          shouldCountForm(key, empType),
         ).length;
         setTotalForms(totalForms);
 
@@ -145,7 +145,7 @@ const OrientationChecklist = () => {
         }).length;
 
         const progressPercentage = Math.round(
-          (completedForms / totalForms) * 100
+          (completedForms / totalForms) * 100,
         );
         setOverallProgress(progressPercentage);
         setCompletedFormsCount(completedForms);
@@ -177,7 +177,7 @@ const OrientationChecklist = () => {
         {
           headers,
           withCredentials: true,
-        }
+        },
       );
 
       if (
@@ -268,7 +268,7 @@ const OrientationChecklist = () => {
       const response = await axios.post(
         `${baseURL}/onboarding/save-orientation-checklist`,
         submissionData,
-        { headers, withCredentials: true }
+        { headers, withCredentials: true },
       );
 
       if (response.data) {
@@ -336,8 +336,8 @@ const OrientationChecklist = () => {
     if (missingFields.length > 0) {
       toast.error(
         `Please fill in the following required fields: ${missingFields.join(
-          ", "
-        )}`
+          ", ",
+        )}`,
       );
       window.scrollTo({ top: 0, behavior: "smooth" });
       // Explicitly prevent form submission when validation fails
@@ -614,7 +614,7 @@ const OrientationChecklist = () => {
                                   const newSignature = e.target.value;
                                   handleInputChange(
                                     "applicantSignature",
-                                    newSignature
+                                    newSignature,
                                   );
                                 }}
                                 placeholder="Type your full name as signature"
@@ -646,7 +646,7 @@ const OrientationChecklist = () => {
                                 onChange={(e) =>
                                   handleInputChange(
                                     "signatureDate",
-                                    e.target.value
+                                    e.target.value,
                                   )
                                 }
                                 className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"

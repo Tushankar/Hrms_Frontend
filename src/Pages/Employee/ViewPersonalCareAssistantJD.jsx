@@ -25,8 +25,8 @@ const ViewPersonalCareAssistantJD = () => {
       try {
         setLoading(true);
         const response = await axios.get(
-          `https://api-hrms-backend.kyptronix.us/onboarding/get-job-description/${taskId}/PCA`,
-          { withCredentials: true }
+          `https://api.carecompapp.com/onboarding/get-job-description/${taskId}/PCA`,
+          { withCredentials: true },
         );
 
         if (response.data && response.data.data) {
@@ -181,7 +181,7 @@ const ViewPersonalCareAssistantJD = () => {
                   <div className="p-3 bg-gray-50 rounded-lg border">
                     {formData.employeeInfo.startDate
                       ? new Date(
-                          formData.employeeInfo.startDate
+                          formData.employeeInfo.startDate,
                         ).toLocaleDateString()
                       : "Not provided"}
                   </div>
@@ -317,7 +317,7 @@ const ViewPersonalCareAssistantJD = () => {
                       <Calendar className="w-4 h-4 text-gray-500 mr-2" />
                       {formData.staffSignature?.date
                         ? new Date(
-                            formData.staffSignature.date
+                            formData.staffSignature.date,
                           ).toLocaleDateString()
                         : "Not provided"}
                     </div>
@@ -347,7 +347,7 @@ const ViewPersonalCareAssistantJD = () => {
                       <Calendar className="w-4 h-4 text-gray-500 mr-2" />
                       {formData.supervisorSignature?.date
                         ? new Date(
-                            formData.supervisorSignature.date
+                            formData.supervisorSignature.date,
                           ).toLocaleDateString()
                         : "Not provided"}
                     </div>

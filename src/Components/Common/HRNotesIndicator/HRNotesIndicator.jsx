@@ -19,7 +19,7 @@ const HRNotesIndicator = ({
 
   // Get base URL from environment variable
   const baseURL =
-    import.meta.env.VITE__BASEURL || "https://api-hrms-backend.kyptronix.us";
+    import.meta.env.VITE__BASEURL || "https://api.carecompapp.com";
   console.log("--------------------------", hrFeedback);
   // Don't show indicator if there's no HR feedback content at all (neither text nor signatures)
   const hasAnyFeedback = !!(
@@ -178,7 +178,7 @@ const HRNotesIndicator = ({
       const rel = s.substring(
         uploadsIdx - 1 >= 0 && s[uploadsIdx - 1] === "/"
           ? uploadsIdx - 1
-          : uploadsIdx
+          : uploadsIdx,
       );
       const relPath = rel.startsWith("/") ? rel : `/${rel}`;
       if (relPath.startsWith("/uploads/signatures/")) {
@@ -209,7 +209,7 @@ const HRNotesIndicator = ({
   console.log("HRNotesIndicator - hrFeedback object:", hrFeedback);
   console.log(
     "HRNotesIndicator - supervisorSignature prop:",
-    supervisorSignature
+    supervisorSignature,
   );
   console.log("HRNotesIndicator - Raw agency signature:", rawAgencySignature);
   console.log("HRNotesIndicator - Type:", typeof rawAgencySignature);
@@ -219,7 +219,7 @@ const HRNotesIndicator = ({
 
   console.log(
     "HRNotesIndicator - Final agency signature URL:",
-    agencySignature
+    agencySignature,
   );
   // Optional client signature (for TB Symptom Screen)
   const rawClientSignature = hrFeedback.clientSignature || null;
@@ -389,21 +389,21 @@ const HRNotesIndicator = ({
                           crossOrigin="anonymous"
                           onLoad={() => {
                             console.log(
-                              "✅ HRNotesIndicator - Signature image loaded successfully"
+                              "✅ HRNotesIndicator - Signature image loaded successfully",
                             );
                             console.log(
                               "✅ HRNotesIndicator - Image src:",
-                              agencySignature
+                              agencySignature,
                             );
                           }}
                           onError={(e) => {
                             console.error(
                               "❌ HRNotesIndicator - Signature image failed to load:",
-                              e.target.src
+                              e.target.src,
                             );
                             console.error(
                               "❌ HRNotesIndicator - Error event:",
-                              e
+                              e,
                             );
                             handleImgError(e);
                           }}

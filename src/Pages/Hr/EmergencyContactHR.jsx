@@ -16,7 +16,7 @@ const EmergencyContactHR = () => {
   const [existingFeedback, setExistingFeedback] = useState(null);
 
   const baseURL =
-    import.meta.env.VITE__BASEURL || "https://api-hrms-backend.kyptronix.us";
+    import.meta.env.VITE__BASEURL || "https://api.carecompapp.com";
 
   useEffect(() => {
     if (employeeId) {
@@ -53,7 +53,7 @@ const EmergencyContactHR = () => {
         } else {
           console.error(
             "No emergency contact data received:",
-            response.data?.message || "No data in response"
+            response.data?.message || "No data in response",
           );
           toast.error("No emergency contact data found for this user");
         }
@@ -65,7 +65,7 @@ const EmergencyContactHR = () => {
         toast.error(
           `Failed to load emergency contact data: ${
             error.response.data?.message || error.response.statusText
-          }`
+          }`,
         );
       } else if (error.request) {
         console.error("Network error:", error.request);
@@ -105,7 +105,7 @@ const EmergencyContactHR = () => {
         },
         {
           withCredentials: true,
-        }
+        },
       );
 
       console.log("Send notes response:", response.data);
@@ -128,7 +128,7 @@ const EmergencyContactHR = () => {
         toast.error(
           `Failed to send notes: ${
             error.response.data?.message || error.response.statusText
-          }`
+          }`,
         );
       } else if (error.request) {
         console.error("Network error:", error.request);
@@ -358,8 +358,8 @@ const EmergencyContactHR = () => {
                           emergencyContactData.status === "submitted"
                             ? "bg-green-100 text-green-800"
                             : emergencyContactData.status === "draft"
-                            ? "bg-yellow-100 text-yellow-800"
-                            : "bg-gray-100 text-gray-800"
+                              ? "bg-yellow-100 text-yellow-800"
+                              : "bg-gray-100 text-gray-800"
                         }`}
                       >
                         {emergencyContactData.status || "Unknown"}
@@ -373,7 +373,7 @@ const EmergencyContactHR = () => {
                     <p className="text-gray-800 font-semibold mt-1">
                       {emergencyContactData.createdAt
                         ? new Date(
-                            emergencyContactData.createdAt
+                            emergencyContactData.createdAt,
                           ).toLocaleDateString()
                         : "N/A"}
                     </p>
@@ -422,7 +422,7 @@ const EmergencyContactHR = () => {
                         <span className="ml-4">
                           Date:{" "}
                           {new Date(
-                            existingFeedback.reviewedAt
+                            existingFeedback.reviewedAt,
                           ).toLocaleDateString()}
                         </span>
                       )}

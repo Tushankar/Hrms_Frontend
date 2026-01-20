@@ -75,7 +75,7 @@ const EditBackgroundFormCheckResults = () => {
 
   // Configure axios
   const baseURL =
-    import.meta.env.VITE__BASEURL || "https://api-hrms-backend.kyptronix.us";
+    import.meta.env.VITE__BASEURL || "https://api.carecompapp.com";
   const api = axios.create({
     baseURL: baseURL,
     withCredentials: true,
@@ -102,7 +102,7 @@ const EditBackgroundFormCheckResults = () => {
 
       const response = await axios.get(
         `${baseURL}/onboarding/get-application/${user._id}`,
-        { withCredentials: true }
+        { withCredentials: true },
       );
 
       if (response.data?.data?.application) {
@@ -161,7 +161,7 @@ const EditBackgroundFormCheckResults = () => {
 
         // const totalForms = 25; // using state now
         const progressPercentage = Math.round(
-          (completedForms / filteredKeys.length) * 100
+          (completedForms / filteredKeys.length) * 100,
         );
         setOverallProgress(progressPercentage);
       }
@@ -206,7 +206,7 @@ const EditBackgroundFormCheckResults = () => {
         setUserId(currentUserId);
 
         const appResponse = await api.get(
-          `/onboarding/get-application/${currentUserId}`
+          `/onboarding/get-application/${currentUserId}`,
         );
         targetApplicationId = appResponse.data?.data?.application?._id;
 
@@ -230,25 +230,25 @@ const EditBackgroundFormCheckResults = () => {
       // 1. Fetch Background Check data (if it exists)
       try {
         const bgResponse = await api.get(
-          `/onboarding/get-background-check/${targetApplicationId}`
+          `/onboarding/get-background-check/${targetApplicationId}`,
         );
         if (bgResponse.data?.backgroundCheck) {
           backgroundData = bgResponse.data.backgroundCheck;
           console.log(
             "🟢 Found existing Background Check data:",
-            backgroundData
+            backgroundData,
           );
         }
       } catch (error) {
         console.log(
-          "📝 No existing Background Check data found. Will rely on Personal Info data."
+          "📝 No existing Background Check data found. Will rely on Personal Info data.",
         );
       }
 
       // 2. Fetch Personal Information data (where name, SSN, DOB, address are stored)
       try {
         const personalResponse = await api.get(
-          `/onboarding/get-personal-information/${targetApplicationId}`
+          `/onboarding/get-personal-information/${targetApplicationId}`,
         );
         if (personalResponse.data?.personalInformation) {
           personalInfoData = personalResponse.data.personalInformation;
@@ -257,7 +257,7 @@ const EditBackgroundFormCheckResults = () => {
       } catch (error) {
         console.error(
           "🔴 Critical Error: Could not load Personal Information data.",
-          error
+          error,
         );
         toast.error("Failed to load required personal information.");
       }
@@ -332,7 +332,7 @@ const EditBackgroundFormCheckResults = () => {
       // Ensure we have a valid application ID
       if (!applicationId) {
         toast.error(
-          "No application ID available. Please refresh the page and try again."
+          "No application ID available. Please refresh the page and try again.",
         );
         return false;
       }
@@ -340,7 +340,7 @@ const EditBackgroundFormCheckResults = () => {
       // Ensure we have a valid user ID
       if (!userId) {
         toast.error(
-          "No user ID available. Please refresh the page and try again."
+          "No user ID available. Please refresh the page and try again.",
         );
         return false;
       }
@@ -412,7 +412,7 @@ const EditBackgroundFormCheckResults = () => {
 
       const response = await api.post(
         "/onboarding/save-background-check",
-        payload
+        payload,
       );
 
       console.log("🟢 Save response received:", response);
@@ -423,7 +423,7 @@ const EditBackgroundFormCheckResults = () => {
         toast.success(
           `Background check form ${
             status === "completed" ? "submitted" : "saved"
-          } successfully!`
+          } successfully!`,
         );
         return true;
       }
@@ -484,25 +484,25 @@ const EditBackgroundFormCheckResults = () => {
       "lastName:",
       formData.lastName,
       "- trimmed:",
-      formData.lastName?.trim()
+      formData.lastName?.trim(),
     );
     console.log(
       "firstName:",
       formData.firstName,
       "- trimmed:",
-      formData.firstName?.trim()
+      formData.firstName?.trim(),
     );
     console.log(
       "socialSecurityNo:",
       formData.socialSecurityNo,
       "- trimmed:",
-      formData.socialSecurityNo?.trim()
+      formData.socialSecurityNo?.trim(),
     );
     console.log(
       "signature:",
       formData.signature,
       "- trimmed:",
-      formData.signature?.trim()
+      formData.signature?.trim(),
     );
 
     // Validate required fields
@@ -543,12 +543,12 @@ const EditBackgroundFormCheckResults = () => {
     if (missingFields.length > 0) {
       toast.error(
         `Please fill in all required fields! Missing: ${missingFields.join(
-          ", "
+          ", ",
         )}`,
         {
           duration: 4000,
           position: "top-right",
-        }
+        },
       );
       // Force signature validation for debugging
       if (missingFields.includes("signature")) {
@@ -780,7 +780,7 @@ const EditBackgroundFormCheckResults = () => {
                               onChange={(e) =>
                                 handleInputChange(
                                   "middleInitial",
-                                  e.target.value
+                                  e.target.value,
                                 )
                               }
                               readOnly={isHRView}
@@ -807,7 +807,7 @@ const EditBackgroundFormCheckResults = () => {
                               onChange={(e) =>
                                 handleInputChange(
                                   "socialSecurityNo",
-                                  e.target.value
+                                  e.target.value,
                                 )
                               }
                               readOnly={isHRView}
@@ -963,7 +963,7 @@ const EditBackgroundFormCheckResults = () => {
                               onChange={(e) =>
                                 handleInputChange(
                                   "streetAddress",
-                                  e.target.value
+                                  e.target.value,
                                 )
                               }
                               className="w-full h-10 sm:h-12 md:h-14 px-3 sm:px-4 border-2 rounded-xl border-gray-300 focus:border-[#1F3A93] focus:ring-2 focus:ring-[#1F3A93]/20 focus:outline-none bg-white text-gray-900 text-sm sm:text-base transition-all duration-300 shadow-sm hover:shadow-md"
@@ -1040,7 +1040,7 @@ const EditBackgroundFormCheckResults = () => {
                               onChange={(e) =>
                                 handleInputChange(
                                   "positionAppliedFor",
-                                  e.target.value
+                                  e.target.value,
                                 )
                               }
                               className="w-full h-10 sm:h-12 md:h-14 px-3 sm:px-4 border-2 rounded-xl border-gray-300 focus:border-[#1F3A93] focus:ring-2 focus:ring-[#1F3A93]/20 focus:outline-none bg-white text-gray-900 text-sm sm:text-base transition-all duration-300 shadow-sm hover:shadow-md"
@@ -1145,7 +1145,7 @@ const EditBackgroundFormCheckResults = () => {
                             <div className="text-right">
                               <div className="text-lg font-bold text-blue-600">
                                 {Math.round(
-                                  (overallProgress / 100) * totalForms
+                                  (overallProgress / 100) * totalForms,
                                 )}
                                 /{totalForms}
                               </div>

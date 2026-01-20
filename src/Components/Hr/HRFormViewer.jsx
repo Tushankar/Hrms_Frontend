@@ -41,15 +41,15 @@ const HRFormViewer = ({
 
         // Get application details
         const appResponse = await axios.get(
-          `https://api-hrms-backend.kyptronix.us/onboarding/get-all-applications`,
+          `https://api.carecompapp.com/onboarding/get-all-applications`,
           {
             withCredentials: true,
-          }
+          },
         );
 
         if (appResponse.data?.applications) {
           const foundApp = appResponse.data.applications.find(
-            (app) => app._id === applicationId
+            (app) => app._id === applicationId,
           );
 
           if (foundApp) {
@@ -57,10 +57,10 @@ const HRFormViewer = ({
 
             // Get specific form data
             const formResponse = await axios.get(
-              `https://api-hrms-backend.kyptronix.us/onboarding/${apiEndpoint}/${applicationId}`,
+              `https://api.carecompapp.com/onboarding/${apiEndpoint}/${applicationId}`,
               {
                 withCredentials: true,
-              }
+              },
             );
 
             if (formResponse.data) {
@@ -180,15 +180,15 @@ const HRFormViewer = ({
                       formData.status === "submitted"
                         ? "bg-green-100 text-green-800"
                         : formData.status === "draft"
-                        ? "bg-yellow-100 text-yellow-800"
-                        : "bg-gray-100 text-gray-800"
+                          ? "bg-yellow-100 text-yellow-800"
+                          : "bg-gray-100 text-gray-800"
                     }`}
                   >
                     {formData.status === "submitted"
                       ? "Completed"
                       : formData.status === "draft"
-                      ? "In Progress"
-                      : "Not Started"}
+                        ? "In Progress"
+                        : "Not Started"}
                   </span>
                 </div>
 

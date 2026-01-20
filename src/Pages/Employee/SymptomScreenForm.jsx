@@ -102,8 +102,8 @@ const SymptomScreenForm = () => {
         : { _id: "67e0f8770c6feb6ba99d11d2" };
 
       const response = await axios.get(
-        `https://api-hrms-backend.kyptronix.us/onboarding/get-application/${user._id}`,
-        { withCredentials: true }
+        `https://api.carecompapp.com/onboarding/get-application/${user._id}`,
+        { withCredentials: true },
       );
 
       if (response.data?.data?.application) {
@@ -441,7 +441,7 @@ const SymptomScreenForm = () => {
                             onChange={(e) =>
                               handleInputChange(
                                 "chestXRayNormal",
-                                e.target.checked
+                                e.target.checked,
                               )
                             }
                             className="w-5 h-5 text-green-600 border-2 border-gray-300 rounded focus:ring-2 focus:ring-green-500/20"
@@ -455,7 +455,7 @@ const SymptomScreenForm = () => {
                             onChange={(e) =>
                               handleInputChange(
                                 "chestXRayAbnormal",
-                                e.target.checked
+                                e.target.checked,
                               )
                             }
                             className="w-5 h-5 text-red-600 border-2 border-gray-300 rounded focus:ring-2 focus:ring-red-500/20"
@@ -568,7 +568,7 @@ const SymptomScreenForm = () => {
                               onChange={(e) =>
                                 handleInputChange(
                                   "coughingBlood",
-                                  e.target.checked
+                                  e.target.checked,
                                 )
                               }
                               className="w-5 h-5 text-red-600 border-2 border-gray-300 rounded focus:ring-2 focus:ring-red-500/20"
@@ -637,7 +637,7 @@ const SymptomScreenForm = () => {
                                   onChange={(e) =>
                                     handleInputChange(
                                       `${key}Days`,
-                                      e.target.value
+                                      e.target.value,
                                     )
                                   }
                                   className="w-full h-8 px-2 text-sm border rounded border-gray-300 focus:border-[#1F3A93] focus:outline-none"
@@ -653,7 +653,7 @@ const SymptomScreenForm = () => {
                                   onChange={(e) =>
                                     handleInputChange(
                                       `${key}Weeks`,
-                                      e.target.value
+                                      e.target.value,
                                     )
                                   }
                                   className="w-full h-8 px-2 text-sm border rounded border-gray-300 focus:border-[#1F3A93] focus:outline-none"
@@ -669,7 +669,7 @@ const SymptomScreenForm = () => {
                                   onChange={(e) =>
                                     handleInputChange(
                                       `${key}Months`,
-                                      e.target.value
+                                      e.target.value,
                                     )
                                   }
                                   className="w-full h-8 px-2 text-sm border rounded border-gray-300 focus:border-[#1F3A93] focus:outline-none"
@@ -689,7 +689,7 @@ const SymptomScreenForm = () => {
                               onChange={(e) =>
                                 handleInputChange(
                                   "weightLossPounds",
-                                  e.target.value
+                                  e.target.value,
                                 )
                               }
                               className="w-32 h-8 px-2 text-sm border rounded border-gray-300 focus:border-[#1F3A93] focus:outline-none"
@@ -1032,8 +1032,8 @@ const SymptomScreenForm = () => {
                               {saving
                                 ? "Submitting..."
                                 : isSubmitted
-                                ? "Awaiting HR Feedback"
-                                : "Save & Next"}
+                                  ? "Awaiting HR Feedback"
+                                  : "Save & Next"}
                             </span>
                           </button>
                         );

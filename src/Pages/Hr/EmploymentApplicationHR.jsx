@@ -195,7 +195,7 @@ const EmploymentApplicationHR = () => {
   const [existingFeedback, setExistingFeedback] = useState(null);
 
   const baseURL =
-    import.meta.env.VITE__BASEURL || "https://api-hrms-backend.kyptronix.us";
+    import.meta.env.VITE__BASEURL || "https://api.carecompapp.com";
 
   useEffect(() => {
     if (employeeId) {
@@ -208,7 +208,7 @@ const EmploymentApplicationHR = () => {
       setLoading(true);
       console.log(
         "Loading employment application data for employeeId:",
-        employeeId
+        employeeId,
       );
 
       if (employeeId) {
@@ -226,7 +226,7 @@ const EmploymentApplicationHR = () => {
             response.data.data.forms.employmentApplication;
           console.log(
             "Setting employment application form data:",
-            applicationData
+            applicationData,
           );
 
           // Map backend data to form structure
@@ -295,7 +295,7 @@ const EmploymentApplicationHR = () => {
               ...(applicationData.references || []),
               // Fill remaining slots with empty objects if needed
               ...Array(
-                Math.max(0, 3 - (applicationData.references?.length || 0))
+                Math.max(0, 3 - (applicationData.references?.length || 0)),
               ).fill({
                 fullName: "",
                 relationship: "",
@@ -310,7 +310,7 @@ const EmploymentApplicationHR = () => {
               ...(applicationData.employment || []),
               // Fill remaining slots with empty objects if needed
               ...Array(
-                Math.max(0, 3 - (applicationData.employment?.length || 0))
+                Math.max(0, 3 - (applicationData.employment?.length || 0)),
               ).fill({
                 company: "",
                 phone: "",
@@ -356,7 +356,7 @@ const EmploymentApplicationHR = () => {
         } else {
           console.error(
             "No employment application data received:",
-            response.data?.message || "No data in response"
+            response.data?.message || "No data in response",
           );
           toast.error("No employment application data found for this user");
         }
@@ -368,7 +368,7 @@ const EmploymentApplicationHR = () => {
         toast.error(
           `Failed to load employment application data: ${
             error.response.data?.message || error.response.statusText
-          }`
+          }`,
         );
       } else if (error.request) {
         console.error("Network error:", error.request);
@@ -416,7 +416,7 @@ const EmploymentApplicationHR = () => {
         },
         {
           withCredentials: true,
-        }
+        },
       );
 
       console.log("Send notes response:", response.data);
@@ -439,7 +439,7 @@ const EmploymentApplicationHR = () => {
         toast.error(
           `Failed to send notes: ${
             error.response.data?.message || error.response.statusText
-          }`
+          }`,
         );
       } else if (error.request) {
         console.error("Network error:", error.request);
@@ -1014,7 +1014,7 @@ const EmploymentApplicationHR = () => {
                             onChange={(value) =>
                               handleInputChange(
                                 `references[${index}].fullName`,
-                                value
+                                value,
                               )
                             }
                           />
@@ -1024,7 +1024,7 @@ const EmploymentApplicationHR = () => {
                             onChange={(value) =>
                               handleInputChange(
                                 `references[${index}].relationship`,
-                                value
+                                value,
                               )
                             }
                           />
@@ -1034,7 +1034,7 @@ const EmploymentApplicationHR = () => {
                             onChange={(value) =>
                               handleInputChange(
                                 `references[${index}].company`,
-                                value
+                                value,
                               )
                             }
                           />
@@ -1044,7 +1044,7 @@ const EmploymentApplicationHR = () => {
                             onChange={(value) =>
                               handleInputChange(
                                 `references[${index}].phone`,
-                                value
+                                value,
                               )
                             }
                             type="tel"
@@ -1056,7 +1056,7 @@ const EmploymentApplicationHR = () => {
                               onChange={(value) =>
                                 handleInputChange(
                                   `references[${index}].address`,
-                                  value
+                                  value,
                                 )
                               }
                             />
@@ -1087,7 +1087,7 @@ const EmploymentApplicationHR = () => {
                             onChange={(value) =>
                               handleInputChange(
                                 `previousEmployments[${index}].company`,
-                                value
+                                value,
                               )
                             }
                           />
@@ -1097,7 +1097,7 @@ const EmploymentApplicationHR = () => {
                             onChange={(value) =>
                               handleInputChange(
                                 `previousEmployments[${index}].phone`,
-                                value
+                                value,
                               )
                             }
                             type="tel"
@@ -1109,7 +1109,7 @@ const EmploymentApplicationHR = () => {
                               onChange={(value) =>
                                 handleInputChange(
                                   `previousEmployments[${index}].address`,
-                                  value
+                                  value,
                                 )
                               }
                             />
@@ -1122,7 +1122,7 @@ const EmploymentApplicationHR = () => {
                             onChange={(value) =>
                               handleInputChange(
                                 `previousEmployments[${index}].supervisor`,
-                                value
+                                value,
                               )
                             }
                           />
@@ -1132,7 +1132,7 @@ const EmploymentApplicationHR = () => {
                             onChange={(value) =>
                               handleInputChange(
                                 `previousEmployments[${index}].jobTitle`,
-                                value
+                                value,
                               )
                             }
                           />
@@ -1142,7 +1142,7 @@ const EmploymentApplicationHR = () => {
                             onChange={(value) =>
                               handleInputChange(
                                 `previousEmployments[${index}].startingSalary`,
-                                value
+                                value,
                               )
                             }
                           />
@@ -1152,7 +1152,7 @@ const EmploymentApplicationHR = () => {
                             onChange={(value) =>
                               handleInputChange(
                                 `previousEmployments[${index}].endingSalary`,
-                                value
+                                value,
                               )
                             }
                           />
@@ -1176,7 +1176,7 @@ const EmploymentApplicationHR = () => {
                             onChange={(value) =>
                               handleInputChange(
                                 `previousEmployments[${index}].from`,
-                                value
+                                value,
                               )
                             }
                             type="date"
@@ -1187,7 +1187,7 @@ const EmploymentApplicationHR = () => {
                             onChange={(value) =>
                               handleInputChange(
                                 `previousEmployments[${index}].to`,
-                                value
+                                value,
                               )
                             }
                             type="date"
@@ -1266,7 +1266,7 @@ const EmploymentApplicationHR = () => {
                           onChange={(value) =>
                             handleInputChange(
                               "militaryService.rankAtDischarge",
-                              value
+                              value,
                             )
                           }
                         />
@@ -1294,7 +1294,7 @@ const EmploymentApplicationHR = () => {
                           onChange={(value) =>
                             handleInputChange(
                               "militaryService.typeOfDischarge",
-                              value
+                              value,
                             )
                           }
                         />
@@ -1406,7 +1406,7 @@ const EmploymentApplicationHR = () => {
                           <span className="ml-4">
                             Date:{" "}
                             {new Date(
-                              existingFeedback.reviewedAt
+                              existingFeedback.reviewedAt,
                             ).toLocaleDateString()}
                           </span>
                         )}

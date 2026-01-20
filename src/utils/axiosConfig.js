@@ -2,7 +2,7 @@ import axios from "axios";
 
 // Get the base URL from environment or default
 const VITE_BASEURL =
-  import.meta.env.VITE__BASEURL || "https://api-hrms-backend.kyptronix.us";
+  import.meta.env.VITE__BASEURL || "https://api.carecompapp.com";
 
 console.log("🌍 API Base URL:", VITE_BASEURL);
 
@@ -25,7 +25,7 @@ apiClient.interceptors.request.use(
   (error) => {
     console.error("❌ Request Error:", error);
     return Promise.reject(error);
-  }
+  },
 );
 
 // Add response interceptor
@@ -38,7 +38,7 @@ apiClient.interceptors.response.use(
     if (error.response) {
       console.error(
         `❌ Response Error: ${error.response.status} ${error.config.url}`,
-        error.response.data
+        error.response.data,
       );
     } else if (error.request) {
       console.error("❌ No Response - Network Error:", error.message);
@@ -46,7 +46,7 @@ apiClient.interceptors.response.use(
       console.error("❌ Error:", error.message);
     }
     return Promise.reject(error);
-  }
+  },
 );
 
 export default apiClient;

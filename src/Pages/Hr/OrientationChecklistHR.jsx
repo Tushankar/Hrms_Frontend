@@ -11,7 +11,7 @@ const OrientationChecklistHR = () => {
 
   // Base URL configuration
   const baseURL =
-    import.meta.env.VITE__BASEURL || "https://api-hrms-backend.kyptronix.us";
+    import.meta.env.VITE__BASEURL || "https://api.carecompapp.com";
 
   // State for form fields
   const [formData, setFormData] = useState({
@@ -42,7 +42,7 @@ const OrientationChecklistHR = () => {
         setLoading(true);
         console.log(
           "Loading orientation checklist data for employeeId:",
-          employeeId
+          employeeId,
         );
 
         if (employeeId) {
@@ -61,7 +61,7 @@ const OrientationChecklistHR = () => {
             console.log("Full API Response:", response.data.data);
             console.log(
               "Orientation Checklist Data:",
-              orientationChecklistData
+              orientationChecklistData,
             );
 
             if (orientationChecklistData) {
@@ -147,7 +147,7 @@ const OrientationChecklistHR = () => {
           } else {
             console.error(
               "No orientation checklist data received:",
-              response.data?.message || "No data in response"
+              response.data?.message || "No data in response",
             );
             toast.error("No orientation checklist data found for this user");
             setApplicationData({
@@ -164,7 +164,7 @@ const OrientationChecklistHR = () => {
           toast.error(
             `Failed to load orientation checklist data: ${
               error.response.data?.message || error.response.statusText
-            }`
+            }`,
           );
         } else if (error.request) {
           console.error("Network error:", error.request);
@@ -213,7 +213,7 @@ const OrientationChecklistHR = () => {
     try {
       console.log(
         "Sending orientation checklist notes for employeeId:",
-        employeeId
+        employeeId,
       );
 
       const apiUrl = `${baseURL}/onboarding/submit-notes`;
@@ -248,10 +248,10 @@ const OrientationChecklistHR = () => {
       } else {
         console.error(
           "Notes submission failed:",
-          response.data?.message || "Unknown error"
+          response.data?.message || "Unknown error",
         );
         toast.error(
-          `Failed to send notes: ${response.data?.message || "Unknown error"}`
+          `Failed to send notes: ${response.data?.message || "Unknown error"}`,
         );
       }
     } catch (error) {
@@ -261,7 +261,7 @@ const OrientationChecklistHR = () => {
         toast.error(
           `Failed to send notes: ${
             error.response.data?.message || error.response.statusText
-          }`
+          }`,
         );
       } else if (error.request) {
         console.error("Network error:", error.request);
@@ -474,18 +474,18 @@ const OrientationChecklistHR = () => {
                             {statement.key === "policies"
                               ? "Policies"
                               : statement.key === "duties"
-                              ? "Duties"
-                              : statement.key === "emergencies"
-                              ? "Emergencies"
-                              : statement.key === "tbExposure"
-                              ? "TB Exposure"
-                              : statement.key === "clientRights"
-                              ? "Client Rights"
-                              : statement.key === "complaints"
-                              ? "Complaints"
-                              : statement.key === "documentation"
-                              ? "Documentation"
-                              : "Handbook"}
+                                ? "Duties"
+                                : statement.key === "emergencies"
+                                  ? "Emergencies"
+                                  : statement.key === "tbExposure"
+                                    ? "TB Exposure"
+                                    : statement.key === "clientRights"
+                                      ? "Client Rights"
+                                      : statement.key === "complaints"
+                                        ? "Complaints"
+                                        : statement.key === "documentation"
+                                          ? "Documentation"
+                                          : "Handbook"}
                           </div>
                         </div>
                       ))}
@@ -498,7 +498,7 @@ const OrientationChecklistHR = () => {
                             (Object.values(formData).slice(0, 8).filter(Boolean)
                               .length /
                               8) *
-                              100
+                              100,
                           )}
                           %
                         </span>{" "}
@@ -562,7 +562,7 @@ const OrientationChecklistHR = () => {
                               </label>
                               <div className="w-full px-4 py-3 border rounded-md bg-green-50 border-green-400 font-semibold text-gray-800">
                                 {new Date(
-                                  formData.signatureDate
+                                  formData.signatureDate,
                                 ).toLocaleDateString("en-US", {
                                   year: "numeric",
                                   month: "long",
@@ -607,7 +607,7 @@ const OrientationChecklistHR = () => {
                             <div className="flex justify-between items-start mb-2">
                               <span className="text-sm font-medium text-gray-600">
                                 {new Date(
-                                  feedback.timestamp
+                                  feedback.timestamp,
                                 ).toLocaleDateString("en-US", {
                                   year: "numeric",
                                   month: "short",
