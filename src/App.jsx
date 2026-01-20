@@ -70,7 +70,7 @@ import PositionType from "./Pages/Employee/PositionType";
 import OrientationPresentation from "./Pages/Employee/OrientationPresentation";
 import WorkExperience from "./Pages/Employee/WorkExperience";
 import OnboardingDashboard from "./Pages/Employee/OnboardingDashboard";
-import TaskLists from "./Pages/Hr/tasklists";
+import TaskLists from "./Pages/Hr/TaskLists";
 import { Task } from "./Pages/Hr/Task";
 // import ApplicationReview from './Pages/Hr/ApplicationReview';
 // import HREmploymentApplicationViewer from './Pages/Hr/HREmploymentApplicationViewer';
