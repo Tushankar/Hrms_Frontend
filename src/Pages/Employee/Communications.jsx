@@ -37,6 +37,8 @@ export const Communications = () => {
   const iceCandidateQueue = useRef([]); // Queue for ICE candidates
   const [showMobileChat, setShowMobileChat] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const reconnectCountRef = useRef(0);
+  const reconnectTimeoutRef = useRef(null);
 
   const handleEmployeeClick = (employeeId) => {
     setReceiverId(employeeId);
@@ -45,7 +47,7 @@ export const Communications = () => {
   };
 
   const selectedEmployee = employeeList.find(
-    (employee) => employee._id === receiverId
+    (employee) => employee._id === receiverId,
   );
 
   const getAllEmployeeList = async (token) => {
@@ -54,11 +56,11 @@ export const Communications = () => {
         `${baseURL}/employee/get-all-employee`,
         {
           headers: { Authorization: token },
-        }
+        },
       );
       if (getEmployee.status === 200) {
         const filteredEmployees = getEmployee.data.employessList.filter(
-          (employee) => employee.userRole === "hr"
+          (employee) => employee.userRole === "hr",
         );
         setEmployeeList(filteredEmployees);
       }
@@ -104,7 +106,7 @@ export const Communications = () => {
             senderId: userId,
             receiverId,
             candidate: event.candidate,
-          })
+          }),
         );
       }
     };
@@ -144,7 +146,7 @@ export const Communications = () => {
           senderId: userId,
           receiverId,
           offer,
-        })
+        }),
       );
     } catch (error) {
       console.error("Error starting call:", error);
@@ -168,7 +170,7 @@ export const Communications = () => {
           event: "end-call",
           senderId: userId,
           receiverId,
-        })
+        }),
       );
     }
     iceCandidateQueue.current = []; // Clear queue
@@ -185,7 +187,7 @@ export const Communications = () => {
       "Employee userId:",
       userId,
       "receiverId:",
-      receiverId || "Not set"
+      receiverId || "Not set",
     );
 
     if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
@@ -194,145 +196,205 @@ export const Communications = () => {
     }
 
     // Construct WebSocket URL from base URL
-    const wsProtocol = baseURL.startsWith("https") ? "wss://" : "ws://";
-    const wsURL = baseURL.replace(/^https?:\/\//, wsProtocol);
-    console.log("Connecting to WebSocket:", wsURL);
-
-    const ws = new WebSocket(wsURL);
-
-    ws.onopen = () => {
-      if (!userId) {
-        console.error("Cannot send login: userId is missing");
-        ws.close();
-        return;
+    const constructWebSocketURL = () => {
+      try {
+        const url = new URL(baseURL);
+        const wsProtocol = url.protocol === "https:" ? "wss:" : "ws:";
+        // Use /ws endpoint for WebSocket connections
+        const wsURL = `${wsProtocol}//${url.host}/ws`;
+        console.log("Constructed WebSocket URL:", wsURL);
+        return wsURL;
+      } catch (error) {
+        console.error("Error constructing WebSocket URL:", error);
+        // Fallback construction
+        const wsProtocol = baseURL.startsWith("https") ? "wss://" : "ws://";
+        const host = baseURL.replace(/^https?:\/\//, "").replace(/\/$/, "");
+        const wsURL = `${wsProtocol}${host}/ws`;
+        console.log("Fallback WebSocket URL:", wsURL);
+        return wsURL;
       }
-      console.log("WebSocket connected, sending login for senderId:", userId);
-      ws.send(JSON.stringify({ event: "login", senderId: userId }));
     };
 
-    ws.onmessage = async (event) => {
-      const data = JSON.parse(event.data);
-      if (data.event === "login-success") {
-        console.log("Login successful for senderId:", data.senderId);
-      } else if (data.event === "login-error") {
-        console.error("Login error:", data.message);
-        alert(data.message);
-      } else if (data.event === "incoming-call") {
-        console.log("Received incoming call from:", data.senderId);
-        setCallStatus("calling");
-        peerConnectionRef.current = createPeerConnection();
-        try {
-          localStreamRef.current = await navigator.mediaDevices.getUserMedia({
-            audio: true,
-            video: false,
-          });
-          localStreamRef.current.getTracks().forEach((track) => {
-            peerConnectionRef.current.addTrack(track, localStreamRef.current);
-          });
-          await peerConnectionRef.current.setRemoteDescription(
-            new RTCSessionDescription(data.offer)
-          );
-          // Process queued ICE candidates
-          for (const candidate of iceCandidateQueue.current) {
-            await peerConnectionRef.current.addIceCandidate(
-              new RTCIceCandidate(candidate)
-            );
+    const wsURL = constructWebSocketURL();
+
+    const connectWebSocket = () => {
+      try {
+        console.log("Attempting WebSocket connection:", wsURL);
+        const ws = new WebSocket(wsURL);
+
+        let connectionTimeout = setTimeout(() => {
+          if (ws.readyState === WebSocket.CONNECTING) {
+            console.warn("WebSocket connection timeout, closing...");
+            ws.close();
           }
-          iceCandidateQueue.current = []; // Clear queue
-          const answer = await peerConnectionRef.current.createAnswer();
-          await peerConnectionRef.current.setLocalDescription(answer);
-          ws.send(
-            JSON.stringify({
-              event: "answer",
-              senderId: userId,
-              receiverId: data.senderId,
-              answer,
-            })
+        }, 5000);
+
+        ws.onopen = () => {
+          clearTimeout(connectionTimeout);
+          reconnectCountRef.current = 0;
+          if (!userId) {
+            console.error("Cannot send login: userId is missing");
+            ws.close();
+            return;
+          }
+          console.log(
+            "WebSocket connected, sending login for senderId:",
+            userId,
           );
-          setCallStatus("in-call");
-        } catch (error) {
-          console.error("Error answering call:", error);
-          setCallStatus("");
-          alert("Failed to answer call.");
+          ws.send(JSON.stringify({ event: "login", senderId: userId }));
+        };
+
+        ws.onmessage = async (event) => {
+          const data = JSON.parse(event.data);
+          if (data.event === "login-success") {
+            console.log("Login successful for senderId:", data.senderId);
+          } else if (data.event === "login-error") {
+            console.error("Login error:", data.message);
+            alert(data.message);
+          } else if (data.event === "incoming-call") {
+            console.log("Received incoming call from:", data.senderId);
+            setCallStatus("calling");
+            peerConnectionRef.current = createPeerConnection();
+            try {
+              localStreamRef.current =
+                await navigator.mediaDevices.getUserMedia({
+                  audio: true,
+                  video: false,
+                });
+              localStreamRef.current.getTracks().forEach((track) => {
+                peerConnectionRef.current.addTrack(
+                  track,
+                  localStreamRef.current,
+                );
+              });
+              await peerConnectionRef.current.setRemoteDescription(
+                new RTCSessionDescription(data.offer),
+              );
+              // Process queued ICE candidates
+              for (const candidate of iceCandidateQueue.current) {
+                await peerConnectionRef.current.addIceCandidate(
+                  new RTCIceCandidate(candidate),
+                );
+              }
+              iceCandidateQueue.current = []; // Clear queue
+              const answer = await peerConnectionRef.current.createAnswer();
+              await peerConnectionRef.current.setLocalDescription(answer);
+              ws.send(
+                JSON.stringify({
+                  event: "answer",
+                  senderId: userId,
+                  receiverId: data.senderId,
+                  answer,
+                }),
+              );
+              setCallStatus("in-call");
+            } catch (error) {
+              console.error("Error answering call:", error);
+              setCallStatus("");
+              alert("Failed to answer call.");
+            }
+          } else if (data.event === "call-answer") {
+            await peerConnectionRef.current.setRemoteDescription(
+              new RTCSessionDescription(data.answer),
+            );
+            // Process queued ICE candidates
+            for (const candidate of iceCandidateQueue.current) {
+              await peerConnectionRef.current.addIceCandidate(
+                new RTCIceCandidate(candidate),
+              );
+            }
+            iceCandidateQueue.current = []; // Clear queue
+            setCallStatus("in-call");
+          } else if (data.event === "ice-candidate") {
+            if (
+              peerConnectionRef.current &&
+              peerConnectionRef.current.remoteDescription
+            ) {
+              await peerConnectionRef.current.addIceCandidate(
+                new RTCIceCandidate(data.candidate),
+              );
+            } else {
+              console.log("Queuing ICE candidate:", data.candidate);
+              iceCandidateQueue.current.push(data.candidate);
+            }
+          } else if (data.event === "end-call") {
+            endCall();
+          } else if (data.event === "login-error") {
+            console.error("Call error:", data.message);
+            alert(data.message);
+            setCallStatus("");
+          } else if (
+            receiverId &&
+            ((data.sender === userId && data.receiver === receiverId) ||
+              (data.sender === receiverId && data.receiver === userId))
+          ) {
+            setMessages((prev) => {
+              if (!prev.some((msg) => msg._id === data._id)) {
+                return [...prev, data].sort(
+                  (a, b) => new Date(a.createdAt) - new Date(b.createdAt),
+                );
+              }
+              return prev;
+            });
+          }
+        };
+
+        ws.onerror = (error) => {
+          console.error("WebSocket Error:", error);
+          if (ws.readyState === WebSocket.CONNECTING) {
+            console.warn("Connection failed, will attempt reconnection...");
+          }
+        };
+
+        ws.onclose = () => {
+          console.log("WebSocket Disconnected, attempting to reconnect...");
+          clearTimeout(reconnectTimeoutRef.current);
+
+          // Exponential backoff: 1s, 2s, 4s, 8s, 16s (max)
+          const backoffDelay = Math.min(
+            1000 * Math.pow(2, reconnectCountRef.current),
+            16000,
+          );
+          reconnectCountRef.current++;
+
+          console.log(
+            `Reconnecting in ${backoffDelay}ms (attempt ${reconnectCountRef.current})`,
+          );
+          reconnectTimeoutRef.current = setTimeout(() => {
+            if (
+              !socketRef.current ||
+              socketRef.current.readyState === WebSocket.CLOSED
+            ) {
+              connectWebSocket();
+            }
+          }, backoffDelay);
+        };
+
+        socketRef.current = ws;
+
+        if (receiverId) {
+          axios
+            .get(`${baseURL}/chat/${userId}/${receiverId}`)
+            .then((res) => setMessages(res.data))
+            .catch((err) => console.error("Error fetching messages:", err));
         }
-      } else if (data.event === "call-answer") {
-        await peerConnectionRef.current.setRemoteDescription(
-          new RTCSessionDescription(data.answer)
+      } catch (error) {
+        console.error("Error creating WebSocket:", error);
+        const backoffDelay = Math.min(
+          1000 * Math.pow(2, reconnectCountRef.current),
+          16000,
         );
-        // Process queued ICE candidates
-        for (const candidate of iceCandidateQueue.current) {
-          await peerConnectionRef.current.addIceCandidate(
-            new RTCIceCandidate(candidate)
-          );
-        }
-        iceCandidateQueue.current = []; // Clear queue
-        setCallStatus("in-call");
-      } else if (data.event === "ice-candidate") {
-        if (
-          peerConnectionRef.current &&
-          peerConnectionRef.current.remoteDescription
-        ) {
-          await peerConnectionRef.current.addIceCandidate(
-            new RTCIceCandidate(data.candidate)
-          );
-        } else {
-          console.log("Queuing ICE candidate:", data.candidate);
-          iceCandidateQueue.current.push(data.candidate);
-        }
-      } else if (data.event === "end-call") {
-        endCall();
-      } else if (data.event === "login-error") {
-        console.error("Call error:", data.message);
-        alert(data.message);
-        setCallStatus("");
-      } else if (
-        receiverId &&
-        ((data.sender === userId && data.receiver === receiverId) ||
-          (data.sender === receiverId && data.receiver === userId))
-      ) {
-        setMessages((prev) => {
-          if (!prev.some((msg) => msg._id === data._id)) {
-            return [...prev, data].sort(
-              (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
-            );
-          }
-          return prev;
-        });
+        reconnectCountRef.current++;
+        reconnectTimeoutRef.current = setTimeout(() => {
+          connectWebSocket();
+        }, backoffDelay);
       }
     };
 
-    ws.onerror = (error) => {
-      console.error("WebSocket Error:", error);
-    };
-
-    ws.onclose = () => {
-      console.log("WebSocket Disconnected, attempting to reconnect...");
-      setTimeout(() => {
-        if (
-          !socketRef.current ||
-          socketRef.current.readyState === WebSocket.CLOSED
-        ) {
-          const wsProtocol = baseURL.startsWith("https") ? "wss://" : "ws://";
-          const wsURL = baseURL.replace(/^https?:\/\//, wsProtocol);
-          socketRef.current = new WebSocket(wsURL);
-          socketRef.current.onopen = ws.onopen;
-          socketRef.current.onmessage = ws.onmessage;
-          socketRef.current.onerror = ws.onerror;
-          socketRef.current.onclose = ws.onclose;
-        }
-      }, 1000);
-    };
-
-    socketRef.current = ws;
-
-    if (receiverId) {
-      axios
-        .get(`${baseURL}/chat/${userId}/${receiverId}`)
-        .then((res) => setMessages(res.data))
-        .catch((err) => console.error("Error fetching messages:", err));
-    }
+    connectWebSocket();
 
     return () => {
+      clearTimeout(reconnectTimeoutRef.current);
       if (socketRef.current) {
         socketRef.current.close();
         socketRef.current = null;
@@ -351,7 +413,7 @@ export const Communications = () => {
     if (socketRef.current.readyState !== WebSocket.OPEN) {
       console.error(
         "WebSocket is not open. Current state:",
-        socketRef.current.readyState
+        socketRef.current.readyState,
       );
       alert("Connection lost. Attempting to reconnect...");
       return;
@@ -386,13 +448,13 @@ export const Communications = () => {
   const filteredEmployees = employeeList.filter(
     (employee) =>
       employee.userName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      employee.email.toLowerCase().includes(searchQuery.toLowerCase())
+      employee.email.toLowerCase().includes(searchQuery.toLowerCase()),
   );
   const getLastMessage = (employeeId) => {
     const employeeMessages = messages.filter(
       (msg) =>
         (msg.sender === userId && msg.receiver === employeeId) ||
-        (msg.sender === employeeId && msg.receiver === userId)
+        (msg.sender === employeeId && msg.receiver === userId),
     );
     return employeeMessages[employeeMessages.length - 1];
   };
