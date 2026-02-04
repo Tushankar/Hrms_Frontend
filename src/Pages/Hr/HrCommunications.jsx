@@ -229,8 +229,27 @@ export const HrCommunication = () => {
             return;
         }
 
-        console.log("Creating new WebSocket connection to:", "wss://hrms-backend-t38z.onrender.com");
-        const ws = new WebSocket("wss://hrms-backend-t38z.onrender.com");
+        // Construct WebSocket URL from base URL
+        const constructWebSocketURL = () => {
+            try {
+                const url = new URL(baseURL);
+                const wsProtocol = url.protocol === "https:" ? "wss:" : "ws:";
+                const wsURL = `${wsProtocol}//${url.host}/ws`;
+                console.log("Constructed WebSocket URL:", wsURL);
+                return wsURL;
+            } catch (error) {
+                console.error("Error constructing WebSocket URL:", error);
+                const wsProtocol = baseURL.startsWith("https") ? "wss://" : "ws://";
+                const host = baseURL.replace(/^https?:\/\//, "").replace(/\/$/, "");
+                const wsURL = `${wsProtocol}${host}/ws`;
+                console.log("Fallback WebSocket URL:", wsURL);
+                return wsURL;
+            }
+        };
+
+        const wsURL = constructWebSocketURL();
+        console.log("Creating new WebSocket connection to:", wsURL);
+        const ws = new WebSocket(wsURL);
 
         ws.onopen = () => {
             if (!userId) {
@@ -428,7 +447,7 @@ export const HrCommunication = () => {
             setTimeout(() => {
                 if (!socketRef.current) {
                     console.log("Creating new WebSocket connection after disconnect");
-                    const newWs = new WebSocket("wss://hrms-backend-t38z.onrender.com");
+                    const newWs = new WebSocket(wsURL);
                     
                     // Set up event handlers for the new connection
                     newWs.onopen = ws.onopen;
@@ -467,63 +486,89 @@ export const HrCommunication = () => {
         };
     }, [userId, receiverId, clientSession]);
 
-    const sendMessage = () => {
+    const sendMessage = async () => {
         if (!newMessage.trim()) {
             console.log("Not sending empty message");
             return;
         }
-        
-        if (!socketRef.current) {
-            console.error("Socket reference is null, cannot send message");
+
+        if (!userId || !receiverId) {
+            console.error("User ID or Receiver ID missing", { userId, receiverId });
+            alert("Error: User information missing");
             return;
         }
-        
-        if (socketRef.current.readyState !== WebSocket.OPEN) {
-            console.error("WebSocket is not open, current state:", socketRef.current.readyState);
-            // Try to reconnect
-            socketRef.current.close();
-            socketRef.current = new WebSocket("wss://hrms-backend-t38z.onrender.com");
-            socketRef.current.onopen = () => {
-                console.log("WebSocket reconnected after send attempt, sending login");
-                socketRef.current.send(JSON.stringify({ event: "login", senderId: userId }));
-                // Don't send the message here - let the user try again
-            };
-            alert("Connection issue detected. Please try sending your message again in a few seconds.");
-            return;
-        }
-        
-        // Socket is open, proceed with sending
+
         const messageData = {
             event: "message",
             senderId: userId,
             receiverId,
             content: newMessage,
         };
-        
-        console.log("Sending message:", messageData);
-        
+
+        // Try WebSocket first if available and open
+        if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
+            try {
+                console.log("Sending message via WebSocket:", messageData);
+                socketRef.current.send(JSON.stringify(messageData));
+                
+                // Optimistically add the message to the state
+                const tempId = `temp-${Date.now()}`;
+                const tempMessage = {
+                    _id: tempId,
+                    sender: userId,
+                    receiver: receiverId,
+                    content: newMessage,
+                    createdAt: new Date().toISOString(),
+                    status: "sent"
+                };
+                
+                console.log("Adding optimistic message to state:", tempMessage);
+                setMessages(prev => [...prev, tempMessage].sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt)));
+                setNewMessage("");
+                console.log("Message sent via WebSocket");
+                return;
+            } catch (error) {
+                console.error("WebSocket send error, falling back to HTTP:", error);
+            }
+        }
+
+        // Fallback to HTTP if WebSocket is not available or failed
         try {
-            socketRef.current.send(JSON.stringify(messageData));
-            
-            // Optimistically add the message to the state
-            const tempId = `temp-${Date.now()}`;
-            const tempMessage = {
-                _id: tempId,
-                sender: userId,
-                receiver: receiverId,
-                content: newMessage,
-                createdAt: new Date().toISOString(),
-                status: "sent"
-            };
-            
-            console.log("Adding optimistic message to state:", tempMessage);
-            setMessages(prev => [...prev, tempMessage].sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt)));
-            
-            // Clear input
-            setNewMessage("");
+            console.log("Sending message via HTTP fallback");
+            const response = await axios.post(
+                `${baseURL}/chat/send`,
+                {
+                    senderId: userId,
+                    receiverId,
+                    content: newMessage,
+                },
+                {
+                    headers: {
+                        Authorization: clientSession,
+                        "Content-Type": "application/json",
+                    },
+                }
+            );
+
+            if (response.status === 201) {
+                // Add message to local state immediately
+                setMessages((prev) => {
+                    const newMsg = response.data.message;
+                    if (!prev.some((msg) => String(msg._id) === String(newMsg._id))) {
+                        return [...prev, newMsg].sort(
+                            (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
+                        );
+                    }
+                    return prev;
+                });
+                setNewMessage("");
+                console.log("Message sent successfully via HTTP");
+            }
         } catch (error) {
-            console.error("Error sending message:", error);
-            alert("Failed to send message. Please try again.");
+            console.error("Error sending message via HTTP:", error);
+            alert(
+                "Failed to send message. Please check your connection and try again."
+            );
         }
     };
 
