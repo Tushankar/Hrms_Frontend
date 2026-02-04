@@ -155,13 +155,6 @@ export const PersonalDetails = () => {
                     <MapPin size={18} className="text-blue-600" />
                     {userData?.country}
                   </p>
-                  <button
-                    onClick={handleEditProfile}
-                    className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-8 py-3 rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-                  >
-                    <Edit2 size={18} />
-                    Edit Profile
-                  </button>
                   <div className="mt-4 ml-4">
                     <div className="bg-gradient-to-r from-gray-50 to-gray-100 p-4 rounded-xl border border-gray-200">
                       <h4 className="text-base font-semibold text-gray-800 mb-2 flex items-center gap-2">

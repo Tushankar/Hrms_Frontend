@@ -1372,7 +1372,7 @@ export const EmployeeDashboard = () => {
       setIsUpdatingProfile(true);
 
       // Extract only digits from formatted phone number
-      const phoneDigitsOnly = profileData.phone.replace(/\D/g, "");
+      const phoneDigitsOnly = String(profileData.phone || '').replace(/\D/g, "");
 
       const formData = new FormData();
 
@@ -1380,6 +1380,7 @@ export const EmployeeDashboard = () => {
       formData.append("userName", profileData.userName);
       formData.append("email", profileData.email);
       formData.append("phone", phoneDigitsOnly);
+      formData.append("zip", profileData.zip || "");
 
       // Add profile image if selected
       if (selectedProfileImage) {
@@ -1444,6 +1445,7 @@ export const EmployeeDashboard = () => {
       userName: user?.userName || "",
       email: user?.email || "",
       phone: user?.phoneNumber || "",
+      zip: user?.zip || "",
     });
     setSelectedProfileImage(null);
     setProfileImagePreview(null);
@@ -2115,10 +2117,9 @@ export const EmployeeDashboard = () => {
                     <input
                       type="email"
                       value={profileData.email}
-                      onChange={(e) =>
-                        handleProfileInputChange("email", e.target.value)
-                      }
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1F3A93] focus:border-transparent"
+                      disabled
+                      readOnly
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-600 cursor-not-allowed"
                       placeholder="Enter your email"
                     />
                   </div>

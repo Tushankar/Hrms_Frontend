@@ -39,6 +39,8 @@ export const Communications = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const reconnectCountRef = useRef(0);
   const reconnectTimeoutRef = useRef(null);
+  const [useWebSocket, setUseWebSocket] = useState(true);
+  const pollingIntervalRef = useRef(null);
 
   const handleEmployeeClick = (employeeId) => {
     setReceiverId(employeeId);
@@ -198,34 +200,48 @@ export const Communications = () => {
     // Construct WebSocket URL from base URL
     const constructWebSocketURL = () => {
       try {
+        // Check if custom WebSocket URL is provided
+        const wsURL = import.meta.env.VITE__WS_URL;
+        if (wsURL) {
+          console.log("Using custom WebSocket URL:", wsURL);
+          return wsURL;
+        }
+
         const url = new URL(baseURL);
         const wsProtocol = url.protocol === "https:" ? "wss:" : "ws:";
         // Use /ws endpoint for WebSocket connections
-        const wsURL = `${wsProtocol}//${url.host}/ws`;
-        console.log("Constructed WebSocket URL:", wsURL);
-        return wsURL;
+        const constructedURL = `${wsProtocol}//${url.host}/ws`;
+        console.log("Constructed WebSocket URL:", constructedURL);
+        return constructedURL;
       } catch (error) {
         console.error("Error constructing WebSocket URL:", error);
         // Fallback construction
         const wsProtocol = baseURL.startsWith("https") ? "wss://" : "ws://";
         const host = baseURL.replace(/^https?:\/\//, "").replace(/\/$/, "");
-        const wsURL = `${wsProtocol}${host}/ws`;
-        console.log("Fallback WebSocket URL:", wsURL);
-        return wsURL;
+        const fallbackURL = `${wsProtocol}${host}/ws`;
+        console.log("Fallback WebSocket URL:", fallbackURL);
+        return fallbackURL;
       }
     };
 
     const wsURL = constructWebSocketURL();
 
     const connectWebSocket = () => {
+      // If WebSocket is disabled, skip connection
+      if (!useWebSocket) {
+        console.log("WebSocket disabled, using HTTP polling only");
+        return;
+      }
+
       try {
         console.log("Attempting WebSocket connection:", wsURL);
         const ws = new WebSocket(wsURL);
 
         let connectionTimeout = setTimeout(() => {
           if (ws.readyState === WebSocket.CONNECTING) {
-            console.warn("WebSocket connection timeout, closing...");
+            console.warn("WebSocket connection timeout, falling back to HTTP polling");
             ws.close();
+            setUseWebSocket(false);
           }
         }, 5000);
 
@@ -340,20 +356,29 @@ export const Communications = () => {
         };
 
         ws.onerror = (error) => {
-          console.error("WebSocket Error:", error);
+          console.warn("WebSocket connection failed, switching to HTTP polling");
           if (ws.readyState === WebSocket.CONNECTING) {
-            console.warn("Connection failed, will attempt reconnection...");
+            // Disable WebSocket and use HTTP polling instead
+            setUseWebSocket(false);
+            clearTimeout(connectionTimeout);
           }
         };
 
         ws.onclose = () => {
-          console.log("WebSocket Disconnected, attempting to reconnect...");
+          console.log("WebSocket Disconnected");
           clearTimeout(reconnectTimeoutRef.current);
 
-          // Exponential backoff: 1s, 2s, 4s, 8s, 16s (max)
+          // If reconnect attempts exceed 3, switch to HTTP polling
+          if (reconnectCountRef.current >= 3) {
+            console.log("Max reconnection attempts reached, switching to HTTP polling");
+            setUseWebSocket(false);
+            return;
+          }
+
+          // Exponential backoff: 1s, 2s, 4s (max 3 attempts)
           const backoffDelay = Math.min(
             1000 * Math.pow(2, reconnectCountRef.current),
-            16000,
+            4000,
           );
           reconnectCountRef.current++;
 
@@ -379,15 +404,8 @@ export const Communications = () => {
             .catch((err) => console.error("Error fetching messages:", err));
         }
       } catch (error) {
-        console.error("Error creating WebSocket:", error);
-        const backoffDelay = Math.min(
-          1000 * Math.pow(2, reconnectCountRef.current),
-          16000,
-        );
-        reconnectCountRef.current++;
-        reconnectTimeoutRef.current = setTimeout(() => {
-          connectWebSocket();
-        }, backoffDelay);
+        console.warn("Error creating WebSocket, switching to HTTP polling:", error);
+        setUseWebSocket(false);
       }
     };
 
@@ -403,22 +421,7 @@ export const Communications = () => {
     };
   }, [userId, receiverId]);
 
-  const sendMessage = () => {
-    if (!socketRef.current) {
-      console.error("Socket not initialized");
-      alert("Connection not ready. Please wait...");
-      return;
-    }
-
-    if (socketRef.current.readyState !== WebSocket.OPEN) {
-      console.error(
-        "WebSocket is not open. Current state:",
-        socketRef.current.readyState,
-      );
-      alert("Connection lost. Attempting to reconnect...");
-      return;
-    }
-
+  const sendMessage = async () => {
     if (!newMessage.trim()) {
       return;
     }
@@ -436,12 +439,41 @@ export const Communications = () => {
       content: newMessage,
     };
 
+    // Try WebSocket first if available
+    if (useWebSocket && socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
+      try {
+        socketRef.current.send(JSON.stringify(messageData));
+        setNewMessage("");
+        console.log("Message sent via WebSocket");
+        return;
+      } catch (error) {
+        console.warn("WebSocket send failed, falling back to HTTP:", error);
+      }
+    }
+
+    // Fallback to HTTP
     try {
-      socketRef.current.send(JSON.stringify(messageData));
-      setNewMessage("");
-      console.log("Message sent successfully");
+      const response = await axios.post(
+        `${baseURL}/chat/send`,
+        {
+          sender: userId,
+          receiver: receiverId,
+          content: newMessage,
+        },
+        {
+          headers: { Authorization: clientSession },
+        }
+      );
+
+      if (response.status === 200 || response.status === 201) {
+        setNewMessage("");
+        // Fetch updated messages
+        const updatedMessages = await axios.get(`${baseURL}/chat/${userId}/${receiverId}`);
+        setMessages(updatedMessages.data);
+        console.log("Message sent via HTTP");
+      }
     } catch (error) {
-      console.error("Error sending message:", error);
+      console.error("Error sending message via HTTP:", error);
       alert("Failed to send message. Please try again.");
     }
   };
