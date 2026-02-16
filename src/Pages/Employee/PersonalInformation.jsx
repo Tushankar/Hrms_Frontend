@@ -973,15 +973,21 @@ const PersonalInformation = () => {
     return true;
   };
 
-  const fetchProgressData = async (userId) => {
+  const fetchProgressData = async (userId, existingData = null) => {
     try {
-      const response = await axios.get(
-        `${baseURL}/onboarding/get-application/${userId}`,
-        { withCredentials: true }
-      );
+      let backendData = existingData;
 
-      if (response.data?.data) {
-        const backendData = response.data.data;
+      if (!backendData) {
+        const response = await axios.get(
+          `${baseURL}/onboarding/get-application/${userId}`,
+          { withCredentials: true }
+        );
+        if (response.data?.data) {
+          backendData = response.data.data;
+        }
+      }
+
+      if (backendData) {
         setApplicationStatus(
           backendData.application?.applicationStatus || "draft"
         );
@@ -1085,6 +1091,9 @@ const PersonalInformation = () => {
         response.data.data &&
         response.data.data.application
       ) {
+        // Pass the fetched data to fetchProgressData to avoid a second API call
+        await fetchProgressData(user._id, response.data.data);
+        
         setApplicationId(response.data.data.application._id);
 
         // Load existing personal information data if it exists
@@ -1113,7 +1122,7 @@ const PersonalInformation = () => {
         toast.error("Failed to initialize form - invalid response");
       }
 
-      await fetchProgressData(user._id);
+
     } catch (error) {
       console.error("Error initializing form:", error);
       toast.error("Failed to load form data");

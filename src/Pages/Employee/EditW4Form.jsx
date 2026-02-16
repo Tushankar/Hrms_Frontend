@@ -92,21 +92,27 @@ const EditW4Form = () => {
     employerAddress: "",
   });
 
-  const fetchProgressData = async () => {
+  const fetchProgressData = async (existingData = null) => {
     try {
+      let backendData = existingData;
+      
       const userCookie = Cookies.get("user");
       const user = userCookie ? JSON.parse(userCookie) : null;
-      if (!user?._id) return;
 
-      const response = await axios.get(
-        `${baseURL}/onboarding/get-application/${user._id}`,
-        { withCredentials: true },
-      );
+      if (!backendData && user?._id) {
+        const response = await axios.get(
+          `${baseURL}/onboarding/get-application/${user._id}`,
+          { withCredentials: true },
+        );
+        if (response.data?.data) {
+          backendData = response.data.data;
+        }
+      }
 
-      if (response.data?.data?.application) {
-        const forms = response.data.data.forms;
+      if (backendData?.application) {
+        const forms = backendData.forms;
         const completedFormsArray =
-          response.data.data.application?.completedForms || [];
+          backendData.application?.completedForms || [];
         const completedSet = new Set(completedFormsArray);
 
         const completed = FORM_KEYS.filter((key) => {
@@ -219,6 +225,11 @@ const EditW4Form = () => {
               employerAddress: w4Form.employerAddress || "",
             });
           }
+          
+           // Pass fetched data to fetchProgressData to avoid redundant call
+          if (response.data.data) {
+             fetchProgressData(response.data.data);
+          }
         }
       } catch (error) {
         console.error("Error checking form editability:", error);
@@ -230,7 +241,7 @@ const EditW4Form = () => {
 
     if (id) {
       checkFormEditability();
-      fetchProgressData();
+
     }
   }, [id]);
 

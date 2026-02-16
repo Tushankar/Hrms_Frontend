@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Layout } from "../../Components/Common/layout/Layout";
 import Navbar from "../../Components/Common/Navbar/Navbar";
@@ -87,9 +88,8 @@ const Education = () => {
     }
   };
 
-  useEffect(() => {
-    initializeForm();
-  }, []);
+  // Removed manual useEffect for initializeForm
+
 
   const shouldCountForm = (key, empType) => {
     if (key === "w4Form") return empType === "W-2";
@@ -97,19 +97,29 @@ const Education = () => {
     return true;
   };
 
-  const fetchProgressData = async (userId) => {
-    try {
+  // Fetch application data using React Query (same key as Sidebar)
+  const { data: backendData, isLoading: isQueryLoading, refetch } = useQuery({
+    queryKey: ["onboardingApplication", employeeId],
+    queryFn: async () => {
+      if (!employeeId) return null;
       const response = await axios.get(
-        `${baseURL}/onboarding/get-application/${userId}`,
+        `${baseURL}/onboarding/get-application/${employeeId}`,
         { withCredentials: true }
       );
+      return response.data?.data || null;
+    },
+    enabled: !!employeeId,
+    staleTime: 1000 * 60 * 2,
+  });
 
-      if (response.data?.data) {
-        const backendData = response.data.data;
-        setApplicationStatus(
-          backendData.application?.applicationStatus || "draft"
-        );
-
+  useEffect(() => {
+    if (backendData) {
+       // Update application status
+       setApplicationStatus(
+         backendData.application?.applicationStatus || "draft"
+       );
+       
+       // Update progress
         const forms = backendData.forms || {};
         const completedSet = new Set(
           backendData.application?.completedForms || []
@@ -139,10 +149,11 @@ const Education = () => {
         ];
 
         const currentEmploymentType =
-          backendData.application.employmentType || "";
+          backendData.application?.employmentType || "";
         setEmploymentType(currentEmploymentType);
+        
         const filteredKeys = formKeys.filter((key) =>
-          shouldCountForm(key, currentEmploymentType)
+           shouldCountForm(key, currentEmploymentType)
         );
 
         const completedForms = filteredKeys.filter((key) => {
@@ -163,71 +174,72 @@ const Education = () => {
         setCompletedFormsCount(completedForms);
         setTotalForms(totalFormsCount);
         setOverallProgress(percentage);
-      }
-    } catch (error) {
-      console.error("Error fetching progress:", error);
-    }
-  };
-
-  const initializeForm = async () => {
-    try {
-      const userData = getUserFromToken();
-      const empId = userData?._id || userData?.id;
-
-      if (!empId) return;
-
-      setEmployeeId(empId);
-
-      await fetchProgressData(empId);
-      const response = await fetch(
-        `${baseURL}/onboarding/get-application/${empId}`,
-        {
-          credentials: "include",
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
+        
+        // Populate form data
+        if (backendData.application?._id) {
+            setApplicationId(backendData.application._id);
         }
-      );
 
-      if (response.ok) {
-        const data = await response.json();
-
-        if (data.data?.application?._id) {
-          setApplicationId(data.data.application._id);
-
-          const educationData = data.data.forms?.education;
-
-          if (educationData) {
-            // Check if it's an array with items
-            if (Array.isArray(educationData) && educationData.length > 0) {
-              const formattedEducations = educationData.map((edu) => ({
-                ...edu,
-                from: formatDate(edu.from),
-                to: formatDate(edu.to),
-              }));
-              setEducations(formattedEducations);
-            }
-            // Check for status at the root level or first item
-            const formStatus = educationData.status || educationData[0]?.status;
-            if (formStatus) {
-              setApplicationStatus(formStatus);
-            }
+       const educationData = backendData.forms?.education;
+       if (educationData) {
+          let history = [];
+          if (Array.isArray(educationData)) {
+              history = educationData;
+          } else if (educationData.educations && Array.isArray(educationData.educations)) {
+              // Handle case where it's wrapped in an object with 'educations' key (matches save payload)
+              history = educationData.educations;
+          } else if (educationData.educationHistory && Array.isArray(educationData.educationHistory)) {
+             // Handle case where it might be wrapped in an object with 'educationHistory' key
+              history = educationData.educationHistory;
           }
-        }
-      }
-    } catch (error) {
-      console.error("Error initializing form:", error);
-      toast.error("Failed to load form data");
-    } finally {
-      setLoading(false);
+          
+          if (history.length > 0) {
+             const formattedEducations = history.map((edu) => ({
+                 type: edu.type || "",
+                 institutionName: edu.institutionName || "",
+                 address: edu.address || "",
+                 from: formatDate(edu.from),
+                 to: formatDate(edu.to),
+                 didGraduate: edu.didGraduate || "",
+                 degree: edu.degree || "",
+                 diploma: edu.diploma || "",
+             }));
+             setEducations(formattedEducations);
+          }
+
+          // Check for status at the root level or first item and override applicationStatus
+          const formStatus = educationData.status || (Array.isArray(educationData) ? educationData[0]?.status : null);
+          if (formStatus) {
+            setApplicationStatus(formStatus);
+          }
+       }
+       setLoading(false);
+    } else if (!isQueryLoading && !backendData) {
+        setLoading(false);
     }
-  };
+  }, [backendData, isQueryLoading, employeeId]);
+  
+  // Initialize user ID from token if not passed in state
+  useEffect(() => {
+    if (!employeeId) {
+       const user = getUserFromToken();
+       if (user?._id) setEmployeeId(user._id);
+       else if (user?.id) setEmployeeId(user.id);
+    }
+  }, [employeeId]);
+
 
   const formatDate = (dateStr) => {
     if (!dateStr) return "";
-    if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
-    return dateStr.split("T")[0];
+    try {
+        if (dateStr.includes('T')) return dateStr.split("T")[0];
+        return dateStr;
+    } catch (e) {
+        return "";
+    }
   };
+
+
 
   const updateEducation = (index, field, value) => {
     setEducations((prev) => {

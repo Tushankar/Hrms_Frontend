@@ -76,7 +76,7 @@ export default function ServiceDeliveryPolicies() {
     fetchProgressData();
   }, []);
 
-  const fetchProgressData = async () => {
+  const fetchProgressData = async (existingData = null) => {
     try {
       const userToken = Cookies.get("session");
       const decodedToken = userToken && jwtDecode(userToken);
@@ -89,15 +89,19 @@ export default function ServiceDeliveryPolicies() {
 
       console.log("Fetching progress data for user:", user._id);
 
-      const response = await axios.get(
-        `${baseURL}/onboarding/get-application/${user._id}`,
-        { withCredentials: true }
-      );
+      let backendData = existingData;
 
-      console.log("Progress data response:", response.data);
+      if (!backendData) {
+        const response = await axios.get(
+          `${baseURL}/onboarding/get-application/${user._id}`,
+          { withCredentials: true }
+        );
+        if (response.data?.data) {
+          backendData = response.data.data;
+        }
+      }
 
-      if (response.data?.data) {
-        const backendData = response.data.data;
+      if (backendData) {
         const forms = backendData.forms || {};
 
         const currentEmploymentType =
@@ -166,6 +170,11 @@ export default function ServiceDeliveryPolicies() {
         console.log("Application response:", appResponse.data);
 
         if (appResponse.data?.data?.application) {
+          // Pass the fetched data to fetchProgressData to avoid a second API call
+          if (appResponse.data.data) {
+            await fetchProgressData(appResponse.data.data);
+          }
+          
           setApplicationId(appResponse.data.data.application._id);
           console.log(
             "Application ID set:",
@@ -281,7 +290,6 @@ export default function ServiceDeliveryPolicies() {
   useEffect(() => {
     const init = async () => {
       await initializeForm();
-      fetchProgressData();
       await fetchPolicyContent();
     };
     init();

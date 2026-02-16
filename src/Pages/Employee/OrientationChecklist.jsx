@@ -78,7 +78,6 @@ const OrientationChecklist = () => {
 
   useEffect(() => {
     initializeForm();
-    fetchProgressData();
   }, []);
 
   useEffect(() => {
@@ -100,22 +99,29 @@ const OrientationChecklist = () => {
     }
   }, [loading, formData.signatureDate]);
 
-  const fetchProgressData = async () => {
+  const fetchProgressData = async (existingData = null) => {
     try {
       const userCookie = Cookies.get("user");
       const user = userCookie
         ? JSON.parse(userCookie)
         : { _id: "67e0f8770c6feb6ba99d11d2" };
 
-      const response = await axios.get(
-        `${baseURL}/onboarding/get-application/${user._id}`,
-        { withCredentials: true },
-      );
+      let backendData = existingData;
 
-      if (response.data?.data?.application) {
-        const forms = response.data.data.forms;
+      if (!backendData) {
+        const response = await axios.get(
+          `${baseURL}/onboarding/get-application/${user._id}`,
+          { withCredentials: true },
+        );
+        if (response.data?.data) {
+          backendData = response.data.data;
+        }
+      }
+
+      if (backendData?.application) {
+        const forms = backendData.forms;
         setApplicationStatus(forms);
-        const empType = response.data.data.application.employmentType;
+        const empType = backendData.application.employmentType;
         setEmploymentType(empType);
 
         const totalForms = FORM_KEYS.filter((key) =>
@@ -185,6 +191,11 @@ const OrientationChecklist = () => {
         response.data.data &&
         response.data.data.application
       ) {
+        // Pass the fetched data to fetchProgressData to avoid a second API call
+        if (response.data.data) {
+          await fetchProgressData(response.data.data);
+        }
+        
         setApplicationId(response.data.data.application._id);
 
         // Load existing form data if it exists

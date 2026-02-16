@@ -170,15 +170,21 @@ const EmploymentApplication = () => {
     }
   };
 
-  const fetchProgressData = async (userId) => {
+  const fetchProgressData = async (userId, existingData = null) => {
     try {
-      const response = await axios.get(
-        `${baseURL}/onboarding/get-application/${userId}`,
-        { withCredentials: true }
-      );
+      let backendData = existingData;
 
-      if (response.data?.data) {
-        const backendData = response.data.data;
+      if (!backendData) {
+        const response = await axios.get(
+          `${baseURL}/onboarding/get-application/${userId}`,
+          { withCredentials: true }
+        );
+        if (response.data?.data) {
+          backendData = response.data.data;
+        }
+      }
+
+      if (backendData) {
         const forms = backendData.forms || {};
         const completedSet = new Set(
           backendData.application?.completedForms || []
@@ -242,7 +248,7 @@ const EmploymentApplication = () => {
 
       console.log("Initializing form for user:", user._id); // Debug log
 
-      await fetchProgressData(user._id);
+
 
       // Get or create onboarding application
       const headers = {};
@@ -265,6 +271,9 @@ const EmploymentApplication = () => {
         response.data.data &&
         response.data.data.application
       ) {
+        // Pass the fetched data to fetchProgressData to avoid a second API call
+        await fetchProgressData(user._id, response.data.data);
+        
         setApplicationId(response.data.data.application._id);
         console.log("Application ID set:", response.data.data.application._id); // Debug log
 

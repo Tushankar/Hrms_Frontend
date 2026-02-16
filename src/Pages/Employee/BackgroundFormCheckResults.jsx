@@ -679,8 +679,7 @@ const BackgroundFormCheckResults = () => {
 
       setEmployeeId(user._id);
 
-      // Get application and fetch progress data
-      await fetchProgressData(user._id);
+
 
       // Get application ID
       const appResponse = await axios.get(
@@ -689,6 +688,11 @@ const BackgroundFormCheckResults = () => {
       );
 
       if (appResponse.data?.data?.application) {
+        // Pass the fetched data to fetchProgressData to avoid a second API call
+        if (appResponse.data.data) {
+          await fetchProgressData(user._id, appResponse.data.data);
+        }
+        
         setApplicationId(appResponse.data.data.application._id);
       }
     } catch (error) {
@@ -699,17 +703,23 @@ const BackgroundFormCheckResults = () => {
     }
   };
 
-  const fetchProgressData = async (userId) => {
+  const fetchProgressData = async (userId, existingData = null) => {
     try {
-      const response = await axios.get(
-        `${baseURL}/onboarding/get-application/${userId}`,
-        { withCredentials: true }
-      );
+      let backendData = existingData;
 
-      console.log("🔍 Progress Data Response:", response.data);
+      if (!backendData) {
+        const response = await axios.get(
+          `${baseURL}/onboarding/get-application/${userId}`,
+          { withCredentials: true }
+        );
+        if (response.data?.data) {
+          backendData = response.data.data;
+        }
+      }
 
-      if (response.data?.data) {
-        const backendData = response.data.data;
+      console.log("🔍 Progress Data:", backendData);
+
+      if (backendData) {
         setApplicationStatus(
           backendData.application?.applicationStatus || "draft"
         );

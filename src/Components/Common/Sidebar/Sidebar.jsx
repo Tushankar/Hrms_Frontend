@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useMemo } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 // Using external logo URL instead of local TempLogo
 const SIDEBAR_LOGO_URL =
   "https://i.pinimg.com/1200x/fd/81/16/fd81160d9bb6751db8d120e675069b10.jpg";
@@ -55,49 +56,174 @@ const HamburgerIcon = ({ isCollapsed }) => (
   </svg>
 );
 
-export const Sidebar = ({
-  isMobileMenuOpen,
-  setIsMobileMenuOpen,
-  isDesktopCollapsed,
-  setIsDesktopCollapsed,
-}) => {
-  const userToken = Cookies.get("session");
-  const decodedToken = userToken && jwtDecode(userToken);
-  const user = decodedToken?.user;
+export const Sidebar = (props) => {
+  const queryClient = useQueryClient();
+  const { isMobileMenuOpen, setIsMobileMenuOpen, isDesktopCollapsed } = props; // Props from Layout (now Redux-backed)
+
+  // Memoize user from token
+  const user = useMemo(() => {
+    try {
+      const userToken = Cookies.get("session");
+      if (!userToken) return null;
+      const decodedToken = jwtDecode(userToken);
+      return decodedToken?.user;
+    } catch (error) {
+      console.error("Error decoding token:", error);
+      return null;
+    }
+  }, []); // Only decode once
+
   const location = useLocation();
   const navigate = useNavigate();
   const [hoveredItem, setHoveredItem] = useState(null);
-  const [formCompletionStatus, setFormCompletionStatus] = useState({});
-  const [isLoadingFormStatus, setIsLoadingFormStatus] = useState(false);
+  
+  // Local state for UI expansion only
   const [isApplicationsExpanded, setIsApplicationsExpanded] = useState(false);
   const [hasUserCollapsedSubmenu, setHasUserCollapsedSubmenu] = useState(false);
-  const [lastFetchTime, setLastFetchTime] = useState(0);
   const [expandedParts, setExpandedParts] = useState({
     part1: false,
     part2: true,
     part3: false,
   });
-  const [isPCAEligible, setIsPCAEligible] = useState(false);
-  const [pcaEligibilityChecked, setPcaEligibilityChecked] = useState(false);
-  const [applicationStatus, setApplicationStatus] = useState("draft");
-  const [employmentType, setEmploymentType] = useState(null);
 
   const baseURL = import.meta.env.VITE__BASEURL;
 
-  // Forms data organized by parts - memoized to update when isPCAEligible and employmentType changes
-  const formsByParts = useMemo(() => {
-    console.log(
-      "[Sidebar useMemo] isPCAEligible:",
-      isPCAEligible,
-      "applicationStatus:",
-      applicationStatus,
-      "employmentType:",
-      employmentType
-    );
+  // React Query for Application Data
+  const { data: applicationData, isLoading: isLoadingFormStatus } = useQuery({
+    queryKey: ["onboardingApplication", user?._id || user?.id],
+    queryFn: async () => {
+      const employeeId = user?._id || user?.id;
+      if (!employeeId) return null;
 
+      const response = await axios.get(
+        `${baseURL}/onboarding/get-application/${employeeId}`,
+        { withCredentials: true }
+      );
+      return response.data?.data || null;
+    },
+    enabled: !!(user?.userRole === "employee" && (user?._id || user?.id)),
+    staleTime: 1000 * 60 * 2, // 2 minutes
+    refetchOnWindowFocus: true, 
+  });
+
+  // Derived state from React Query data
+  const {
+    isPCAEligible,
+    applicationStatus,
+    employmentType,
+    formCompletionStatus,
+  } = useMemo(() => {
+    if (!applicationData) {
+      return {
+        isPCAEligible: false,
+        applicationStatus: "draft",
+        employmentType: null,
+        formCompletionStatus: {},
+      };
+    }
+
+    const forms = applicationData.forms || {};
+    const positionType = forms.positionType?.positionAppliedFor;
+    const isPCAEligible = positionType === "PCA";
+    const appStatus = applicationData.application?.applicationStatus || "draft";
+    const empType = applicationData.application?.employmentType || null;
+
+    // Helper to get form status
+    const getFormStatus = (formData) => {
+      if (!formData) return undefined;
+      return (
+        formData.status === "submitted" ||
+        formData.status === "completed" ||
+        formData.status === "under_review" ||
+        formData.status === "approved"
+      );
+    };
+
+    // Helper for CPR status
+    const getCprCertificateStatus = (backgroundCheckData) => {
+      if (!backgroundCheckData) return undefined;
+      // Check for either single certificate or array of certificates
+      if (backgroundCheckData.cprFirstAidCertificate) return true;
+      if (
+        backgroundCheckData.cprCertificates &&
+        Array.isArray(backgroundCheckData.cprCertificates) &&
+        backgroundCheckData.cprCertificates.length > 0
+      )
+        return true;
+      if (backgroundCheckData.status) return false;
+      return undefined;
+    };
+
+
+    const completionMap = {
+      "personal-information": getFormStatus(forms.personalInformation),
+      "professional-experience": getFormStatus(forms.professionalExperience),
+      education: getFormStatus(forms.education),
+      references: getFormStatus(forms.references),
+      "legal-disclosures": getFormStatus(forms.legalDisclosures),
+      "work-experience": getFormStatus(forms.workExperience),
+      "orientation-presentation": getFormStatus(forms.orientationPresentation),
+
+      "w4-form": getFormStatus(forms.w4Form),
+      "w9-form": getFormStatus(forms.w9Form),
+      "i9-form": getFormStatus(forms.i9Form),
+      "emergency-contact": getFormStatus(forms.emergencyContact),
+      "direct-deposit": getFormStatus(forms.directDeposit),
+      "misconduct-form": getFormStatus(forms.misconductStatement),
+      "code-of-ethics": getFormStatus(forms.codeOfEthics),
+      "service-delivery-policies": getFormStatus(forms.serviceDeliveryPolicy),
+      "non-compete-agreement": getFormStatus(forms.nonCompeteAgreement),
+      "orientation-checklist": getFormStatus(forms.orientationChecklist),
+      "background-check": getFormStatus(forms.backgroundCheck),
+      "cpr-first-aid-certificate": getCprCertificateStatus(
+        forms.backgroundCheck
+      ),
+      "tb-symptom-screen": getFormStatus(forms.tbSymptomScreen),
+      "driving-license": getFormStatus(forms.drivingLicense),
+      "job-description-pca": getFormStatus(forms.jobDescriptionPCA),
+      "job-description-cna": getFormStatus(forms.jobDescriptionCNA),
+      "job-description-lpn": getFormStatus(forms.jobDescriptionLPN),
+      "job-description-rn": getFormStatus(forms.jobDescriptionRN),
+      "employee-details-upload": getFormStatus(forms.employeeDetailsUpload),
+      "employment-type": !!applicationData.application?.employmentType,
+    };
+
+    // Correct job description status based on position
+    let jobDescStatus = undefined;
+    if (positionType === "PCA")
+      jobDescStatus = getFormStatus(forms.jobDescriptionPCA);
+    else if (positionType === "CNA")
+      jobDescStatus = getFormStatus(forms.jobDescriptionCNA);
+    else if (positionType === "LPN")
+      jobDescStatus = getFormStatus(forms.jobDescriptionLPN);
+    else if (positionType === "RN")
+      jobDescStatus = getFormStatus(forms.jobDescriptionRN);
+
+    completionMap["job-description-pca"] = jobDescStatus;
+
+    // Professional certificates
+    const professionalCertificatesStatus =
+      applicationData.application?.professionalCertificates &&
+      Object.values(applicationData.application.professionalCertificates).some(
+        (arr) => arr && arr.length > 0
+      );
+
+    completionMap["employee-details-upload"] = professionalCertificatesStatus
+      ? true
+      : undefined;
+
+    return {
+      isPCAEligible,
+      applicationStatus: appStatus,
+      employmentType: empType,
+      formCompletionStatus: completionMap,
+    };
+  }, [applicationData]);
+
+  // Forms data organized by parts
+  const formsByParts = useMemo(() => {
     const part4Forms = [];
 
-    // Only show After Hire forms if application is approved
     if (applicationStatus === "approved") {
       part4Forms.push({
         id: "training-video",
@@ -105,11 +231,7 @@ export const Sidebar = ({
         path: "/employee/training-video",
       });
 
-      // Add PCA Training Questions if eligible
       if (isPCAEligible) {
-        console.log(
-          "[Sidebar useMemo] Adding PCA Training Questions to Part 4"
-        );
         part4Forms.push({
           id: "pca-training-questions",
           name: "PCA Training Examinations",
@@ -269,311 +391,21 @@ export const Sidebar = ({
     [formsByParts]
   );
 
-  // Helper function to get user data from JWT token
-  const getUserFromToken = () => {
-    try {
-      const session = Cookies.get("session");
-      if (!session) return null;
-
-      const base64Url = session.split(".")[1];
-      const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
-      const jsonPayload = decodeURIComponent(
-        atob(base64)
-          .split("")
-          .map(function (c) {
-            return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
-          })
-          .join("")
-      );
-
-      const decoded = JSON.parse(jsonPayload);
-      return decoded.user;
-    } catch (error) {
-      console.error("Error decoding token:", error);
-      return null;
-    }
-  };
-
-  // Check PCA eligibility (can be called multiple times to re-check)
-  const checkPCAEligibility = async (forceRecheck = false) => {
-    // Only skip if already checked AND not forcing a recheck
-    if (pcaEligibilityChecked && !forceRecheck) return;
-
-    try {
-      const userData = getUserFromToken();
-      const employeeId = userData?._id || userData?.id;
-
-      if (!employeeId) return;
-
-      const response = await axios.get(
-        `${baseURL}/onboarding/get-application/${employeeId}`,
-        {
-          withCredentials: true,
-        }
-      );
-
-      if (response.data?.data?.forms) {
-        const forms = response.data.data.forms;
-        const positionType = forms.positionType?.positionAppliedFor;
-        const isEligible = positionType === "PCA";
-        console.log(
-          "[Sidebar] Position Type:",
-          positionType,
-          "isPCAEligible:",
-          isEligible
-        );
-        setIsPCAEligible(isEligible);
-        setPcaEligibilityChecked(true);
-      }
-    } catch (error) {
-      console.error("[Sidebar] Error checking PCA eligibility:", error);
-    }
-  };
-
-  // Fetch form completion status with debouncing (minimum 5 seconds between fetches)
-  const fetchFormCompletionStatus = async (force = false) => {
-    const now = Date.now();
-    const timeSinceLastFetch = now - lastFetchTime;
-
-    // Prevent multiple simultaneous calls and enforce minimum 5 second gap unless forced
-    if (isLoadingFormStatus || (!force && timeSinceLastFetch < 5000)) {
-      console.log("[Fetch] Skipped - too soon or already loading");
-      return;
-    }
-
-    try {
-      setIsLoadingFormStatus(true);
-      setLastFetchTime(now);
-
-      const userData = getUserFromToken();
-      const employeeId = userData?._id || userData?.id;
-
-      console.log("[Fetch] Employee ID:", employeeId);
-
-      if (!employeeId) {
-        console.log("[Fetch] No employee ID found");
-        return;
-      }
-
-      const response = await axios.get(
-        `${baseURL}/onboarding/get-application/${employeeId}`,
-        {
-          withCredentials: true,
-        }
-      );
-
-      console.log("[Fetch] Response:", response.data);
-
-      if (response.data && response.data.data) {
-        const backendData = response.data.data;
-        const forms = backendData.forms || {};
-
-        console.log("[Fetch] Forms data:", forms);
-
-        // Map form IDs to their completion status (true = completed, false = draft/incomplete, undefined = not started)
-        const completionMap = {
-          "personal-information": getFormStatus(forms.personalInformation),
-          "professional-experience": getFormStatus(
-            forms.professionalExperience
-          ),
-          education: getFormStatus(forms.education),
-          references: getFormStatus(forms.references),
-          "legal-disclosures": getFormStatus(forms.legalDisclosures),
-          "work-experience": getFormStatus(forms.workExperience),
-          "orientation-presentation": getFormStatus(
-            forms.orientationPresentation
-          ),
-
-          "w4-form": getFormStatus(forms.w4Form),
-          "w9-form": getFormStatus(forms.w9Form),
-          "i9-form": getFormStatus(forms.i9Form),
-          "emergency-contact": getFormStatus(forms.emergencyContact),
-          "direct-deposit": getFormStatus(forms.directDeposit),
-          "misconduct-form": getFormStatus(forms.misconductStatement),
-          "code-of-ethics": getFormStatus(forms.codeOfEthics),
-          "service-delivery-policies": getFormStatus(
-            forms.serviceDeliveryPolicy
-          ),
-          "non-compete-agreement": getFormStatus(forms.nonCompeteAgreement),
-          "orientation-checklist": getFormStatus(forms.orientationChecklist),
-          "background-check": getFormStatus(forms.backgroundCheck),
-          "cpr-first-aid-certificate": getCprCertificateStatus(
-            forms.backgroundCheck
-          ),
-          "tb-symptom-screen": getFormStatus(forms.tbSymptomScreen),
-          "driving-license": getFormStatus(forms.drivingLicense),
-          "job-description-pca": getFormStatus(forms.jobDescriptionPCA),
-          "job-description-cna": getFormStatus(forms.jobDescriptionCNA),
-          "job-description-lpn": getFormStatus(forms.jobDescriptionLPN),
-          "job-description-rn": getFormStatus(forms.jobDescriptionRN),
-          "employee-details-upload": getFormStatus(forms.employeeDetailsUpload),
-          "employment-type": !!backendData.application?.employmentType,
-        };
-
-        console.log("[Fetch] Completion map:", completionMap);
-
-        // Get position type to check the correct job description field
-        const positionType = forms.positionType?.positionAppliedFor;
-        let jobDescStatus = undefined;
-
-        if (positionType === "PCA") {
-          jobDescStatus = getFormStatus(forms.jobDescriptionPCA);
-        } else if (positionType === "CNA") {
-          jobDescStatus = getFormStatus(forms.jobDescriptionCNA);
-        } else if (positionType === "LPN") {
-          jobDescStatus = getFormStatus(forms.jobDescriptionLPN);
-        } else if (positionType === "RN") {
-          jobDescStatus = getFormStatus(forms.jobDescriptionRN);
-        }
-
-        console.log(
-          "[Fetch] Position:",
-          positionType,
-          "Job Desc Status:",
-          jobDescStatus
-        );
-        completionMap["job-description-pca"] = jobDescStatus;
-
-        // Check for employee details upload (professional certificates)
-        const professionalCertificatesStatus =
-          backendData.application?.professionalCertificates &&
-          Object.values(backendData.application.professionalCertificates).some(
-            (arr) => arr && arr.length > 0
-          );
-
-        completionMap["employee-details-upload"] =
-          professionalCertificatesStatus ? true : undefined;
-
-        // Log summary
-        const completedCount = Object.values(completionMap).filter(
-          (v) => v === true
-        ).length;
-        console.log(`[Fetch] Summary: ${completedCount}/20 forms completed`);
-
-        setFormCompletionStatus(completionMap);
-        setApplicationStatus(
-          backendData.application?.applicationStatus || "draft"
-        );
-        setEmploymentType(backendData.application?.employmentType || null);
-      } else {
-        console.log("[Fetch] No data in response");
-      }
-    } catch (error) {
-      console.error("Error fetching form completion status:", error);
-      console.error("Error details:", error.response?.data);
-    } finally {
-      setIsLoadingFormStatus(false);
-    }
-  };
-
-  // Helper function to get form status (true = completed, false = draft/incomplete, undefined = not started)
-  const getFormStatus = (formData) => {
-    if (!formData) {
-      return undefined; // Form not started
-    }
-
-    console.log(
-      "[getFormStatus] Checking form:",
-      formData._id,
-      "Status:",
-      formData.status
-    );
-
-    // Completed statuses - show green tick
-    if (
-      formData.status === "submitted" ||
-      formData.status === "completed" ||
-      formData.status === "under_review" ||
-      formData.status === "approved"
-    ) {
-      console.log("[getFormStatus] ✓ Completed");
-      return true;
-    }
-
-    // Draft status - show red cross (form started but not completed)
-    if (formData.status === "draft") {
-      console.log("[getFormStatus] ❌ Draft");
-      return false;
-    }
-
-    console.log("[getFormStatus] Unknown status");
-    return undefined; // Unknown status
-  };
-
-  // Helper function to get CPR certificate status (checks if cprFirstAidCertificate file exists)
-  const getCprCertificateStatus = (backgroundCheckData) => {
-    if (!backgroundCheckData) {
-      return undefined; // Not started
-    }
-
-    // If CPR certificate file exists, it's completed
-    if (backgroundCheckData.cprFirstAidCertificate) {
-      console.log("[getCprCertificateStatus] ✓ Completed");
-      return true;
-    }
-
-    // If background check form is started/completed but no CPR certificate, it's draft
-    if (backgroundCheckData.status) {
-      console.log("[getCprCertificateStatus] ❌ Draft");
-      return false;
-    }
-
-    return undefined; // Not started
-  };
-
-  // Fetch form status only on component mount
+  // Event Listeners for cache invalidation
   useEffect(() => {
-    if (user && user.userRole === "employee" && !isLoadingFormStatus) {
-      fetchFormCompletionStatus();
-      checkPCAEligibility();
-    }
-  }, [user?.userRole]); // Only re-fetch if user role changes
-
-  // Listen for position type updates to re-check PCA eligibility
-  useEffect(() => {
-    const handlePositionTypeUpdate = () => {
-      console.log(
-        "[Sidebar] Position type updated, re-checking PCA eligibility"
-      );
-      // Force recheck both form status and PCA eligibility
-      fetchFormCompletionStatus(true);
-      checkPCAEligibility(true);
+    const invalidateData = () => {
+      console.log("[Sidebar] Invalidating application data query");
+      queryClient.invalidateQueries(["onboardingApplication"]);
     };
 
-    const handleFormStatusUpdate = () => {
-      console.log("[Sidebar] Form status updated, refreshing");
-      fetchFormCompletionStatus(true);
-    };
-
-    // Listen for custom events
-    window.addEventListener("positionTypeSaved", handlePositionTypeUpdate);
-    window.addEventListener("formStatusUpdated", handleFormStatusUpdate);
+    window.addEventListener("positionTypeSaved", invalidateData);
+    window.addEventListener("formStatusUpdated", invalidateData);
 
     return () => {
-      window.removeEventListener("positionTypeSaved", handlePositionTypeUpdate);
-      window.removeEventListener("formStatusUpdated", handleFormStatusUpdate);
+      window.removeEventListener("positionTypeSaved", invalidateData);
+      window.removeEventListener("formStatusUpdated", invalidateData);
     };
-  }, []);
-
-  // Auto-refresh form completion status every 2 minutes for employees (reduced frequency)
-  // COMMENTED OUT: Only fetch on component mount or when clicking My Applications
-  // useEffect(() => {
-  //   let interval;
-  //   const isOnTaskManagement = location.pathname === "/employee/task-management";
-
-  //   if (user && user.userRole === "employee" && !isOnTaskManagement) {
-  //     interval = setInterval(() => {
-  //       if (!isLoadingFormStatus) {
-  //         fetchFormCompletionStatus(false); // Non-forced refresh
-  //       }
-  //     }, 120000); // 120 seconds (2 minutes)
-  //   }
-  //   return () => {
-  //     if (interval) {
-  //       clearInterval(interval);
-  //     }
-  //   };
-  // }, [user?.userRole, isLoadingFormStatus, location.pathname]);
+  }, [queryClient]);
 
   // Auto-expand applications submenu when on form routes
   useEffect(() => {
@@ -582,11 +414,8 @@ export const Sidebar = ({
       (form) => form.path === currentPath
     );
 
-    // Always expand submenu when on a form page
     if (isOnFormPage) {
       setIsApplicationsExpanded(true);
-
-      // Also expand the relevant part
       Object.keys(formsByParts).forEach((partKey) => {
         const partForms = formsByParts[partKey].forms;
         const isInThisPart = partForms.some(
@@ -596,8 +425,6 @@ export const Sidebar = ({
           setExpandedParts((prev) => ({ ...prev, [partKey]: true }));
         }
       });
-
-      // Reset the manual collapse flag when navigating to a form
       setHasUserCollapsedSubmenu(false);
     }
   }, [location.pathname, applicationForms, formsByParts]);
@@ -789,8 +616,8 @@ export const Sidebar = ({
                     onClick={() => {
                       console.log("=== My Applications Clicked ===");
 
-                      // Fetch fresh form status when clicking My Applications
-                      fetchFormCompletionStatus(true); // Force refresh
+                      // Invalidate query to fetch fresh data
+                      queryClient.invalidateQueries(["onboardingApplication"]);
 
                       // Navigate to task management
                       navigate("/employee/task-management");

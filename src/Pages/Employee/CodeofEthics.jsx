@@ -58,7 +58,7 @@ export default function CodeOfEthics() {
     fetchProgressData();
   }, []);
 
-  const fetchProgressData = async () => {
+  const fetchProgressData = async (existingData = null) => {
     try {
       const userToken = Cookies.get("session");
       const decodedToken = userToken && jwtDecode(userToken);
@@ -69,13 +69,19 @@ export default function CodeOfEthics() {
         return;
       }
 
-      const response = await axios.get(
-        `${baseURL}/onboarding/get-application/${user._id}`,
-        { withCredentials: true }
-      );
+      let backendData = existingData;
 
-      if (response.data?.data) {
-        const backendData = response.data.data;
+      if (!backendData) {
+        const response = await axios.get(
+          `${baseURL}/onboarding/get-application/${user._id}`,
+          { withCredentials: true }
+        );
+        if (response.data?.data) {
+          backendData = response.data.data;
+        }
+      }
+
+      if (backendData) {
         const forms = backendData.forms || {};
 
         const currentEmploymentType =
@@ -139,6 +145,11 @@ export default function CodeOfEthics() {
       );
 
       if (appResponse.data?.data?.application) {
+        // Pass the fetched data to fetchProgressData to avoid a second API call
+        if (appResponse.data.data) {
+          await fetchProgressData(appResponse.data.data);
+        }
+        
         setApplicationId(appResponse.data.data.application._id);
       }
     } catch (error) {
@@ -192,7 +203,6 @@ export default function CodeOfEthics() {
   };
 
   useEffect(() => {
-    fetchProgressData();
     initializeForm();
   }, []);
 

@@ -142,15 +142,21 @@ const WorkExperience = () => {
     return true;
   };
 
-  const fetchProgressData = async (userId) => {
+  const fetchProgressData = async (userId, existingData = null) => {
     try {
-      const response = await axios.get(
-        `${baseURL}/onboarding/get-application/${userId}`,
-        { withCredentials: true }
-      );
+      let backendData = existingData;
 
-      if (response.data?.data) {
-        const backendData = response.data.data;
+      if (!backendData) {
+        const response = await axios.get(
+          `${baseURL}/onboarding/get-application/${userId}`,
+          { withCredentials: true }
+        );
+        if (response.data?.data) {
+          backendData = response.data.data;
+        }
+      }
+
+      if (backendData) {
         setApplicationStatus(
           backendData.application?.applicationStatus || "draft"
         );
@@ -227,7 +233,6 @@ const WorkExperience = () => {
       console.log("[WorkExperience] Using employee ID:", empId);
       setEmployeeId(empId);
 
-      await fetchProgressData(empId);
       const response = await fetch(
         `${baseURL}/onboarding/get-application/${empId}`,
         {
@@ -240,6 +245,12 @@ const WorkExperience = () => {
 
       if (response.ok) {
         const data = await response.json();
+        
+        // Pass the fetched data to fetchProgressData to avoid a second API call
+        if (data.data) {
+          await fetchProgressData(empId, data.data);
+        }
+
         console.log("📦 [WorkExperience] Full API response:", data);
         console.log("📦 [WorkExperience] Application data:", data.data);
         console.log("📦 [WorkExperience] Forms data:", data.data?.forms);

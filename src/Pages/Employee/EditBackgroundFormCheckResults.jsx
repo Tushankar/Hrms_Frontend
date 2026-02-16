@@ -93,22 +93,29 @@ const EditBackgroundFormCheckResults = () => {
     return formKey !== "w9Form"; // default to W-2 if not set
   };
 
-  const fetchProgressData = async () => {
+  const fetchProgressData = async (userId, existingData = null) => {
     try {
+      let backendData = existingData;
+      
       const userCookie = Cookies.get("user");
       const user = userCookie
         ? JSON.parse(userCookie)
         : { _id: "67e0f8770c6feb6ba99d11d2" };
 
-      const response = await axios.get(
-        `${baseURL}/onboarding/get-application/${user._id}`,
-        { withCredentials: true },
-      );
+      if (!backendData) {
+        const response = await axios.get(
+          `${baseURL}/onboarding/get-application/${user._id}`,
+          { withCredentials: true },
+        );
+        if (response.data?.data) {
+           backendData = response.data.data;
+        }
+      }
 
-      if (response.data?.data?.application) {
-        const forms = response.data.data.forms;
+      if (backendData?.application) {
+        const forms = backendData.forms;
         setApplicationStatus(forms);
-        setEmploymentType(response.data.data.application.employmentType);
+        setEmploymentType(backendData.application.employmentType);
 
         const formKeys = [
           "employmentType",
@@ -183,7 +190,7 @@ const EditBackgroundFormCheckResults = () => {
     if (isHRView || isViewMode) {
       initializeForm();
       if (!isHRView) {
-        fetchProgressData();
+
       }
     }
   }, [isHRView, isViewMode]);
@@ -211,7 +218,12 @@ const EditBackgroundFormCheckResults = () => {
         targetApplicationId = appResponse.data?.data?.application?._id;
 
         if (targetApplicationId) {
-          fetchProgressData(currentUserId);
+          // Pass fetched data to fetchProgressData
+          if (appResponse.data?.data) {
+             fetchProgressData(currentUserId, appResponse.data.data);
+          } else {
+             fetchProgressData(currentUserId);
+          }
         }
       }
 

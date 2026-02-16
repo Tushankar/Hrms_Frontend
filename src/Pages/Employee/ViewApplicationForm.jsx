@@ -43,15 +43,21 @@ const ViewApplicationForm = () => {
   const baseURL = import.meta.env.VITE__BASEURL;
 
   // Fetch progress data from task management API
-  const fetchProgressData = async (userId) => {
+  const fetchProgressData = async (userId, existingData = null) => {
     try {
-      const response = await axios.get(
-        `${baseURL}/onboarding/get-application/${userId}`,
-        { withCredentials: true }
-      );
+      let backendData = existingData;
 
-      if (response.data?.data) {
-        const backendData = response.data.data;
+      if (!backendData) {
+        const response = await axios.get(
+          `${baseURL}/onboarding/get-application/${userId}`,
+          { withCredentials: true }
+        );
+        if (response.data?.data) {
+          backendData = response.data.data;
+        }
+      }
+
+      if (backendData) {
         setApplicationStatus(
           backendData.application?.applicationStatus || "draft"
         );
@@ -155,8 +161,7 @@ const ViewApplicationForm = () => {
       console.log("Final token:", token); // Debug log
       console.log("Initializing form for user:", user._id); // Debug log
 
-      // Fetch progress data
-      await fetchProgressData(user._id);
+
 
       // Get or create onboarding application
       const headers = {};
@@ -179,6 +184,9 @@ const ViewApplicationForm = () => {
         response.data.data &&
         response.data.data.application
       ) {
+        // Pass the fetched data to fetchProgressData to avoid a second API call
+        await fetchProgressData(user._id, response.data.data);
+        
         setApplicationId(response.data.data.application._id);
         console.log("Application ID set:", response.data.data.application._id); // Debug log
 
