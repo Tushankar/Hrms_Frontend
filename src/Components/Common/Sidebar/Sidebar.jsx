@@ -88,6 +88,27 @@ export const Sidebar = (props) => {
 
   const baseURL = import.meta.env.VITE__BASEURL;
 
+  // Live super-admin check from DB (bypasses stale JWT)
+  const { data: liveAdminData } = useQuery({
+    queryKey: ["adminMe", user?._id || user?.id],
+    queryFn: async () => {
+      const token = Cookies.get("session");
+      if (!token) return null;
+      const role = user?.userRole;
+      if (role !== "admin" && role !== "hr") return null;
+      const res = await axios.get(`${baseURL}/admin/me`, {
+        headers: { Authorization: token },
+        withCredentials: true,
+      });
+      return res.data?.data || null;
+    },
+    enabled: user?.userRole === "admin" || user?.userRole === "hr",
+    staleTime: 1000 * 30, // re-check every 30s
+  });
+
+  // isSuperAdmin: prefer live DB value, fall back to JWT value
+  const isSuperAdmin = !!(liveAdminData?.isSuperAdmin ?? user?.isSuperAdmin);
+
   // React Query for Application Data
   const { data: applicationData, isLoading: isLoadingFormStatus } = useQuery({
     queryKey: ["onboardingApplication", user?._id || user?.id],
@@ -981,6 +1002,55 @@ export const Sidebar = (props) => {
                     <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-[#1F3A93] rounded-r-full" />
                   )}
                 </li>
+
+                {/* Manage Admins – visible ONLY to the super admin */}
+                {!!isSuperAdmin && (
+                  <li
+                    className={getMenuItemClass("/admin/manage-admins", 5)}
+                    onMouseEnter={() => setHoveredItem(5)}
+                    onMouseLeave={() => setHoveredItem(null)}
+                  >
+                    <Link
+                      to="/admin/manage-admins"
+                      className={`flex justify-start items-center gap-4 w-full ${
+                        isDesktopCollapsed ? "md:justify-center" : ""
+                      }`}
+                      onClick={closeMobileMenu}
+                    >
+                      <span className={getIconColorClass("/admin/manage-admins", 5)}>
+                        {/* Shield / Users icon */}
+                        <svg
+                          width="20"
+                          height="20"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                          <circle cx="9" cy="7" r="4" />
+                          <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                          <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                        </svg>
+                      </span>
+                      <h4
+                        className={`text-xs md:text-sm ${getTextColorClass(
+                          "/admin/manage-admins",
+                          5
+                        )} font-medium block transition-all duration-200 ease-linear whitespace-nowrap ${
+                          isDesktopCollapsed ? "md:hidden" : ""
+                        }`}
+                      >
+                        Manage Admins
+                      </h4>
+                    </Link>
+                    {isActiveRoute("/admin/manage-admins") && (
+                      <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-[#1F3A93] rounded-r-full" />
+                    )}
+                  </li>
+                )}
               </ul>
             </div>
           </>
@@ -1167,6 +1237,47 @@ export const Sidebar = (props) => {
                   </li>
                 </Link>
               </ul>
+
+              {/* Manage Admins – super admin (HR) only */}
+              {!!isSuperAdmin && (
+                <ul className="flex flex-col justify-center items-center w-full gap-0 mt-0">
+                  <li
+                    className={`${getMenuItemClass("/hr/manage-admins", 5)} gap-3`}
+                    onMouseEnter={() => setHoveredItem(5)}
+                    onMouseLeave={() => setHoveredItem(null)}
+                  >
+                    <Link
+                      to="/hr/manage-admins"
+                      className={`flex justify-start items-center gap-4 w-full ${
+                        isDesktopCollapsed ? "md:justify-center" : ""
+                      }`}
+                      onClick={closeMobileMenu}
+                    >
+                      <span className={getIconColorClass("/hr/manage-admins", 5)}>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                          <circle cx="9" cy="7" r="4" />
+                          <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                          <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                        </svg>
+                      </span>
+                      <h4
+                        className={`text-xs md:text-sm ${getTextColorClass(
+                          "/hr/manage-admins",
+                          5
+                        )} font-medium block transition-all duration-200 ease-linear whitespace-nowrap ${
+                          isDesktopCollapsed ? "md:hidden" : ""
+                        }`}
+                      >
+                        Manage Admins
+                      </h4>
+                    </Link>
+                    {isActiveRoute("/hr/manage-admins") && (
+                      <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-[#1F3A93] rounded-r-full" />
+                    )}
+                  </li>
+                </ul>
+              )}
             </div>
           </>
         );

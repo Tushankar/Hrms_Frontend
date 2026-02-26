@@ -23,6 +23,7 @@ import { Taskdetails } from "./Pages/Hr/Taskdetails";
 import { EditEmployee } from "./Pages/Admin/EditEmployee";
 import { ViewTask } from "./Pages/Admin/ViewTask";
 import { CreateEmployee } from "./Pages/Admin/Create-employee";
+import { ManageAdmins } from "./Pages/Admin/ManageAdmins";
 import EmployeeTaskManagement from "./Pages/Employee/EmployeeTaskManagement";
 import EditEmployeeTask from "./Pages/Employee/EditEmployeeTask";
 import ViewEmployeeTask from "./Pages/Employee/ViewEmployeeTask";
@@ -187,6 +188,8 @@ function App() {
             element={<Taskdetails />}
           />
           <Route path="/admin/error-logs" exact element={<ErrorLogs />} />
+          <Route path="/admin/manage-admins" exact element={<ManageAdmins />} />
+          <Route path="/hr/manage-admins" exact element={<ManageAdmins />} />
 
           <Route
             path="/employee/dashboard"
